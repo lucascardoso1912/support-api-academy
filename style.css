@@ -409,6 +409,10 @@ tr:last-child td { border-bottom: none; }
 .video-card .icon { color: var(--accent); }
 .video-card-title { font-size: 13.5px; font-weight: 500; color: var(--text); }
 .video-card-sub { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
+.video-card-empty { cursor: default; border-style: dashed; }
+.video-card-empty:hover { border-color: var(--border-soft); }
+.video-card-empty .icon { color: var(--text-faint); }
+.video-card-empty .video-card-title { color: var(--text-faint); }
 
 /* endpoint detail layout */
 .endpoint-head {

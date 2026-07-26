@@ -1,5 +1,5 @@
 // ============================================================
-// SUPPORT API ACADEMY — app.js
+// SUPPORT API ACADEMY - app.js
 // SPA simples com roteamento por hash. Sem build step.
 // ============================================================
 
@@ -53,14 +53,6 @@ function highlightJson(json) {
     .replace(/: (true|false|null)/g, ': <span class="n">$1</span>');
 }
 
-function highlightPython(code) {
-  const escaped = escapeHtml(code);
-  return escaped.replace(
-    /\b(import|from|as|def|print|return|if|else|for|in)\b/g,
-    '<span class="k">$1</span>'
-  );
-}
-
 // ---------- sidebar ----------
 function renderSidebar() {
   const groupsHtml = [];
@@ -69,16 +61,19 @@ function renderSidebar() {
     ${STATIC_PAGES.slice(0, 2).map(navLinkHtml).join("")}
   </div>`);
 
-  const endpointLinks = ENDPOINTS.map(ep => `
-    <div class="nav-link" data-route="endpoint/${ep.slug}">
-      <span class="method-tag method-${ep.method}">${ep.method}</span>
-      <span>${ep.title}</span>
-    </div>`).join("");
-
-  groupsHtml.push(`<div class="nav-group">
-    <div class="nav-group-label">Endpoints</div>
-    ${endpointLinks}
-  </div>`);
+  CATEGORIES.forEach(cat => {
+    const eps = ENDPOINTS.filter(e => e.category === cat);
+    if (!eps.length) return;
+    const links = eps.map(ep => `
+      <div class="nav-link" data-route="endpoint/${ep.slug}">
+        <span class="method-tag method-${ep.method}">${ep.method}</span>
+        <span>${ep.title}</span>
+      </div>`).join("");
+    groupsHtml.push(`<div class="nav-group">
+      <div class="nav-group-label">${cat}</div>
+      ${links}
+    </div>`);
+  });
 
   groupsHtml.push(`<div class="nav-group">
     ${STATIC_PAGES.slice(2).map(navLinkHtml).join("")}
@@ -156,11 +151,11 @@ function renderHome() {
       <div class="hero-copy">
         <span class="eyebrow">Suporte C2S · Trilha Técnica</span>
         <h1>Support API Academy</h1>
-        <p>Documentação viva de APIs e integrações do C2S, feita para que o suporte investigue e resolva casos técnicos sem precisar escalar toda dúvida básica. Endpoints, exemplos prontos, troubleshooting e casos reais — tudo num lugar só.</p>
+        <p>Documentação viva de APIs e integrações do C2S, feita para que o suporte investigue e resolva casos técnicos sem precisar escalar toda dúvida básica. Endpoints, exemplos prontos, troubleshooting e casos reais, tudo num lugar só.</p>
         <div class="stat-row">
-          <div class="stat"><div class="stat-num">${ENDPOINTS.length}</div><div class="stat-label">endpoints documentados</div></div>
+          <div class="stat"><div class="stat-num">${ENDPOINTS.length}</div><div class="stat-label">endpoints mapeados</div></div>
+          <div class="stat"><div class="stat-num">${CATEGORIES.length}</div><div class="stat-label">categorias</div></div>
           <div class="stat"><div class="stat-num">${CASOS.length}</div><div class="stat-label">casos reais</div></div>
-          <div class="stat"><div class="stat-num">v${CHANGELOG[0].versao}</div><div class="stat-label">versão atual</div></div>
         </div>
       </div>
       <div class="hero-terminal">
@@ -182,7 +177,7 @@ function renderHome() {
   `;
 
   const cards = [
-    { icon: "book", title: "Fundamentos", desc: "HTTP, REST, JSON, autenticação — a base antes de investigar qualquer caso.", route: "fundamentos" },
+    { icon: "book", title: "Fundamentos", desc: "HTTP, REST, JSON, autenticação: a base antes de investigar qualquer caso.", route: "fundamentos" },
     { icon: "api", title: "Endpoints", desc: "Todos os endpoints com exemplo real, cURL e Python prontos para copiar.", route: "endpoint/" + (ENDPOINTS[0]?.slug || "") },
     { icon: "mail", title: "Postman", desc: "Como importar a collection, configurar environment e testar sem escalar.", route: "postman" },
     { icon: "warning", title: "Troubleshooting", desc: "Tabela de erros comuns: causa provável, como validar, quando escalar.", route: "troubleshooting" },
@@ -228,7 +223,7 @@ function renderFundamentos() {
   app.innerHTML = `
     <span class="eyebrow">Base teórica</span>
     <h1 class="page-title">Fundamentos</h1>
-    <p class="page-lede">O mínimo necessário para entender qualquer chamada de API do C2S — sem precisar decorar, só entender o suficiente pra investigar um caso com segurança.</p>
+    <p class="page-lede">O mínimo necessário para entender qualquer chamada de API do C2S, sem precisar decorar, só o suficiente pra investigar um caso com segurança.</p>
 
     <div class="section">
       <h2>O que é HTTP</h2>
@@ -251,7 +246,7 @@ function renderFundamentos() {
 
     <div class="section">
       <h2>JSON</h2>
-      <p>É o formato dos dados que a API manda e recebe — pares de chave e valor, parecido com um dicionário. Toda resposta da API do C2S vem em JSON.</p>
+      <p>É o formato dos dados que a API manda e recebe: pares de chave e valor, parecido com um dicionário. Toda resposta da API do C2S vem em JSON.</p>
       ${codePanel({ tabs: [{ label: "exemplo.json", html: highlightJson(`{\n  "nome": "João Silva",\n  "status": "em_negociacao",\n  "ativo": true\n}`) }] })}
     </div>
 
@@ -261,13 +256,13 @@ function renderFundamentos() {
     </div>
 
     <div class="section">
-      <h2>Status Code — o essencial</h2>
+      <h2>Status Code: o essencial</h2>
       <table>
         <thead><tr><th>Faixa</th><th>Significado</th></tr></thead>
         <tbody>
-          <tr><td><span class="status-chip status-2">2xx</span></td><td>Sucesso — a requisição funcionou</td></tr>
+          <tr><td><span class="status-chip status-2">2xx</span></td><td>Sucesso, a requisição funcionou</td></tr>
           <tr><td><span class="status-chip status-4">4xx</span></td><td>Erro do lado de quem chamou (token, dado inválido, etc.)</td></tr>
-          <tr><td><span class="status-chip status-5">5xx</span></td><td>Erro do lado do servidor — aqui normalmente se escala</td></tr>
+          <tr><td><span class="status-chip status-5">5xx</span></td><td>Erro do lado do servidor, aqui normalmente se escala</td></tr>
         </tbody>
       </table>
     </div>
@@ -279,7 +274,7 @@ function renderPostman() {
   app.innerHTML = `
     <span class="eyebrow">Ferramenta</span>
     <h1 class="page-title">Postman</h1>
-    <p class="page-lede">Postman é onde você testa a API sem precisar escrever código — ótimo pra validar um caso antes de decidir se escala ou não.</p>
+    <p class="page-lede">Postman é onde você testa a API sem precisar escrever código, ótimo pra validar um caso antes de decidir se escala ou não.</p>
 
     <div class="section">
       <h2>Configurando o Environment</h2>
@@ -317,7 +312,7 @@ function renderTroubleshooting() {
     { code: "401", classe: "4", causa: "Token ausente ou header errado", validar: "Testar em GET /integration isoladamente" },
     { code: "403", classe: "4", causa: "Token inválido, expirado ou sem permissão", validar: "Verificar se o token foi regenerado no painel" },
     { code: "404", classe: "4", causa: "Endpoint ou recurso não existe", validar: "Conferir a URL e o ID usado" },
-    { code: "409", classe: "4", causa: "Conflito — registro duplicado", validar: "Verificar se o recurso já existe" },
+    { code: "409", classe: "4", causa: "Conflito, registro duplicado", validar: "Verificar se o recurso já existe" },
     { code: "422", classe: "4", causa: "Campo obrigatório ausente ou inválido", validar: "Conferir os campos exigidos pelo endpoint" },
     { code: "500", classe: "5", causa: "Erro interno do servidor", validar: "Reproduzir o caso e escalar com prints" }
   ];
@@ -417,43 +412,21 @@ function renderEndpointDetail(slug) {
   const ep = ENDPOINTS.find(e => e.slug === slug);
   if (!ep) { app.innerHTML = `<p>Endpoint não encontrado.</p>`; return; }
 
-  const paramsTable = ep.params.length ? `
-    <div class="section">
-      <h2>Parâmetros</h2>
-      <table>
-        <thead><tr><th>Nome</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
-        <tbody>
-          ${ep.params.map(p => `
-            <tr><td><code>${p.name}</code></td><td>${p.type}</td><td>${p.required ? "Sim" : "Não"}</td><td>${p.desc}</td></tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>` : "";
-
   const videoSection = ep.video ? `
-    <div class="section">
-      <h2>Demonstração em vídeo</h2>
-      <a class="video-card" href="${escapeHtml(ep.video)}" target="_blank" rel="noopener">
-        ${icon("play", 22)}
-        <div>
-          <div class="video-card-title">Assistir demonstração — ${ep.title}</div>
-          <div class="video-card-sub">Abre em uma nova aba</div>
-        </div>
-      </a>
-    </div>` : "";
-
-  const errorsTable = ep.errors?.length ? `
-    <div class="section">
-      <h2>Erros comuns</h2>
-      <table>
-        <thead><tr><th>Status</th><th>Erro</th><th>Causa</th></tr></thead>
-        <tbody>
-          ${ep.errors.map(e => `
-            <tr><td><span class="status-chip status-4">${e.code}</span></td><td><code>${e.meaning}</code></td><td>${e.cause}</td></tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>` : "";
+    <a class="video-card" href="${escapeHtml(ep.video)}" target="_blank" rel="noopener">
+      ${icon("play", 22)}
+      <div>
+        <div class="video-card-title">Assistir demonstração: ${ep.title}</div>
+        <div class="video-card-sub">Abre em uma nova aba</div>
+      </div>
+    </a>` : `
+    <a class="video-card video-card-empty">
+      ${icon("play", 22)}
+      <div>
+        <div class="video-card-title">Vídeo ainda não adicionado</div>
+        <div class="video-card-sub">Assim que gravar, é só preencher o campo "video" deste endpoint no data.js</div>
+      </div>
+    </a>`;
 
   app.innerHTML = `
     <span class="eyebrow">${ep.category}</span>
@@ -464,38 +437,15 @@ function renderEndpointDetail(slug) {
     <h1 class="page-title">${ep.title}</h1>
     <p class="page-lede">${ep.summary}</p>
 
-    <div class="two-col">
-      <div>
-        <div class="section">
-          <h2>Quando usar</h2>
-          <p>${ep.description}</p>
-        </div>
+    <div class="section">
+      <h2>Demonstração em vídeo</h2>
+      ${videoSection}
+    </div>
 
-        ${videoSection}
-
-        <div class="section">
-          <h2>Headers</h2>
-          <table>
-            <thead><tr><th>Key</th><th>Value</th><th>Descrição</th></tr></thead>
-            <tbody>
-              ${ep.headers.map(h => `<tr><td><code>${h.key}</code></td><td><code>${h.value}</code></td><td>${h.desc}</td></tr>`).join("")}
-            </tbody>
-          </table>
-        </div>
-
-        ${paramsTable}
-        ${errorsTable}
-      </div>
-
-      <div>
-        ${codePanel({
-          tabs: [
-            { label: "cURL", html: escapeHtml(ep.curl) },
-            { label: "Python", html: highlightPython(ep.python) },
-            { label: "Response", html: highlightJson(ep.response) }
-          ]
-        })}
-      </div>
+    <div class="section">
+      <h2>Como testar</h2>
+      <p>${ep.testar}</p>
+      ${codePanel({ tabs: [{ label: "cURL", html: escapeHtml(ep.curl) }] })}
     </div>
   `;
   wireCodePanels(app);
