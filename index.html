@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Support API Academy — Trilha Técnica C2S</title>
+<meta name="description" content="Documentação técnica de APIs e integrações do C2S para o time de suporte." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">C2</div>
+    <div class="brand-text">
+      <span class="brand-title">API Academy</span>
+      <span class="brand-sub">Suporte C2S</span>
+    </div>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Abrir menu">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+</div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">C2</div>
+      <div class="brand-text">
+        <span class="brand-title">API Academy</span>
+        <span class="brand-sub">Suporte C2S · v1.0</span>
+      </div>
+    </div>
+    <input class="nav-search" id="nav-search" type="text" placeholder="Buscar (ex: 401, webhook, lead)" />
+    <nav id="sidebar-nav"></nav>
+  </aside>
+
+  <main class="main" id="app"></main>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
