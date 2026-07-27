@@ -48,7 +48,7 @@ const ENDPOINTS = [
     summary: "Confirma se um token está válido e retorna os dados da empresa autenticada.",
     quandoUsar: "Esse será sempre o primeiro passo de qualquer investigação técnica, a autenticação é o primeiro ponto de acesso à API antes de testar qualquer outro endpoint.",
     ferramentas: ["postman", "api"],
-    testar: "Chame o endpoint sozinho, sem mais nada. Se voltar 200 com o nome da empresa, o token está válido. Se voltar 403, o problema é o token, ainda antes de qualquer outra investigação.",
+    testar: "Chame o endpoint sozinho. Se voltar 200 com o nome da empresa, o token está válido. Se voltar 403, o problema é o token, ainda antes de qualquer outra investigação.",
     curl: `curl -X GET "https://api.contact2sale.com/integration" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
