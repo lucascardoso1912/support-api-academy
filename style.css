@@ -393,6 +393,42 @@ tr:last-child td { border-bottom: none; }
 }
 .version-badge b { color: var(--accent); }
 
+/* status block + tools block */
+.status-block, .tools-block {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 24px;
+}
+.status-block-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.status-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+}
+.status-item, .tool-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.status-item.done { color: var(--success); }
+.status-item.done .icon { color: var(--success); }
+.status-item.pending { color: var(--text-faint); }
+.status-item.pending .icon { color: var(--text-faint); }
+.status-item.revisao { color: var(--text-dim); }
+.status-item.revisao .icon { color: var(--text-faint); }
+.tool-item .icon { color: var(--accent); }
+
 /* video card */
 .video-card {
   display: flex;

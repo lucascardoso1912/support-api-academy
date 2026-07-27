@@ -19,7 +19,11 @@ const ICONS = {
   clock: `<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>`,
   copy: `<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>`,
   play: `<circle cx="12" cy="12" r="9"/><path d="m10 8.5 6 3.5-6 3.5v-7Z"/>`,
-  chevron: `<path d="m9 6 6 6-6 6"/>`
+  chevron: `<path d="m9 6 6 6-6 6"/>`,
+  circle: `<circle cx="12" cy="12" r="9"/>`,
+  platform: `<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/>`,
+  logs: `<path d="M4 6h16M4 12h11M4 18h14"/>`,
+  target: `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>`
 };
 
 function icon(name, size = 16) {
@@ -143,6 +147,48 @@ function wireCodePanels(root) {
   });
 }
 
+// ---------- selo de status do procedimento ----------
+function statusBlock(ep) {
+  const items = [
+    { done: !!ep.status.validado, label: "Validado pelo Suporte" },
+    { done: !!ep.video, label: "Vídeo disponível" },
+    { done: !!ep.status.testadoPostman, label: "Testado no Postman" }
+  ];
+  const itemsHtml = items.map(it => `
+    <div class="status-item ${it.done ? "done" : "pending"}">
+      ${icon(it.done ? "check" : "circle", 15)}
+      <span>${it.label}</span>
+    </div>`).join("");
+
+  return `
+  <div class="status-block">
+    <div class="status-block-label">Status deste procedimento</div>
+    <div class="status-items">
+      ${itemsHtml}
+      <div class="status-item revisao">
+        ${icon("clock", 15)}
+        <span>Última revisão: ${ep.status.revisao}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------- bloco de ferramentas necessárias ----------
+const TOOL_ICONS = { postman: "mail", api: "api", plataforma: "platform", logs: "logs" };
+
+function toolsBlock(ep) {
+  const items = ep.ferramentas.map(key => `
+    <div class="tool-item">
+      ${icon(TOOL_ICONS[key] || "check", 15)}
+      <span>${TOOLS[key]?.label || key}</span>
+    </div>`).join("");
+  return `
+  <div class="tools-block">
+    <div class="status-block-label">Ferramentas necessárias</div>
+    <div class="status-items">${items}</div>
+  </div>`;
+}
+
 // ---------- pages ----------
 function renderHome() {
   app.innerHTML = `
@@ -153,7 +199,7 @@ function renderHome() {
         <h1>Support API Academy</h1>
         <p>Documentação viva de APIs e integrações do C2S, feita para que o suporte investigue e resolva casos técnicos sem precisar escalar toda dúvida básica. Endpoints, exemplos prontos, troubleshooting e casos reais, tudo num lugar só.</p>
         <div class="stat-row">
-          <div class="stat"><div class="stat-num">${ENDPOINTS.length}</div><div class="stat-label">endpoints mapeados</div></div>
+          <div class="stat"><div class="stat-num">${ENDPOINTS.length}</div><div class="stat-label">procedimentos guiados</div></div>
           <div class="stat"><div class="stat-num">${CATEGORIES.length}</div><div class="stat-label">categorias</div></div>
           <div class="stat"><div class="stat-num">${CASOS.length}</div><div class="stat-label">casos reais</div></div>
         </div>
@@ -178,7 +224,7 @@ function renderHome() {
 
   const cards = [
     { icon: "book", title: "Fundamentos", desc: "HTTP, REST, JSON, autenticação: a base antes de investigar qualquer caso.", route: "fundamentos" },
-    { icon: "api", title: "Endpoints", desc: "Todos os endpoints com exemplo real, cURL e Python prontos para copiar.", route: "endpoint/" + (ENDPOINTS[0]?.slug || "") },
+    { icon: "api", title: "Procedimentos", desc: "Investigações e testes guiados por endpoint, com status de validação e vídeo.", route: "endpoint/" + (ENDPOINTS[0]?.slug || "") },
     { icon: "mail", title: "Postman", desc: "Como importar a collection, configurar environment e testar sem escalar.", route: "postman" },
     { icon: "warning", title: "Troubleshooting", desc: "Tabela de erros comuns: causa provável, como validar, quando escalar.", route: "troubleshooting" },
     { icon: "case", title: "Casos Reais", desc: "Investigações reais documentadas, passo a passo, prontas para consultar.", route: "casos-reais" },
@@ -410,7 +456,7 @@ function renderChangelog() {
 
 function renderEndpointDetail(slug) {
   const ep = ENDPOINTS.find(e => e.slug === slug);
-  if (!ep) { app.innerHTML = `<p>Endpoint não encontrado.</p>`; return; }
+  if (!ep) { app.innerHTML = `<p>Procedimento não encontrado.</p>`; return; }
 
   const videoSection = ep.video ? `
     <a class="video-card" href="${escapeHtml(ep.video)}" target="_blank" rel="noopener">
@@ -424,7 +470,7 @@ function renderEndpointDetail(slug) {
       ${icon("play", 22)}
       <div>
         <div class="video-card-title">Vídeo ainda não adicionado</div>
-        <div class="video-card-sub">Assim que gravar, é só preencher o campo "video" deste endpoint no data.js</div>
+        <div class="video-card-sub">Assim que gravar, é só preencher o campo "video" deste procedimento no data.js</div>
       </div>
     </a>`;
 
@@ -437,15 +483,24 @@ function renderEndpointDetail(slug) {
     <h1 class="page-title">${ep.title}</h1>
     <p class="page-lede">${ep.summary}</p>
 
+    ${statusBlock(ep)}
+
     <div class="section">
-      <h2>Demonstração em vídeo</h2>
-      ${videoSection}
+      <h2>Quando utilizar</h2>
+      <p>${ep.quandoUsar}</p>
     </div>
+
+    ${toolsBlock(ep)}
 
     <div class="section">
       <h2>Como testar</h2>
       <p>${ep.testar}</p>
       ${codePanel({ tabs: [{ label: "cURL", html: escapeHtml(ep.curl) }] })}
+    </div>
+
+    <div class="section">
+      <h2>Demonstração em vídeo</h2>
+      ${videoSection}
     </div>
   `;
   wireCodePanels(app);

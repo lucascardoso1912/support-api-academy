@@ -37,39 +37,48 @@ Qualquer uma das duas opções é gratuita e não exige saber programar além de
 - Zero emoji na interface: todos os ícones são SVG monocromático, definidos em `ICONS` no topo do `app.js`. Pra trocar um ícone de alguma página, é só apontar para uma chave diferente desse objeto (ou adicionar um novo `path` SVG lá).
 - Tokens de cor, tipografia e espaçamento ficam centralizados no topo do `style.css` (`:root { ... }`), qualquer ajuste de paleta é feito só ali.
 
-## Como adicionar vídeo em um endpoint
+## Como adicionar vídeo em um procedimento
 
-No objeto do endpoint em `data.js`, preencha o campo `video` com o link (Loom, YouTube não-listado, Google Drive, Streamable etc):
+No objeto do procedimento em `data.js`, preencha o campo `video` com o link (Loom, YouTube não-listado, Google Drive, Streamable etc):
 
 ```js
 video: "https://www.loom.com/share/xxxxxxxx"
 ```
 
-A seção "Demonstração em vídeo" só aparece na página quando esse campo não está vazio.
+A seção "Demonstração em vídeo" só aparece com o link real quando esse campo não está vazio; enquanto estiver vazio, a página mostra um aviso discreto de que o vídeo ainda não foi gravado.
 
-## Como adicionar um novo endpoint
+## Sobre o selo de status (importante)
+
+Cada procedimento tem um bloco `status` assim:
+
+```js
+status: { validado: false, testadoPostman: false, revisao: "Jul/2026" }
+```
+
+`validado` e `testadoPostman` começam como `false` de propósito. Só mude para `true` depois de você mesmo ter executado aquele teste de verdade, no Postman ou na API. É isso que dá credibilidade ao selo "Status deste procedimento" que aparece no topo da página: ele só vale alguma coisa se refletir o que foi realmente testado, não o que foi só escrito. Atualize também o campo `revisao` sempre que revisar um procedimento.
+
+## Como adicionar um novo procedimento
 
 Abra `data.js` e copie um dos objetos dentro do array `ENDPOINTS`, ajustando os campos:
 
 ```js
 {
-  slug: "criar-lead",           // usado na URL, sem espaços/acentos
+  slug: "criar-lead",                 // usado na URL, sem espaços/acentos
   method: "POST",
   path: "/integration/leads",
-  title: "Criar lead",
-  category: "Leads",
-  summary: "Descrição curta de uma linha.",
-  description: "Explicação de quando/por que usar esse endpoint.",
-  headers: [ /* mesma estrutura dos exemplos existentes */ ],
-  params: [ /* se houver query params ou body params */ ],
-  response: `{ ... }`,          // JSON de exemplo, como string
-  errors: [ /* erros conhecidos desse endpoint */ ],
+  title: "Testar Criação de Lead",    // orientado à ação: Investigar (leitura) ou Testar (escrita)
+  category: "Leads",                  // precisa bater com um item de CATEGORIES
+  summary: "Descrição curta de uma linha, aparece embaixo do título.",
+  quandoUsar: "Utilize quando... (o gatilho real que leva o analista a abrir esta página).",
+  ferramentas: ["postman", "api", "plataforma"], // opções: postman, api, plataforma, logs
+  testar: "Dica prática de como testar esse procedimento.",
   curl: `curl ...`,
-  python: `import requests ...`
+  status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+  video: ""
 }
 ```
 
-Salve o arquivo e o endpoint aparece automaticamente no menu lateral, na busca e ganha sua própria página. Não precisa mexer em `app.js`.
+Salve o arquivo e o procedimento aparece automaticamente no menu lateral (agrupado pela categoria), na busca e ganha sua própria página. Não precisa mexer em `app.js`.
 
 O mesmo vale para novos **casos reais** (array `CASOS`) e para o **changelog** (array `CHANGELOG`).
 
