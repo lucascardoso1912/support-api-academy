@@ -46,9 +46,9 @@ const ENDPOINTS = [
     title: "Validar Autenticação",
     category: "Autenticação",
     summary: "Confirma se um token está válido e retorna os dados da empresa autenticada.",
-    quandoUsar: "Utilize sempre que for o primeiro passo de qualquer investigação técnica, ou quando o cliente relatar erro de acesso à API antes de testar qualquer outro endpoint.",
+    quandoUsar: "Esse é sempre o primeiro passo de qualquer investigação técnica. Use também quando o cliente relatar erro de acesso à API, antes de testar qualquer outro endpoint.",
     ferramentas: ["postman", "api"],
-    testar: "Chame o endpoint sozinho, sem mais nada. Se voltar 200 com o nome da empresa, o token está válido. Se voltar 403, o problema é o token, ainda antes de qualquer outra investigação.",
+    testar: "Chame o endpoint sozinho, sem mais nada. Se voltar 200 com o nome da empresa, o token está válido. Se voltar 403, o problema é o token, antes mesmo de qualquer outra investigação.",
     curl: `curl -X GET "https://api.contact2sale.com/integration" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
@@ -63,7 +63,7 @@ const ENDPOINTS = [
     title: "Investigar Listagem de Leads",
     category: "Leads",
     summary: "Confirma se a API está retornando corretamente os leads da empresa, com filtros e paginação.",
-    quandoUsar: "Utilize esta validação quando um cliente relatar divergências na listagem de leads, ou quando precisar confirmar se um lead específico está sendo retornado pela API.",
+    quandoUsar: "Use quando um cliente relatar divergências na listagem de leads, ou quando precisar confirmar se um lead específico está sendo retornado pela API.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste filtrando por phone ou email do cliente reclamado, é o jeito mais rápido de achar um lead específico numa investigação.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads?status=em_negociacao&perpage=50" \\
@@ -78,7 +78,7 @@ const ENDPOINTS = [
     title: "Investigar Lead Específico",
     category: "Leads",
     summary: "Retorna todo o detalhe de um lead pelo ID: histórico, mensagens e agendamentos.",
-    quandoUsar: "Utilize quando já souber o ID do lead e precisar conferir o histórico completo dele, por exemplo para confirmar se uma mensagem ou atividade foi registrada corretamente.",
+    quandoUsar: "Use quando já souber o ID do lead e precisar conferir o histórico completo dele, por exemplo para confirmar se uma mensagem ou atividade foi registrada corretamente.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Pegue o ID de um lead retornado em Investigar Listagem de Leads e chame este endpoint para conferir o detalhe completo dele.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads/{id}" \\
@@ -93,7 +93,7 @@ const ENDPOINTS = [
     title: "Testar Criação de Lead",
     category: "Leads",
     summary: "Cria um novo lead. É obrigatório enviar ao menos phone ou email, senão a API retorna 423.",
-    quandoUsar: "Utilize quando o cliente relatar que leads não estão sendo criados pela integração dele, para isolar se o problema está na API ou no sistema de origem.",
+    quandoUsar: "Indicado quando o cliente relatar que leads não estão sendo criados pela integração dele: ajuda a isolar se o problema está na API ou no sistema de origem.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Envie um body mínimo só com name, phone e description para validar que o token tem permissão de criação antes de testar campos avançados.",
     curl: `curl -X POST "https://api.contact2sale.com/integration/leads" \\
@@ -110,7 +110,7 @@ const ENDPOINTS = [
     title: "Testar Atualização de Lead",
     category: "Leads",
     summary: "Atualiza um lead existente. Suporta 3 formatos de body diferentes.",
-    quandoUsar: "Utilize quando o cliente relatar que uma atualização (novo telefone, novo status do produto etc) não está refletindo no lead dentro do C2S.",
+    quandoUsar: "Use quando o cliente relatar que uma atualização (novo telefone, novo status do produto etc) não está refletindo no lead dentro do C2S.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste primeiro atualizando um único campo simples (como o nome do cliente) antes de testar o body completo, ajuda a isolar qual formato o sistema do cliente está usando.",
     curl: `curl -X PUT "https://api.contact2sale.com/integration/leads/{id}" \\
@@ -127,7 +127,7 @@ const ENDPOINTS = [
     title: "Testar Encaminhamento de Lead",
     category: "Leads",
     summary: "Encaminha um lead de um vendedor para outro.",
-    quandoUsar: "Utilize quando o cliente relatar que um lead não mudou de vendedor após uma tentativa de encaminhamento pela integração dele.",
+    quandoUsar: "Indicado quando o cliente relatar que um lead não mudou de vendedor após uma tentativa de encaminhamento pela integração dele.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Confirme antes os IDs criptografados dos dois vendedores (origem e destino) usando o procedimento Investigar Lista de Vendedores.",
     curl: `curl -X PUT "https://api.contact2sale.com/integration/leads/{id}/forward" \\
@@ -144,7 +144,7 @@ const ENDPOINTS = [
     title: "Investigar Tags de um Lead",
     category: "Leads",
     summary: "Retorna todas as tags associadas a um lead específico.",
-    quandoUsar: "Utilize quando o cliente relatar que uma tag esperada não aparece no lead, ou para confirmar o estado atual antes de adicionar/remover uma tag.",
+    quandoUsar: "Use quando o cliente relatar que uma tag esperada não aparece no lead, ou para conferir o estado atual antes de adicionar ou remover uma tag.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Use num lead que você já sabe que tem tag pra confirmar visualmente que a resposta bate com o que aparece no painel do C2S.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads/{id}/tags" \\
@@ -159,7 +159,7 @@ const ENDPOINTS = [
     title: "Testar Adição de Tag",
     category: "Leads",
     summary: "Adiciona uma tag já existente a um lead.",
-    quandoUsar: "Utilize quando o cliente relatar que a tag enviada pela integração dele não está sendo aplicada ao lead.",
+    quandoUsar: "Indicado quando o cliente relatar que a tag enviada pela integração dele não está sendo aplicada ao lead.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Pegue o ID de uma tag em Investigar Lista de Tags antes de testar aqui. A tag precisa já existir na empresa.",
     curl: `curl -X POST "https://api.contact2sale.com/integration/leads/{id}/tags" \\
@@ -176,7 +176,7 @@ const ENDPOINTS = [
     title: "Testar Remoção de Tag",
     category: "Leads",
     summary: "Remove uma ou mais tags de um lead. Aceita tag_id como string única ou array.",
-    quandoUsar: "Utilize quando uma tag precisar ser removida em massa ou quando o cliente relatar que a remoção pela integração dele não está funcionando.",
+    quandoUsar: "Use quando uma tag precisar ser removida em massa, ou quando o cliente relatar que a remoção pela integração dele não está funcionando.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste primeiro removendo uma única tag antes de testar com array de várias tags de uma vez.",
     curl: `curl -X DELETE "https://api.contact2sale.com/integration/leads/{id}/tags" \\
@@ -193,7 +193,7 @@ const ENDPOINTS = [
     title: "Testar Marcação de Lead como Lido",
     category: "Leads",
     summary: "Marca um lead como lido ou interagido.",
-    quandoUsar: "Utilize quando o cliente relatar que leads continuam aparecendo como não lidos mesmo após interação pelo sistema dele.",
+    quandoUsar: "Indicado quando o cliente relatar que leads continuam aparecendo como não lidos mesmo depois da interação pelo sistema dele.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Confirme no painel do C2S, antes e depois da chamada, que o indicador de não lido do lead sumiu.",
     curl: `curl -X PUT "https://api.contact2sale.com/integration/leads/{id}/read" \\
@@ -208,7 +208,7 @@ const ENDPOINTS = [
     title: "Testar Criação de Mensagem",
     category: "Leads",
     summary: "Cria uma mensagem dentro de um lead, para registrar o histórico de conversa vindo de um canal externo.",
-    quandoUsar: "Utilize quando o cliente relatar que mensagens de um canal (WhatsApp, chat do site) não estão aparecendo no histórico do lead.",
+    quandoUsar: "Use quando o cliente relatar que mensagens de um canal (WhatsApp, chat do site) não estão aparecendo no histórico do lead.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Envie uma mensagem de teste com o campo origin preenchido (ex: whatsapp) e confirme que ela aparece no card do lead no C2S.",
     curl: `curl -X POST "https://api.contact2sale.com/integration/leads/{id}/messages" \\
@@ -225,7 +225,7 @@ const ENDPOINTS = [
     title: "Testar Criação de Atividade",
     category: "Leads",
     summary: "Cria uma atividade (agendamento) em um lead, com data, título e opção de notificação push.",
-    quandoUsar: "Utilize quando o cliente relatar que agendamentos criados pela integração dele não aparecem para o vendedor, ou que a notificação não chegou.",
+    quandoUsar: "Indicado quando o cliente relatar que agendamentos criados pela integração dele não aparecem para o vendedor, ou que a notificação não chegou.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste com send_push true e confirme se o vendedor responsável recebeu a notificação.",
     curl: `curl -X POST "https://api.contact2sale.com/integration/leads/{id}/activities" \\
@@ -242,7 +242,7 @@ const ENDPOINTS = [
     title: "Testar Atualização de Status",
     category: "Leads",
     summary: "Atualiza o status de um lead. Quando status = 3, o lead é marcado como perdido/arquivado.",
-    quandoUsar: "Utilize quando o cliente relatar que um lead deveria ter sido arquivado pela integração dele e continua ativo, ou o contrário.",
+    quandoUsar: "Use quando o cliente relatar que um lead deveria ter sido arquivado pela integração dele e continua ativo, ou o contrário.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Use um lead de teste para o status 3 e confirme se o motivo (lost_reason_ids) aparece certo no painel.",
     curl: `curl -X PUT "https://api.contact2sale.com/integration/leads/{id}/status" \\
@@ -259,7 +259,7 @@ const ENDPOINTS = [
     title: "Testar Fechamento de Negócio",
     category: "Leads",
     summary: "Registra o fechamento de negócio (venda) de um lead, com valor e detalhes.",
-    quandoUsar: "Utilize quando o cliente relatar que uma venda registrada pela integração dele não aparece no relatório de negócios fechados.",
+    quandoUsar: "Indicado quando o cliente relatar que uma venda registrada pela integração dele não aparece no relatório de negócios fechados.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste em um lead de exemplo e confirme se ele muda de status e o valor aparece corretamente no relatório de vendas.",
     curl: `curl -X POST "https://api.contact2sale.com/integration/leads/{id}/done" \\
@@ -278,7 +278,7 @@ const ENDPOINTS = [
     title: "Investigar Lista de Vendedores",
     category: "Vendedores",
     summary: "Lista todos os vendedores da empresa autenticada, incluindo empresas do grupo.",
-    quandoUsar: "Utilize sempre que precisar do ID criptografado de um vendedor para outra chamada (encaminhar lead, configurar fila etc), ou quando o cliente relatar que um vendedor não aparece na integração.",
+    quandoUsar: "Esse é o ponto de partida sempre que precisar do ID criptografado de um vendedor para outra chamada (encaminhar lead, configurar fila etc). Use também quando o cliente relatar que um vendedor não aparece na integração.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Use este endpoint primeiro sempre que precisar do ID criptografado de um vendedor para outra chamada.",
     curl: `curl -X GET "https://api.contact2sale.com/sellers" \\
@@ -293,9 +293,9 @@ const ENDPOINTS = [
     title: "Testar Criação de Vendedor",
     category: "Vendedores",
     summary: "Cria um novo vendedor na empresa.",
-    quandoUsar: "Utilize quando o cliente relatar falha ao criar vendedores em massa pela integração dele, para isolar se o problema é da API ou do sistema de origem.",
+    quandoUsar: "Indicado quando o cliente relatar falha ao criar vendedores em massa pela integração dele: ajuda a isolar se o problema é da API ou do sistema de origem.",
     ferramentas: ["postman", "api", "plataforma"],
-    testar: "Confirme o company_id certo antes de testar, criar vendedor na empresa errada é o erro mais comum aqui.",
+    testar: "Confirme o company_id certo antes de testar: criar vendedor na empresa errada é o erro mais comum aqui.",
     curl: `curl -X POST "https://api.contact2sale.com/sellers" \\
   -H "Authorization: Bearer {token}" \\
   -H "Content-Type: application/json" \\
@@ -310,7 +310,7 @@ const ENDPOINTS = [
     title: "Testar Atualização de Vendedor",
     category: "Vendedores",
     summary: "Atualiza um vendedor existente. Aceita também campos de rotação e distribuição de leads.",
-    quandoUsar: "Utilize quando o cliente relatar que dados de um vendedor (email, permissão de receber leads) não estão sendo atualizados corretamente.",
+    quandoUsar: "Use quando o cliente relatar que dados de um vendedor (email, permissão de receber leads) não estão sendo atualizados corretamente.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste alterando um campo simples primeiro (nome ou email) antes de testar os campos de rotação/distribuição.",
     curl: `curl -X PUT "https://api.contact2sale.com/sellers/{id}" \\
@@ -327,7 +327,7 @@ const ENDPOINTS = [
     title: "Testar Atualização de Rotação em Lote",
     category: "Vendedores",
     summary: "Atualiza em lote a configuração de rotação de múltiplos vendedores.",
-    quandoUsar: "Utilize quando o cliente relatar que a ordem de rotação de leads entre vendedores está incorreta após uma atualização em lote.",
+    quandoUsar: "Indicado quando o cliente relatar que a ordem de rotação de leads entre vendedores ficou incorreta após uma atualização em lote.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Use com uma lista pequena de 2 ou 3 vendedores de teste antes de rodar em lote com o time inteiro.",
     curl: `curl -X PUT "https://api.contact2sale.com/sellers/timeshift" \\
@@ -346,9 +346,9 @@ const ENDPOINTS = [
     title: "Investigar Empresas do Grupo",
     category: "Empresas",
     summary: "Lista todas as empresas do grupo (filiais) da empresa autenticada.",
-    quandoUsar: "Utilize como primeiro passo em qualquer investigação envolvendo hierarquia ou filial, antes de olhar leads ou vendedores de uma empresa específica.",
+    quandoUsar: "Esse é o primeiro passo em qualquer investigação envolvendo hierarquia ou filial, antes de olhar leads ou vendedores de uma empresa específica.",
     ferramentas: ["postman", "api", "plataforma"],
-    testar: "Confira se o número de filiais retornado bate com o que o cliente enxerga no painel dele.",
+    testar: "Confira se o número de filiais retornado bate com o que o cliente vê no painel dele.",
     curl: `curl -X GET "https://api.contact2sale.com/companies" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
@@ -363,9 +363,9 @@ const ENDPOINTS = [
     title: "Investigar Lista de Tags",
     category: "Tags",
     summary: "Lista as tags cadastradas na empresa, com filtro por nome ou autofill.",
-    quandoUsar: "Utilize antes de testar Adição de Tag, você precisa do ID exato da tag, ou quando o cliente relatar que uma tag esperada não existe mais na empresa.",
+    quandoUsar: "Use antes de testar a Adição de Tag, já que você vai precisar do ID exato dela, ou quando o cliente relatar que uma tag esperada não existe mais na empresa.",
     ferramentas: ["postman", "api", "plataforma"],
-    testar: "Use isso antes de testar Testar Adição de Tag, precisa do ID exato da tag.",
+    testar: "Use isso antes de testar a Adição de Tag: você vai precisar do ID exato dela.",
     curl: `curl -X GET "https://api.contact2sale.com/tags" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
@@ -378,7 +378,7 @@ const ENDPOINTS = [
     title: "Testar Criação de Tag",
     category: "Tags",
     summary: "Cria uma nova tag. Se já existir uma tag com os mesmos parâmetros, retorna a existente.",
-    quandoUsar: "Utilize quando o cliente relatar que a criação de tags pela integração dele está duplicando ou falhando.",
+    quandoUsar: "Indicado quando o cliente relatar que a criação de tags pela integração dele está duplicando ou falhando.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste criando a mesma tag duas vezes de propósito para confirmar o comportamento de deduplicação (retorna 201 com chave errors).",
     curl: `curl -X POST "https://api.contact2sale.com/tags" \\
@@ -397,7 +397,7 @@ const ENDPOINTS = [
     title: "Investigar Regras de Distribuição",
     category: "Distribuição",
     summary: "Lista todas as regras de distribuição (regiões) da empresa e suas filiais.",
-    quandoUsar: "Utilize quando o cliente relatar que leads de uma região específica não estão indo para o vendedor esperado.",
+    quandoUsar: "Use quando o cliente relatar que leads de uma região específica não estão indo para o vendedor esperado.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Compare o retorno com o que está configurado na tela de distribuição do painel para validar que bate.",
     curl: `curl -X GET "https://api.contact2sale.com/distribution_rules" \\
@@ -412,7 +412,7 @@ const ENDPOINTS = [
     title: "Testar Criação de Regra de Distribuição",
     category: "Distribuição",
     summary: "Cria uma nova regra de distribuição vinculando uma região a um vendedor.",
-    quandoUsar: "Utilize quando precisar validar, junto com o time de implantação, se uma nova regra de distribuição vai funcionar como esperado antes de aplicar em produção.",
+    quandoUsar: "Indicado quando precisar validar, junto com o time de implantação, se uma nova regra de distribuição vai funcionar como esperado antes de ir para produção.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste com uma regra de prioridade alta isolada, depois confirme no painel se ela realmente está direcionando os leads certos.",
     curl: `curl -X POST "https://api.contact2sale.com/distribution_rules" \\
@@ -429,7 +429,7 @@ const ENDPOINTS = [
     title: "Investigar Filas de Distribuição",
     category: "Distribuição",
     summary: "Lista as filas de distribuição da empresa pai, com headers de paginação.",
-    quandoUsar: "Utilize quando o cliente relatar que uma fila de distribuição não existe mais ou está com configuração diferente da esperada.",
+    quandoUsar: "Use quando o cliente relatar que uma fila de distribuição não existe mais ou está com configuração diferente da esperada.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Confira os headers de paginação da resposta, não só o body, muita integração de cliente erra justamente aí.",
     curl: `curl -X GET "https://api.contact2sale.com/distribution_queues" \\
@@ -444,7 +444,7 @@ const ENDPOINTS = [
     title: "Investigar Vendedores de uma Fila",
     category: "Distribuição",
     summary: "Lista os vendedores de uma fila de distribuição específica, com paginação.",
-    quandoUsar: "Utilize quando o cliente relatar que um vendedor não está recebendo leads de uma fila específica.",
+    quandoUsar: "Indicado quando o cliente relatar que um vendedor não está recebendo leads de uma fila específica.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Pegue o ID da fila em Investigar Filas de Distribuição antes de testar aqui.",
     curl: `curl -X GET "https://api.contact2sale.com/distribution_queues/{id}/sellers" \\
@@ -459,7 +459,7 @@ const ENDPOINTS = [
     title: "Testar Atualização de Prioridades",
     category: "Distribuição",
     summary: "Atualiza as prioridades dos vendedores dentro de uma fila de distribuição.",
-    quandoUsar: "Utilize quando o cliente relatar que a ordem de prioridade de uma fila não está sendo respeitada na hora de distribuir leads.",
+    quandoUsar: "Use quando o cliente relatar que a ordem de prioridade de uma fila não está sendo respeitada na hora de distribuir leads.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste com uma fila pequena de 2 vendedores para confirmar visualmente a nova ordem antes de aplicar em filas grandes.",
     curl: `curl -X PUT "https://api.contact2sale.com/distribution_queues/{id}/sellers" \\
@@ -476,7 +476,7 @@ const ENDPOINTS = [
     title: "Testar Redistribuição de Lead",
     category: "Distribuição",
     summary: "Redistribui um lead específico pela fila, passando para o próximo vendedor da rotação.",
-    quandoUsar: "Utilize quando o cliente pedir para reprocessar manualmente um lead que ficou parado sem vendedor.",
+    quandoUsar: "Indicado quando o cliente pedir para reprocessar manualmente um lead que ficou parado sem vendedor.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Use um lead de teste e confirme no painel se o novo vendedor bate com o next_seller esperado da fila.",
     curl: `curl -X POST "https://api.contact2sale.com/distribution_queues/{id}/redistribute" \\
@@ -493,7 +493,7 @@ const ENDPOINTS = [
     title: "Testar Definição do Próximo Vendedor",
     category: "Distribuição",
     summary: "Define manualmente o próximo vendedor na rotação da fila.",
-    quandoUsar: "Utilize quando o cliente pedir para forçar manualmente qual vendedor deve receber o próximo lead da fila.",
+    quandoUsar: "Use quando o cliente pedir para forçar manualmente qual vendedor deve receber o próximo lead da fila.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Confirme antes que o vendedor escolhido está com status enabled na fila, senão a chamada falha silenciosamente.",
     curl: `curl -X PUT "https://api.contact2sale.com/distribution_queues/{id}/next_seller" \\
@@ -512,7 +512,7 @@ const ENDPOINTS = [
     title: "Testar Assinatura de Webhook",
     category: "Webhooks",
     summary: "Assina eventos de webhook para leads: on_create_lead, on_update_lead ou on_close_lead. Só 1 endpoint por token.",
-    quandoUsar: "Utilize quando o cliente relatar que não está recebendo notificações automáticas de leads no servidor dele.",
+    quandoUsar: "Indicado quando o cliente relatar que não está recebendo notificações automáticas de leads no servidor dele.",
     ferramentas: ["postman", "api", "logs"],
     testar: "Assine um gatilho de cada vez e teste separadamente. Lembre que cadastrar uma nova URL apaga a assinatura anterior desse token.",
     curl: `curl -X POST "https://api.contact2sale.com/api/subscribe" \\
@@ -529,7 +529,7 @@ const ENDPOINTS = [
     title: "Testar Cancelamento de Webhook",
     category: "Webhooks",
     summary: "Cancela a assinatura de um gatilho de webhook.",
-    quandoUsar: "Utilize quando o cliente pedir para parar de receber um determinado evento, ou antes de reconfigurar uma nova URL de destino.",
+    quandoUsar: "Use quando o cliente pedir para parar de receber um determinado evento, ou antes de reconfigurar uma nova URL de destino.",
     ferramentas: ["postman", "api", "logs"],
     testar: "Depois de cancelar, dispare a ação correspondente (ex: criar um lead) e confirme que o servidor do cliente não recebeu mais nada.",
     curl: `curl -X POST "https://api.contact2sale.com/api/unsubscribe" \\
@@ -548,7 +548,7 @@ const ENDPOINTS = [
     title: "Investigar Lista de Estandes",
     category: "Stand de Vendas",
     summary: "Lista os estandes de vendas acessíveis pela hierarquia, com o formulário associado a cada um.",
-    quandoUsar: "Utilize como primeiro passo sempre que for investigar qualquer caso do módulo Stand de Vendas, os IDs daqui alimentam os outros dois endpoints do módulo.",
+    quandoUsar: "Esse é sempre o primeiro passo ao investigar qualquer caso do módulo Stand de Vendas: os IDs retornados aqui alimentam os outros dois endpoints do módulo.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Confirme que o módulo Stand de Vendas está ativo na conta do cliente antes de investigar mais a fundo.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/stands" \\
@@ -563,7 +563,7 @@ const ENDPOINTS = [
     title: "Investigar Leads do Estande",
     category: "Stand de Vendas",
     summary: "Lista os leads capturados em estandes de vendas, paginados de 50 em 50.",
-    quandoUsar: "Utilize quando o cliente relatar que leads capturados no estande físico não aparecem no relatório dele.",
+    quandoUsar: "Indicado quando o cliente relatar que leads capturados no estande físico não aparecem no relatório dele.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Filtre por custom_lead_form_ids usando o ID obtido em Investigar Lista de Estandes para conferir só os leads de um formulário específico.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/leads?start_date=2026-07-01&end_date=2026-07-26" \\
@@ -578,7 +578,7 @@ const ENDPOINTS = [
     title: "Investigar Resumo de Presenças",
     category: "Stand de Vendas",
     summary: "Lista o resumo de presenças por vendedor, gerente ou empresa. start_date e end_date são obrigatórios.",
-    quandoUsar: "Utilize quando o cliente questionar os números de um relatório de presença no estande.",
+    quandoUsar: "Use quando o cliente questionar os números de um relatório de presença no estande.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste com um período curto (uma semana) primeiro para conferir os números antes de puxar um relatório mensal inteiro.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/attendance_summaries?start_date=2026-07-01&end_date=2026-07-26" \\
@@ -595,7 +595,7 @@ const ENDPOINTS = [
     title: "Investigar Blocklist",
     category: "Blocklist",
     summary: "Lista as entradas da blocklist da hierarquia, da mais recente para a mais antiga.",
-    quandoUsar: "Utilize quando o cliente relatar que um contato não está recebendo leads e você suspeitar que ele está bloqueado.",
+    quandoUsar: "Indicado quando o cliente relatar que um contato não está recebendo leads e a suspeita for de que ele está bloqueado.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Confirme que o escopo retornado é o da hierarquia correta antes de investigar por que um contato específico está bloqueado.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/hierarchy_blocklists" \\
@@ -610,7 +610,7 @@ const ENDPOINTS = [
     title: "Testar Inclusão na Blocklist",
     category: "Blocklist",
     summary: "Adiciona telefone e/ou email à blocklist da hierarquia. Retorna 409 se já existir.",
-    quandoUsar: "Utilize quando o cliente pedir para bloquear um contato manualmente, ou quando precisar confirmar se um número já está bloqueado antes de investigar outro sintoma.",
+    quandoUsar: "Use quando o cliente pedir para bloquear um contato manualmente, ou quando precisar confirmar se um número já está bloqueado antes de investigar outro sintoma.",
     ferramentas: ["postman", "api", "plataforma"],
     testar: "Teste enviando o mesmo telefone em dois formatos diferentes (com e sem DDI) para confirmar que o sistema reconhece como duplicado (409).",
     curl: `curl -X POST "https://api.contact2sale.com/integration/hierarchy_blocklists" \\
@@ -654,6 +654,15 @@ const CASOS = [
 
 // Changelog do projeto
 const CHANGELOG = [
+  {
+    versao: "1.5",
+    data: "27 Jul 2026",
+    itens: [
+      "Revisão de português em todos os blocos \"Quando utilizar\" e \"Como testar\" dos 33 procedimentos",
+      "Corrigida a frase de abertura de Validar Autenticação e outras construções repetitivas ou confusas",
+      "Variação nas aberturas de frase (Use / Indicado quando / Esse é o primeiro passo) para reduzir repetição"
+    ]
+  },
   {
     versao: "1.4",
     data: "27 Jul 2026",
