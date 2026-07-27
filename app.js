@@ -5,6 +5,7 @@
 
 const app = document.getElementById("app");
 const sidebarNav = document.getElementById("sidebar-nav");
+const OFFICIAL_DOCS_URL = "https://docs-api-leads.c2sapp.com/";
 
 // ---------- ícones (stroke, 1.5px, sem emoji) ----------
 const ICONS = {
@@ -23,7 +24,8 @@ const ICONS = {
   circle: `<circle cx="12" cy="12" r="9"/>`,
   platform: `<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/>`,
   logs: `<path d="M4 6h16M4 12h11M4 18h14"/>`,
-  target: `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>`
+  target: `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>`,
+  external: `<path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>`
 };
 
 function icon(name, size = 16) {
@@ -213,6 +215,19 @@ function renderHome() {
           <div class="terminal-body" id="hero-terminal-body"></div>
         </div>
       </div>
+    </div>
+
+    <div class="docs-relation">
+      <div class="docs-relation-copy">
+        <div class="status-block-label">Documentação Oficial da API</div>
+        <p>A documentação oficial reúne todas as informações técnicas da API: endpoints, parâmetros, autenticação, exemplos de requisição e de resposta. É a fonte de referência.</p>
+        <p>A Support API Academy complementa essa documentação, mostrando como usar esses recursos em cenários reais de suporte: quando investigar, com o que testar, e o teste sendo feito em vídeo.</p>
+      </div>
+      <a class="docs-relation-btn" href="${OFFICIAL_DOCS_URL}" target="_blank" rel="noopener">
+        ${icon("book", 18)}
+        <span>Acessar Documentação Oficial da API</span>
+        ${icon("external", 15)}
+      </a>
     </div>
 
     <div class="section">
@@ -502,6 +517,11 @@ function renderEndpointDetail(slug) {
       <h2>Demonstração em vídeo</h2>
       ${videoSection}
     </div>
+
+    <a class="official-docs-link" href="${OFFICIAL_DOCS_URL}" target="_blank" rel="noopener">
+      ${icon("external", 13)}
+      <span>Ver especificação completa de ${ep.path} na documentação oficial</span>
+    </a>
   `;
   wireCodePanels(app);
 }

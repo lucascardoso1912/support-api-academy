@@ -36,6 +36,7 @@ Qualquer uma das duas opções é gratuita e não exige saber programar além de
 - Paleta grafite + azul (cor de marca do C2S), sem laranja/âmbar.
 - Zero emoji na interface: todos os ícones são SVG monocromático, definidos em `ICONS` no topo do `app.js`. Pra trocar um ícone de alguma página, é só apontar para uma chave diferente desse objeto (ou adicionar um novo `path` SVG lá).
 - Tokens de cor, tipografia e espaçamento ficam centralizados no topo do `style.css` (`:root { ... }`), qualquer ajuste de paleta é feito só ali.
+- O link para a documentação oficial da API fica numa constante só, `OFFICIAL_DOCS_URL` no topo do `app.js`. Se o endereço mudar, é só trocar ali; ele é usado tanto no botão da home quanto no link de cada procedimento.
 
 ## Como adicionar vídeo em um procedimento
 
