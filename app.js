@@ -284,40 +284,44 @@ function renderFundamentos() {
   app.innerHTML = `
     <span class="eyebrow">Base teórica</span>
     <h1 class="page-title">Fundamentos</h1>
-    <p class="page-lede">O mínimo necessário para entender qualquer chamada de API do C2S, sem precisar decorar, só o suficiente pra investigar um caso com segurança.</p>
+    <p class="page-lede">Esta trilha ajuda a entender o básico de qualquer integração com a API do C2S, desde como uma requisição é enviada até como interpretar a resposta. O objetivo não é decorar detalhes, e sim construir uma base sólida para investigar casos com segurança.</p>
 
     <div class="section">
       <h2>O que é HTTP</h2>
-      <p>É o protocolo usado para o seu sistema (ou o do cliente) conversar com o C2S pela internet. Toda chamada de API é uma requisição HTTP: você manda uma pergunta ou um comando, e o servidor responde com um resultado e um código de status.</p>
+      <p>HTTP é o protocolo usado para o seu sistema, ou o sistema do cliente, conversar com o C2S pela internet. Cada chamada de API é uma requisição HTTP: você envia um pedido para um endpoint e recebe uma resposta com dados e um código de status.</p>
+      <p>Na prática, isso significa que, ao investigar um caso, você normalmente começa pelo fluxo simples: pedir informação, verificar a resposta e comparar com o que o cliente esperava.</p>
     </div>
 
     <div class="section">
       <h2>O que é REST / API</h2>
-      <p>A API do C2S segue o padrão REST: cada tipo de informação (leads, vendedores, filas) tem um endereço próprio (endpoint), e você usa métodos HTTP diferentes pra dizer o que quer fazer com aquele recurso.</p>
+      <p>A API do C2S segue o padrão REST. Em vez de uma única função, cada recurso tem um endereço próprio, chamado endpoint, e cada método HTTP descreve a ação que você quer realizar.</p>
       <table>
         <thead><tr><th>Método</th><th>Uso</th></tr></thead>
         <tbody>
-          <tr><td><span class="method-tag method-GET">GET</span></td><td>Buscar/listar informação (ex: listar leads)</td></tr>
-          <tr><td><span class="method-tag method-POST">POST</span></td><td>Criar um novo registro (ex: criar lead)</td></tr>
+          <tr><td><span class="method-tag method-GET">GET</span></td><td>Buscar/listar dados (ex.: listar leads)</td></tr>
+          <tr><td><span class="method-tag method-POST">POST</span></td><td>Criar um novo registro (ex.: criar lead)</td></tr>
           <tr><td><span class="method-tag method-PUT">PUT</span></td><td>Atualizar um registro existente</td></tr>
           <tr><td><span class="method-tag method-DELETE">DELETE</span></td><td>Remover um registro</td></tr>
         </tbody>
       </table>
+      <p>Em suporte, pensar em “recurso + método + resposta” ajuda a localizar rapidamente onde o problema pode estar.</p>
     </div>
 
     <div class="section">
       <h2>JSON</h2>
-      <p>É o formato dos dados que a API manda e recebe: pares de chave e valor, parecido com um dicionário. Toda resposta da API do C2S vem em JSON.</p>
+      <p>JSON é o formato usado para a API enviar e receber dados: pares de chave e valor, parecidos com um dicionário. Muitas respostas da API do C2S chegam em JSON, então saber ler esse formato é essencial para interpretar o retorno.</p>
       ${codePanel({ tabs: [{ label: "exemplo.json", html: highlightJson(`{\n  "nome": "João Silva",\n  "status": "em_negociacao",\n  "ativo": true\n}`) }] })}
     </div>
 
     <div class="section">
       <h2>Autenticação (Bearer Token)</h2>
-      <p>Toda chamada precisa de um token, enviado no header <code>Authorization</code> (preferencial) ou <code>Authentication</code> (alternativo). Sem token válido, a API responde <code>403</code> com <code>not_authorized</code>.</p>
+      <p>Toda chamada precisa de um token válido, enviado no header <code>Authorization</code>. Sem esse token, a API normalmente responde com <code>403</code> e um erro como <code>not_authorized</code>.</p>
+      <p>Em ambientes de suporte, validar o token antes de qualquer outra hipótese costuma economizar tempo porque elimina falhas de acesso e credenciais.</p>
     </div>
 
     <div class="section">
       <h2>Status Code: o essencial</h2>
+      <p>Os códigos de status mostram rapidamente se a chamada funcionou, se houve erro de entrada ou se o problema está do lado do servidor.</p>
       <table>
         <thead><tr><th>Faixa</th><th>Significado</th></tr></thead>
         <tbody>
@@ -326,6 +330,7 @@ function renderFundamentos() {
           <tr><td><span class="status-chip status-5">5xx</span></td><td>Erro do lado do servidor, aqui normalmente se escala</td></tr>
         </tbody>
       </table>
+      <p>Exemplos úteis: <code>200</code> para sucesso em leitura, <code>201</code> para criação, <code>403</code> para falta de autorização, <code>423</code> para regra de negócio ou dado inválido e <code>500</code> para falha interna.</p>
     </div>
   `;
   wireCodePanels(app);
