@@ -12,6 +12,7 @@ support-api-academy/
 ├── style.css    → todos os estilos (tokens de cor/tipografia no topo do arquivo)
 ├── data.js      → onde ficam os ENDPOINTS, CASOS e CHANGELOG
 ├── app.js       → roteamento e renderização das páginas
+├── favicon.svg  → ícone da aba do navegador
 └── README.md
 ```
 
@@ -33,6 +34,9 @@ Qualquer uma das duas opções é gratuita e não exige saber programar além de
 
 ## Design
 
+- Favicon (`favicon.svg`) segue a mesma identidade: quadrado azul com o símbolo `</>`.
+- Botão "Voltar" aparece automaticamente no topo de toda página que não seja a Home, útil especialmente para quem acessa pelo celular (iPhone/Android), onde nem sempre tem um gesto óbvio de voltar. Ele usa o histórico do navegador; se não houver histórico (ex: abriu um link direto), volta para a Home.
+- Tema claro/escuro: o botão fica no topo da barra lateral, ao lado do nome do site. A escolha é salva no navegador da pessoa (`localStorage`), então persiste entre visitas. Se a pessoa nunca escolheu, o site usa a preferência do sistema operacional dela.
 - Paleta grafite + azul (cor de marca do C2S), sem laranja/âmbar.
 - Zero emoji na interface: todos os ícones são SVG monocromático, definidos em `ICONS` no topo do `app.js`. Pra trocar um ícone de alguma página, é só apontar para uma chave diferente desse objeto (ou adicionar um novo `path` SVG lá).
 - Tokens de cor, tipografia e espaçamento ficam centralizados no topo do `style.css` (`:root { ... }`), qualquer ajuste de paleta é feito só ali.

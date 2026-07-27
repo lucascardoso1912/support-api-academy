@@ -46,9 +46,9 @@ const ENDPOINTS = [
     title: "Validar Autenticação",
     category: "Autenticação",
     summary: "Confirma se um token está válido e retorna os dados da empresa autenticada.",
-    quandoUsar: "Esse será sempre o primeiro passo de qualquer investigação técnica, a autenticação é o primeiro ponto de acesso à API antes de testar qualquer outro endpoint.",
+    quandoUsar: "Utilize sempre que for o primeiro passo de qualquer investigação técnica, ou quando o cliente relatar erro de acesso à API antes de testar qualquer outro endpoint.",
     ferramentas: ["postman", "api"],
-    testar: "Chame o endpoint sozinho. Se voltar 200 com o nome da empresa, o token está válido. Se voltar 403, o problema é o token, ainda antes de qualquer outra investigação.",
+    testar: "Chame o endpoint sozinho, sem mais nada. Se voltar 200 com o nome da empresa, o token está válido. Se voltar 403, o problema é o token, ainda antes de qualquer outra investigação.",
     curl: `curl -X GET "https://api.contact2sale.com/integration" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
@@ -654,6 +654,15 @@ const CASOS = [
 
 // Changelog do projeto
 const CHANGELOG = [
+  {
+    versao: "1.3",
+    data: "27 Jul 2026",
+    itens: [
+      "Favicon adicionado (ícone </> em azul, combinando com a identidade visual)",
+      "Botão \"Voltar\" no topo de toda página, essencial para navegação no celular",
+      "Tema claro adicionado, com alternância salva no navegador da pessoa"
+    ]
+  },
   {
     versao: "1.2",
     data: "26 Jul 2026",
