@@ -655,6 +655,15 @@ const CASOS = [
 // Changelog do projeto
 const CHANGELOG = [
   {
+    versao: "1.4",
+    data: "27 Jul 2026",
+    itens: [
+      "Tema claro ajustado: tons de branco menos estourados, superfícies em cinza claro em camadas",
+      "Badge de versão da home corrigido para puxar a versão atual automaticamente",
+      "Página de Changelog removida da navegação"
+    ]
+  },
+  {
     versao: "1.3",
     data: "27 Jul 2026",
     itens: [

@@ -32,27 +32,27 @@
 
 /* ================= TEMA CLARO ================= */
 html[data-theme="light"] {
-  --bg: #F6F7F9;
-  --bg-elevated: #FFFFFF;
-  --bg-elevated-2: #EEF0F3;
+  --bg: #EDEFF3;
+  --bg-elevated: #F7F8FA;
+  --bg-elevated-2: #E9EBF0;
   --bg-code: #0A0D13;      /* blocos de código continuam escuros nos dois temas, de propósito */
-  --text: #1B1F27;
+  --text: #20242C;
   --text-dim: #565D6E;
   --text-faint: #838B9B;
-  --border: #E1E4EA;
-  --border-soft: #ECEEF2;
+  --border: #DBDFE6;
+  --border-soft: #E3E6EC;
 
   --accent: #2F63D9;
   --accent-dim: #244EAD;
-  --accent-soft: #E7EEFC;
+  --accent-soft: #E2E9F9;
   --link: #2F63D9;
-  --link-soft: #E7EEFC;
+  --link-soft: #E2E9F9;
   --violet: #6A63C9;
-  --violet-soft: #ECEAFB;
+  --violet-soft: #E7E4F7;
   --success: #1E9E63;
-  --success-soft: #E4F7EE;
+  --success-soft: #DFF3E9;
   --error: #D14343;
-  --error-soft: #FBE9E9;
+  --error-soft: #F8E3E3;
 }
 html[data-theme="light"] .terminal-body,
 html[data-theme="light"] .code-panel pre { color: #C9D1DE; }

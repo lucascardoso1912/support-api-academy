@@ -41,8 +41,7 @@ const STATIC_PAGES = [
   { slug: "postman", label: "Postman", icon: "mail" },
   { slug: "troubleshooting", label: "Troubleshooting", icon: "warning" },
   { slug: "casos-reais", label: "Casos Reais", icon: "case" },
-  { slug: "checklist", label: "Checklist", icon: "check" },
-  { slug: "changelog", label: "Changelog", icon: "clock" }
+  { slug: "checklist", label: "Checklist", icon: "check" }
 ];
 
 function escapeHtml(str) {
@@ -197,7 +196,7 @@ function toolsBlock(ep) {
 // ---------- pages ----------
 function renderHome() {
   app.innerHTML = `
-    <span class="version-badge">Versão <b>1.0</b> · atualizado em 26 Jul 2026</span>
+    <span class="version-badge">Versão <b>${CHANGELOG[0].versao}</b> · atualizado em ${CHANGELOG[0].data}</span>
     <div class="hero">
       <div class="hero-copy">
         <span class="eyebrow">Suporte C2S · Trilha Técnica</span>
@@ -454,24 +453,6 @@ function renderChecklist() {
   });
 }
 
-function renderChangelog() {
-  app.innerHTML = `
-    <span class="eyebrow">Histórico</span>
-    <h1 class="page-title">Changelog</h1>
-    <p class="page-lede">Como a trilha evolui mês a mês.</p>
-    <div class="section">
-      ${CHANGELOG.map(c => `
-        <div class="caso-card">
-          <span class="caso-id">v${c.versao} · ${c.data}</span>
-          <ul style="margin:10px 0 0; padding-left:18px; color:var(--text-dim)">
-            ${c.itens.map(i => `<li style="margin-bottom:5px">${i}</li>`).join("")}
-          </ul>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
 function renderEndpointDetail(slug) {
   const ep = ENDPOINTS.find(e => e.slug === slug);
   if (!ep) { app.innerHTML = `<p>Procedimento não encontrado.</p>`; return; }
@@ -544,7 +525,6 @@ function router() {
     case "troubleshooting": renderTroubleshooting(); break;
     case "casos-reais": renderCasosReais(); break;
     case "checklist": renderChecklist(); break;
-    case "changelog": renderChangelog(); break;
     case "endpoint": renderEndpointDetail(sub); break;
     default: renderHome();
   }
