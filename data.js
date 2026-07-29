@@ -37,6 +37,83 @@ const TOOLS = {
   logs: { label: "Logs da integração" }
 };
 
+// ============================================================
+// VÍDEOS por padrão de requisição.
+//
+// Estratégia: em vez de 1 vídeo por endpoint (muito repetitivo,
+// já que testar um GET é sempre o mesmo padrão), os vídeos
+// ensinam o PADRÃO de investigação/teste. Vários procedimentos
+// apontam para o mesmo vídeo através do campo "videoGroup" de
+// cada endpoint (lá embaixo, no array ENDPOINTS).
+//
+// Para gravar e publicar um vídeo, é só preencher o campo
+// "video" do grupo correspondente aqui. Ele passa a valer
+// automaticamente para todos os procedimentos daquele grupo.
+// ============================================================
+const VIDEO_GROUPS = {
+  "get-requests": {
+    titulo: "Validando requisições GET",
+    resumo: "O padrão por trás de toda investigação: montar a chamada, autenticar e ler a resposta.",
+    ensina: [
+      "Como montar uma requisição GET",
+      "Como usar o header Authorization Bearer",
+      "Como interpretar HTTP 200",
+      "Como interpretar HTTP 403",
+      "Como validar o retorno contra o que está na Plataforma C2S",
+      "Erros comuns em requisições GET"
+    ],
+    video: ""
+  },
+  "post-requests": {
+    titulo: "Trabalhando com requisições POST",
+    resumo: "Como criar e modificar recursos com body JSON, usando exemplos reais de Leads e Tags.",
+    ensina: [
+      "Como montar o body em JSON",
+      "Campos obrigatórios x opcionais",
+      "Envio da requisição com Content-Type correto",
+      "Validação do resultado na Plataforma C2S",
+      "Interpretação da resposta",
+      "Erros comuns (400, 422, 423)",
+      "Exemplos práticos: Criar Lead, Adicionar Tag e Remover Tag"
+    ],
+    video: ""
+  },
+  "put-requests": {
+    titulo: "Trabalhando com requisições PUT",
+    resumo: "Como atualizar um recurso existente e confirmar que a mudança realmente foi aplicada.",
+    ensina: [
+      "Atualização de recursos existentes",
+      "Diferença entre atualizar um campo simples e um body completo",
+      "Validação do resultado após a atualização",
+      "Erros comuns em requisições PUT"
+    ],
+    video: ""
+  },
+  "webhooks": {
+    titulo: "Webhooks: assinatura e cancelamento",
+    resumo: "Como configurar, testar e confirmar o recebimento de eventos de webhook.",
+    ensina: [
+      "Como assinar um gatilho (on_create_lead, on_update_lead, on_close_lead)",
+      "A regra de 1 endpoint por token",
+      "Como confirmar o recebimento no servidor do cliente",
+      "Como cancelar uma assinatura",
+      "Erros comuns de configuração"
+    ],
+    video: ""
+  },
+  "casos-reais": {
+    titulo: "Casos Reais de investigação",
+    resumo: "Investigações completas, do sintoma relatado pelo cliente até a causa raiz.",
+    ensina: [
+      "Erro 403 na integração do cliente",
+      "Lead duplicado",
+      "Lead não entrou na plataforma",
+      "Problemas de distribuição entre vendedores"
+    ],
+    video: ""
+  }
+};
+
 const ENDPOINTS = [
   // ---------------- Autenticação ----------------
   {
@@ -52,7 +129,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
 
   // ---------------- Leads ----------------
@@ -69,7 +146,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads?status=em_negociacao&perpage=50" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "buscar-lead",
@@ -84,7 +161,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads/{id}" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "criar-lead",
@@ -101,7 +178,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"data":{"type":"lead","attributes":{"name":"Teste","phone":"11999999999"}}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
   {
     slug: "atualizar-lead",
@@ -118,7 +195,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"lead":{"customer":{"name":"Nome Atualizado"}}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "put-requests"
   },
   {
     slug: "encaminhar-lead",
@@ -135,7 +212,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"seller_from_id":"{id_origem}","seller_to_id":"{id_destino}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "put-requests"
   },
   {
     slug: "listar-tags-lead",
@@ -146,11 +223,11 @@ const ENDPOINTS = [
     summary: "Retorna todas as tags associadas a um lead específico.",
     quandoUsar: "Use quando o cliente relatar que uma tag esperada não aparece no lead, ou para conferir o estado atual antes de adicionar ou remover uma tag.",
     ferramentas: ["postman", "api", "plataforma"],
-    testar: "Use num lead que você já sabe que tem tag pra confirmar visualmente que a resposta bate com o que aparece no painel do C2S.",
+    testar: "Use num lead que você já sabe que tem tag para confirmar visualmente que a resposta bate com o painel do C2S. Esse endpoint é o que você usa para validar qualquer teste de Adicionar ou Remover Tag.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads/{id}/tags" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "adicionar-tag-lead",
@@ -161,13 +238,13 @@ const ENDPOINTS = [
     summary: "Adiciona uma tag já existente a um lead.",
     quandoUsar: "Indicado quando o cliente relatar que a tag enviada pela integração dele não está sendo aplicada ao lead.",
     ferramentas: ["postman", "api", "plataforma"],
-    testar: "Pegue o ID de uma tag em Investigar Lista de Tags antes de testar aqui. A tag precisa já existir na empresa.",
+    testar: "Pegue o ID de uma tag em Investigar Lista de Tags antes de testar aqui (a tag precisa já existir na empresa). Depois de adicionar, confira em Investigar Tags de um Lead se ela aparece na lista, essa é a validação que fecha o teste. Erro comum: usar o nome da tag em vez do ID criptografado.",
     curl: `curl -X POST "https://api.contact2sale.com/integration/leads/{id}/tags" \\
   -H "Authorization: Bearer {token}" \\
   -H "Content-Type: application/json" \\
   -d '{"tag_id":"{tag_id}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
   {
     slug: "remover-tag-lead",
@@ -178,13 +255,13 @@ const ENDPOINTS = [
     summary: "Remove uma ou mais tags de um lead. Aceita tag_id como string única ou array.",
     quandoUsar: "Use quando uma tag precisar ser removida em massa, ou quando o cliente relatar que a remoção pela integração dele não está funcionando.",
     ferramentas: ["postman", "api", "plataforma"],
-    testar: "Teste primeiro removendo uma única tag antes de testar com array de várias tags de uma vez.",
+    testar: "Teste primeiro removendo uma única tag antes de testar com array de várias tags de uma vez. Depois de remover, confirme em Investigar Tags de um Lead que ela realmente sumiu da lista. Erro comum: reenviar o tag_id de uma tag que já foi removida.",
     curl: `curl -X DELETE "https://api.contact2sale.com/integration/leads/{id}/tags" \\
   -H "Authorization: Bearer {token}" \\
   -H "Content-Type: application/json" \\
   -d '{"tag_id":"{tag_id}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
   {
     slug: "marcar-lead-lido",
@@ -199,7 +276,7 @@ const ENDPOINTS = [
     curl: `curl -X PUT "https://api.contact2sale.com/integration/leads/{id}/read" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "put-requests"
   },
   {
     slug: "criar-mensagem-lead",
@@ -216,7 +293,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"body":"Mensagem de teste","from":"bot"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
   {
     slug: "criar-atividade-lead",
@@ -233,7 +310,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"date":"2026-08-01T14:00:00Z","type":{"activity":true},"body":"Retornar contato"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
   {
     slug: "atualizar-status-lead",
@@ -250,7 +327,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"status":3,"message":"Cliente sem interesse","lost_reason_ids":[12]}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "put-requests"
   },
   {
     slug: "fechar-negocio-lead",
@@ -267,7 +344,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"done_type_negotiation":"sale","value":"500000"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
 
   // ---------------- Vendedores ----------------
@@ -284,7 +361,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/sellers" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "criar-vendedor",
@@ -301,7 +378,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"company_id":"{company_id}","name":"Novo Vendedor","email":"vendedor@exemplo.com"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
   {
     slug: "atualizar-vendedor",
@@ -318,7 +395,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"name":"Vendedor Atualizado"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "put-requests"
   },
   {
     slug: "timeshift-vendedores",
@@ -335,7 +412,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"seller_ids":["{id_1}","{id_2}"]}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "put-requests"
   },
 
   // ---------------- Empresas ----------------
@@ -352,7 +429,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/companies" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
 
   // ---------------- Tags ----------------
@@ -369,7 +446,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/tags" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "criar-tag",
@@ -386,7 +463,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"tag":{"name":"Nova Tag","autofill":false}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
 
   // ---------------- Distribuição ----------------
@@ -403,7 +480,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/distribution_rules" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "criar-regra-distribuicao",
@@ -420,7 +497,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"cod_1":"SP","cod_2":"São Paulo","priority":1,"type_rule":"rotation","seller_id":"{seller_id}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
   {
     slug: "listar-filas-distribuicao",
@@ -435,7 +512,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/distribution_queues" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "listar-vendedores-fila",
@@ -450,7 +527,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/distribution_queues/{id}/sellers" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "atualizar-prioridades-fila",
@@ -467,7 +544,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{ }'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "put-requests"
   },
   {
     slug: "redistribuir-lead",
@@ -484,7 +561,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"id":"{lead_id}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   },
   {
     slug: "definir-proximo-vendedor",
@@ -501,7 +578,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"next_queue_seller_id":123}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "put-requests"
   },
 
   // ---------------- Webhooks ----------------
@@ -520,7 +597,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"hook_action":"on_create_lead","hook_url":"https://seu-servidor.com/webhook"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "webhooks"
   },
   {
     slug: "cancelar-webhook",
@@ -537,7 +614,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"hook_action":"on_create_lead"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "webhooks"
   },
 
   // ---------------- Stand de Vendas ----------------
@@ -554,7 +631,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/stands" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "listar-leads-estande",
@@ -569,7 +646,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/leads?start_date=2026-07-01&end_date=2026-07-26" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "resumo-presencas-estande",
@@ -584,7 +661,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/attendance_summaries?start_date=2026-07-01&end_date=2026-07-26" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
 
   // ---------------- Blocklist ----------------
@@ -601,7 +678,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/hierarchy_blocklists" \\
   -H "Authorization: {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "get-requests"
   },
   {
     slug: "adicionar-blocklist",
@@ -618,7 +695,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"hierarchy_blocklist":{"phone":"11999998888","remove_leads":true}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "post-requests"
   }
 ];
 
@@ -654,6 +731,18 @@ const CASOS = [
 
 // Changelog do projeto
 const CHANGELOG = [
+  {
+    versao: "2.0",
+    data: "27 Jul 2026",
+    itens: [
+      "Nova estratégia de vídeo: em vez de 1 vídeo por endpoint, os vídeos agora ensinam padrões de requisição (GET, POST, PUT) e são compartilhados entre procedimentos parecidos",
+      "Webhooks e Casos Reais continuam com vídeo exclusivo",
+      "Cada página de procedimento mostra o vídeo do padrão e explica o que ele cobre, deixando claro que não é exclusivo daquele endpoint",
+      "Vídeo dedicado adicionado à página Casos Reais",
+      "Textos de Listar Tags, Adicionar Tag e Remover Tag enriquecidos com passos de validação e erros comuns",
+      "Nenhum procedimento foi removido; os 35 continuam existindo, cada um com sua própria página"
+    ]
+  },
   {
     versao: "1.5",
     data: "27 Jul 2026",

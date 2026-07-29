@@ -42,15 +42,43 @@ Qualquer uma das duas opções é gratuita e não exige saber programar além de
 - Tokens de cor, tipografia e espaçamento ficam centralizados no topo do `style.css` (`:root { ... }`), qualquer ajuste de paleta é feito só ali.
 - O link para a documentação oficial da API fica numa constante só, `OFFICIAL_DOCS_URL` no topo do `app.js`. Se o endereço mudar, é só trocar ali; ele é usado tanto no botão da home quanto no link de cada procedimento.
 
-## Como adicionar vídeo em um procedimento
+## Como adicionar um vídeo (por padrão de requisição)
 
-No objeto do procedimento em `data.js`, preencha o campo `video` com o link (Loom, YouTube não-listado, Google Drive, Streamable etc):
+Os vídeos não são mais um por procedimento. Um mesmo vídeo é compartilhado por vários procedimentos parecidos (todos os GET, todos os POST etc), porque testar um GET é sempre o mesmo padrão, gravar um vídeo por endpoint gerava conteúdo repetitivo.
+
+Os vídeos vivem no objeto `VIDEO_GROUPS`, no topo do `data.js`, antes do array `ENDPOINTS`:
 
 ```js
-video: "https://www.loom.com/share/xxxxxxxx"
+const VIDEO_GROUPS = {
+  "get-requests": {
+    titulo: "Validando requisições GET",
+    resumo: "...",
+    ensina: ["...", "..."],
+    video: "https://www.loom.com/share/xxxxxxxx"   // cole o link aqui
+  },
+  // "post-requests", "put-requests", "webhooks", "casos-reais"
+}
 ```
 
-A seção "Demonstração em vídeo" só aparece com o link real quando esse campo não está vazio; enquanto estiver vazio, a página mostra um aviso discreto de que o vídeo ainda não foi gravado.
+Para publicar um vídeo, preencha o campo `video` do grupo correspondente. Ele passa a valer automaticamente para **todos os procedimentos daquele grupo**, sem precisar editar cada um.
+
+Hoje existem 5 grupos:
+
+| Grupo | Cobre |
+|---|---|
+| `get-requests` | Todos os endpoints de leitura (GET): autenticação, listagens, buscas |
+| `post-requests` | Endpoints de criação/escrita (POST) e a remoção de tag (DELETE, mesmo padrão de validação) |
+| `put-requests` | Endpoints de atualização (PUT) |
+| `webhooks` | Assinar e cancelar webhook (exclusivo, não compartilha com POST) |
+| `casos-reais` | Vídeo específico da página Casos Reais, não aparece nos procedimentos |
+
+Cada procedimento aponta para um grupo através do campo `videoGroup`:
+
+```js
+videoGroup: "get-requests"
+```
+
+Se um novo endpoint seguir um padrão já coberto, é só apontar para o grupo existente, sem gravar vídeo novo.
 
 ## Sobre o selo de status (importante)
 
@@ -79,7 +107,7 @@ Abra `data.js` e copie um dos objetos dentro do array `ENDPOINTS`, ajustando os 
   testar: "Dica prática de como testar esse procedimento.",
   curl: `curl ...`,
   status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-  video: ""
+  videoGroup: "get-requests"  // aponta pra um grupo existente em VIDEO_GROUPS (ou crie um novo grupo lá se for um padrão diferente)
 }
 ```
 

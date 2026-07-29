@@ -153,9 +153,10 @@ function wireCodePanels(root) {
 
 // ---------- selo de status do procedimento ----------
 function statusBlock(ep) {
+  const hasVideo = !!VIDEO_GROUPS[ep.videoGroup]?.video;
   const items = [
     { done: !!ep.status.validado, label: "Validado pelo Suporte" },
-    { done: !!ep.video, label: "Vídeo disponível" },
+    { done: hasVideo, label: "Vídeo disponível" },
     { done: !!ep.status.testadoPostman, label: "Testado no Postman" }
   ];
   const itemsHtml = items.map(it => `
@@ -402,10 +403,32 @@ function renderTroubleshooting() {
 }
 
 function renderCasosReais() {
+  const group = VIDEO_GROUPS["casos-reais"];
+  const videoSection = group.video ? `
+    <a class="video-card" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
+      ${icon("play", 22)}
+      <div>
+        <div class="video-card-title">Assistir: ${group.titulo}</div>
+        <div class="video-card-sub">${group.resumo}</div>
+      </div>
+    </a>` : `
+    <a class="video-card video-card-empty">
+      ${icon("play", 22)}
+      <div>
+        <div class="video-card-title">${group.titulo} (vídeo ainda não adicionado)</div>
+        <div class="video-card-sub">${group.resumo}</div>
+      </div>
+    </a>`;
+
   app.innerHTML = `
     <span class="eyebrow">Base de conhecimento</span>
     <h1 class="page-title">Casos Reais</h1>
     <p class="page-lede">Investigações documentadas passo a passo. Cresce a cada caso novo resolvido pelo time.</p>
+
+    <div class="section">
+      ${videoSection}
+    </div>
+
     <div class="section">
       ${CASOS.map(c => `
         <div class="caso-card">
@@ -457,21 +480,28 @@ function renderEndpointDetail(slug) {
   const ep = ENDPOINTS.find(e => e.slug === slug);
   if (!ep) { app.innerHTML = `<p>Procedimento não encontrado.</p>`; return; }
 
-  const videoSection = ep.video ? `
-    <a class="video-card" href="${escapeHtml(ep.video)}" target="_blank" rel="noopener">
+  const group = VIDEO_GROUPS[ep.videoGroup];
+  const videoSection = group ? `
+    ${group.video ? `
+    <a class="video-card" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
       ${icon("play", 22)}
       <div>
-        <div class="video-card-title">Assistir demonstração: ${ep.title}</div>
-        <div class="video-card-sub">Abre em uma nova aba</div>
+        <div class="video-card-title">Assistir: ${group.titulo}</div>
+        <div class="video-card-sub">${group.resumo}</div>
       </div>
     </a>` : `
     <a class="video-card video-card-empty">
       ${icon("play", 22)}
       <div>
-        <div class="video-card-title">Vídeo ainda não adicionado</div>
-        <div class="video-card-sub">Assim que gravar, é só preencher o campo "video" deste procedimento no data.js</div>
+        <div class="video-card-title">${group.titulo} (vídeo ainda não adicionado)</div>
+        <div class="video-card-sub">${group.resumo}</div>
       </div>
-    </a>`;
+    </a>`}
+    <div class="video-group-note">
+      <span class="video-group-note-label">Esse é um vídeo por padrão de requisição, não exclusivo deste endpoint</span>
+      <span>Ele também vale para todos os outros procedimentos ${ep.method} parecidos. O vídeo ensina:</span>
+      <ul>${group.ensina.map(i => `<li>${i}</li>`).join("")}</ul>
+    </div>` : "";
 
   app.innerHTML = `
     <span class="eyebrow">${ep.category}</span>
@@ -498,7 +528,7 @@ function renderEndpointDetail(slug) {
     </div>
 
     <div class="section">
-      <h2>Demonstração em vídeo</h2>
+      <h2>Vídeo relacionado</h2>
       ${videoSection}
     </div>
 
