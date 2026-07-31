@@ -13,6 +13,7 @@ support-api-academy/
 ├── data.js      → onde ficam os ENDPOINTS, CASOS e CHANGELOG
 ├── app.js       → roteamento e renderização das páginas
 ├── favicon.svg  → ícone da aba do navegador
+├── videos/      → arquivos de vídeo locais (opcional, ver seção de vídeo abaixo)
 └── README.md
 ```
 
@@ -42,43 +43,32 @@ Qualquer uma das duas opções é gratuita e não exige saber programar além de
 - Tokens de cor, tipografia e espaçamento ficam centralizados no topo do `style.css` (`:root { ... }`), qualquer ajuste de paleta é feito só ali.
 - O link para a documentação oficial da API fica numa constante só, `OFFICIAL_DOCS_URL` no topo do `app.js`. Se o endereço mudar, é só trocar ali; ele é usado tanto no botão da home quanto no link de cada procedimento.
 
-## Como adicionar um vídeo (por padrão de requisição)
+## Como adicionar um vídeo a um procedimento
 
-Os vídeos não são mais um por procedimento. Um mesmo vídeo é compartilhado por vários procedimentos parecidos (todos os GET, todos os POST etc), porque testar um GET é sempre o mesmo padrão, gravar um vídeo por endpoint gerava conteúdo repetitivo.
+Cada procedimento tem seu próprio campo `video` em `data.js`. Existem duas formas de preencher:
 
-Os vídeos vivem no objeto `VIDEO_GROUPS`, no topo do `data.js`, antes do array `ENDPOINTS`:
-
-```js
-const VIDEO_GROUPS = {
-  "get-requests": {
-    titulo: "Validando requisições GET",
-    resumo: "...",
-    ensina: ["...", "..."],
-    video: "https://www.loom.com/share/xxxxxxxx"   // cole o link aqui
-  },
-  // "post-requests", "put-requests", "webhooks", "casos-reais"
-}
-```
-
-Para publicar um vídeo, preencha o campo `video` do grupo correspondente. Ele passa a valer automaticamente para **todos os procedimentos daquele grupo**, sem precisar editar cada um.
-
-Hoje existem 5 grupos:
-
-| Grupo | Cobre |
-|---|---|
-| `get-requests` | Todos os endpoints de leitura (GET): autenticação, listagens, buscas |
-| `post-requests` | Endpoints de criação/escrita (POST) e a remoção de tag (DELETE, mesmo padrão de validação) |
-| `put-requests` | Endpoints de atualização (PUT) |
-| `webhooks` | Assinar e cancelar webhook (exclusivo, não compartilha com POST) |
-| `casos-reais` | Vídeo específico da página Casos Reais, não aparece nos procedimentos |
-
-Cada procedimento aponta para um grupo através do campo `videoGroup`:
+**1. Link externo** (Loom, YouTube não-listado, Google Drive, Streamable etc):
 
 ```js
-videoGroup: "get-requests"
+video: "https://www.loom.com/share/xxxxxxxx"
 ```
 
-Se um novo endpoint seguir um padrão já coberto, é só apontar para o grupo existente, sem gravar vídeo novo.
+Nesse caso a página mostra um cartão que abre o vídeo em uma nova aba.
+
+**2. Arquivo de vídeo local**, incluído dentro do próprio projeto na pasta `videos/`:
+
+```js
+video: "videos/validar-autenticacao.mp4"
+```
+
+Nesse caso o vídeo toca direto na página, com um player embutido (sem precisar sair do site). Para adicionar um vídeo local:
+
+1. Coloque o arquivo `.mp4` dentro da pasta `videos/`.
+2. Aponte o campo `video` do procedimento pro caminho relativo do arquivo (ex: `videos/nome-do-arquivo.mp4`).
+
+**Atenção ao tamanho:** o GitHub recusa arquivos acima de 100MB e já avisa a partir de 50MB. Um vídeo de uns 90-100MB (como o de Validar Autenticação) ainda sobe, mas deixa o repositório mais pesado para clonar. Se a ideia é gravar vários vídeos assim, vale considerar comprimir mais (ex: 720p, bitrate menor) ou migrar para um link externo (Loom/YouTube não-listado), que não pesa o repositório e ainda permite embutir.
+
+Se o campo `video` estiver vazio (`""`), a página mostra um aviso discreto de que o vídeo ainda não foi gravado.
 
 ## Sobre o selo de status (importante)
 
@@ -107,7 +97,7 @@ Abra `data.js` e copie um dos objetos dentro do array `ENDPOINTS`, ajustando os 
   testar: "Dica prática de como testar esse procedimento.",
   curl: `curl ...`,
   status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-  videoGroup: "get-requests"  // aponta pra um grupo existente em VIDEO_GROUPS (ou crie um novo grupo lá se for um padrão diferente)
+  video: ""   // link externo, caminho local em videos/, ou "" se ainda não gravou
 }
 ```
 
