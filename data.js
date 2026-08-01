@@ -46,9 +46,20 @@ const TOOLS = {
 // GET, Leads POST), mostrando o exemplo principal na tela e
 // citando os outros endpoints parecidos como exemplo extra.
 //
+// Organização por MÓDULO DE NEGÓCIO, não só por URL: os
+// procedimentos de tag de um lead (adicionar/remover) moraram
+// fisicamente em /integration/leads/:id/tags, mas pedagogicamente
+// pertencem ao módulo Tags, então a categoria deles é "Tags" e
+// o vídeo é compartilhado com os outros procedimentos de Tags.
+//
 // Todos os vídeos serão hospedados no Loom. Cole o link no
 // campo "video" do grupo correspondente quando estiver pronto,
 // ele passa a valer pra todos os procedimentos daquele grupo.
+// Cada grupo também alimenta automaticamente o cabeçalho
+// "Objetivo / Endpoints abordados / Pré-requisitos / Tempo
+// estimado" que aparece em toda página com vídeo (ver
+// videoInfoBlock em app.js): nada disso é hardcoded lá, tudo
+// vem daqui.
 // ============================================================
 const VIDEO_GROUPS = {
   "autenticacao-get": {
@@ -61,11 +72,13 @@ const VIDEO_GROUPS = {
       "Como usar o header Authorization Bearer",
       "Como interpretar HTTP 200 e HTTP 403"
     ],
-    video: ""
+    preRequisitos: ["Token de autenticação válido", "Postman ou terminal com curl"],
+    duracao: "3-5 min",
+    video: "https://www.loom.com/share/70684644097d4bb7adf5535e10040e1d"
   },
   "leads-get": {
     titulo: "Leads: requisições GET",
-    resumo: "Como investigar leads, seja em listagem, busca por ID ou consulta de tags.",
+    resumo: "Como investigar leads, seja em listagem, busca por ID ou consulta de tags de um lead.",
     exemploPrincipal: "Investigar Listagem de Leads",
     outrosExemplos: ["Investigar Lead Específico", "Investigar Tags de um Lead"],
     ensina: [
@@ -74,19 +87,23 @@ const VIDEO_GROUPS = {
       "Como validar o retorno contra a Plataforma C2S",
       "Erros comuns em requisições GET de Leads"
     ],
-    video: ""
+    preRequisitos: ["Token válido (ver Validar Autenticação)", "Um lead de teste já existente"],
+    duracao: "8-10 min",
+    video: "https://www.loom.com/share/73a17bac40f6424887621feadad936a3"
   },
   "leads-post": {
     titulo: "Leads: requisições POST",
     resumo: "Como criar e registrar informações em um lead usando body JSON.",
     exemploPrincipal: "Testar Criação de Lead",
-    outrosExemplos: ["Testar Adição de Tag", "Testar Criação de Mensagem", "Testar Criação de Atividade", "Testar Fechamento de Negócio"],
+    outrosExemplos: ["Testar Criação de Mensagem", "Testar Criação de Atividade", "Testar Fechamento de Negócio"],
     ensina: [
       "Como montar o body em JSON",
       "Campos obrigatórios x opcionais",
       "Validação do resultado na Plataforma C2S",
       "Erros comuns (400, 422, 423)"
     ],
+    preRequisitos: ["Token válido", "Postman configurado com Content-Type: application/json"],
+    duracao: "8-10 min",
     video: ""
   },
   "leads-put": {
@@ -99,18 +116,8 @@ const VIDEO_GROUPS = {
       "Validação do resultado após a atualização",
       "Erros comuns em requisições PUT de Leads"
     ],
-    video: ""
-  },
-  "leads-delete": {
-    titulo: "Leads: requisição DELETE",
-    resumo: "Como remover uma tag de um lead e confirmar que ela realmente saiu.",
-    exemploPrincipal: "Testar Remoção de Tag",
-    outrosExemplos: [],
-    ensina: [
-      "Como montar uma requisição DELETE com body",
-      "Diferença entre remover 1 tag e remover várias de uma vez",
-      "Como validar a remoção"
-    ],
+    preRequisitos: ["Token válido", "ID de um lead existente"],
+    duracao: "8-10 min",
     video: ""
   },
   "vendedores-get": {
@@ -119,6 +126,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Investigar Lista de Vendedores",
     outrosExemplos: [],
     ensina: ["Como montar a requisição", "Como usar o ID retornado em outras chamadas (encaminhar lead, filas etc)"],
+    preRequisitos: ["Token válido"],
+    duracao: "4-5 min",
     video: ""
   },
   "vendedores-post": {
@@ -127,6 +136,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Testar Criação de Vendedor",
     outrosExemplos: [],
     ensina: ["Como montar o body em JSON", "Campo company_id e erros comuns de empresa errada"],
+    preRequisitos: ["Token válido", "ID da empresa (company_id)"],
+    duracao: "5-7 min",
     video: ""
   },
   "vendedores-put": {
@@ -135,6 +146,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Testar Atualização de Vendedor",
     outrosExemplos: ["Testar Atualização de Rotação em Lote"],
     ensina: ["Atualização de campo simples x campos de rotação/distribuição", "Como testar em lote com segurança"],
+    preRequisitos: ["Token válido", "ID de um vendedor existente"],
+    duracao: "6-8 min",
     video: ""
   },
   "empresas-get": {
@@ -143,6 +156,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Investigar Empresas do Grupo",
     outrosExemplos: [],
     ensina: ["Como montar a requisição", "Quando usar isso como primeiro passo de uma investigação de hierarquia"],
+    preRequisitos: ["Token válido"],
+    duracao: "3-4 min",
     video: ""
   },
   "tags-get": {
@@ -151,14 +166,36 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Investigar Lista de Tags",
     outrosExemplos: [],
     ensina: ["Como montar a requisição e usar os filtros", "Como usar o ID retornado para Adicionar Tag a um lead"],
+    preRequisitos: ["Token válido"],
+    duracao: "3-4 min",
     video: ""
   },
   "tags-post": {
-    titulo: "Tags: requisição POST",
-    resumo: "Como criar uma tag nova e o comportamento de deduplicação.",
+    titulo: "Tags: requisições POST",
+    resumo: "Como criar uma tag nova na empresa e como anexar uma tag existente a um lead.",
     exemploPrincipal: "Testar Criação de Tag",
+    outrosExemplos: ["Testar Adição de Tag ao Lead"],
+    ensina: [
+      "Como montar o body em JSON",
+      "Comportamento ao criar uma tag repetida (201 com chave errors)",
+      "Diferença entre criar uma tag na empresa e anexar uma tag existente a um lead"
+    ],
+    preRequisitos: ["Token válido", "Um lead de teste existente (para o exemplo de anexar tag)"],
+    duracao: "6-8 min",
+    video: ""
+  },
+  "tags-delete": {
+    titulo: "Tags: requisição DELETE",
+    resumo: "Como remover uma tag de um lead e confirmar que ela realmente saiu.",
+    exemploPrincipal: "Testar Remoção de Tag do Lead",
     outrosExemplos: [],
-    ensina: ["Como montar o body em JSON", "Comportamento ao criar uma tag repetida (201 com chave errors)"],
+    ensina: [
+      "Como montar uma requisição DELETE com body",
+      "Diferença entre remover 1 tag e remover várias de uma vez",
+      "Como validar a remoção"
+    ],
+    preRequisitos: ["Token válido", "Um lead com tag já aplicada"],
+    duracao: "4-5 min",
     video: ""
   },
   "distribuicao-get": {
@@ -167,6 +204,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Investigar Regras de Distribuição",
     outrosExemplos: ["Investigar Filas de Distribuição", "Investigar Vendedores de uma Fila"],
     ensina: ["Como montar a requisição", "Como ler os headers de paginação", "Como comparar o retorno com o painel"],
+    preRequisitos: ["Token válido"],
+    duracao: "5-6 min",
     video: ""
   },
   "distribuicao-post": {
@@ -175,6 +214,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Testar Criação de Regra de Distribuição",
     outrosExemplos: ["Testar Redistribuição de Lead"],
     ensina: ["Como montar o body em JSON", "Como validar o efeito da regra no painel"],
+    preRequisitos: ["Token válido", "ID de um vendedor"],
+    duracao: "6-8 min",
     video: ""
   },
   "distribuicao-put": {
@@ -183,6 +224,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Testar Atualização de Prioridades",
     outrosExemplos: ["Testar Definição do Próximo Vendedor"],
     ensina: ["Como montar o body em JSON", "Erros comuns quando o vendedor não está habilitado na fila"],
+    preRequisitos: ["Token válido", "ID de uma fila de distribuição"],
+    duracao: "5-7 min",
     video: ""
   },
   "webhooks-post": {
@@ -196,6 +239,8 @@ const VIDEO_GROUPS = {
       "Como confirmar o recebimento no servidor do cliente",
       "Erros comuns de configuração"
     ],
+    preRequisitos: ["Token válido", "Um servidor de teste para receber o webhook (ex: webhook.site)"],
+    duracao: "8-10 min",
     video: ""
   },
   "stand-de-vendas-get": {
@@ -204,6 +249,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Investigar Lista de Estandes",
     outrosExemplos: ["Investigar Leads do Estande", "Investigar Resumo de Presenças"],
     ensina: ["Por que sempre começar por Listar Estandes", "Como usar os IDs retornados nos outros dois endpoints do módulo"],
+    preRequisitos: ["Token válido", "Módulo Stand de Vendas ativo na conta"],
+    duracao: "5-6 min",
     video: ""
   },
   "blocklist-get": {
@@ -212,6 +259,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Investigar Blocklist",
     outrosExemplos: [],
     ensina: ["Como montar a requisição", "Escopo por hierarquia"],
+    preRequisitos: ["Token válido", "Função de Hierarquia ativa na conta"],
+    duracao: "3-4 min",
     video: ""
   },
   "blocklist-post": {
@@ -220,6 +269,8 @@ const VIDEO_GROUPS = {
     exemploPrincipal: "Testar Inclusão na Blocklist",
     outrosExemplos: [],
     ensina: ["Como montar o body em JSON", "Como o telefone é normalizado", "Erro 409 de contato já bloqueado"],
+    preRequisitos: ["Token válido", "Um telefone ou email de teste para bloquear"],
+    duracao: "4-5 min",
     video: ""
   }
 };
@@ -338,40 +389,6 @@ const ENDPOINTS = [
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
     videoGroup: "leads-get"
-  },
-  {
-    slug: "adicionar-tag-lead",
-    method: "POST",
-    path: "/integration/leads/:id/tags",
-    title: "Testar Adição de Tag",
-    category: "Leads",
-    summary: "Adiciona uma tag já existente a um lead.",
-    quandoUsar: "Indicado quando o cliente relatar que a tag enviada pela integração dele não está sendo aplicada ao lead.",
-    ferramentas: ["postman", "api", "plataforma"],
-    testar: "Pegue o ID de uma tag em Investigar Lista de Tags antes de testar aqui (a tag precisa já existir na empresa). Depois de adicionar, confira em Investigar Tags de um Lead se ela aparece na lista, essa é a validação que fecha o teste. Erro comum: usar o nome da tag em vez do ID criptografado.",
-    curl: `curl -X POST "https://api.contact2sale.com/integration/leads/{id}/tags" \\
-  -H "Authorization: Bearer {token}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"tag_id":"{tag_id}"}'`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    videoGroup: "leads-post"
-  },
-  {
-    slug: "remover-tag-lead",
-    method: "DELETE",
-    path: "/integration/leads/:id/tags",
-    title: "Testar Remoção de Tag",
-    category: "Leads",
-    summary: "Remove uma ou mais tags de um lead. Aceita tag_id como string única ou array.",
-    quandoUsar: "Use quando uma tag precisar ser removida em massa, ou quando o cliente relatar que a remoção pela integração dele não está funcionando.",
-    ferramentas: ["postman", "api", "plataforma"],
-    testar: "Teste primeiro removendo uma única tag antes de testar com array de várias tags de uma vez. Depois de remover, confirme em Investigar Tags de um Lead que ela realmente sumiu da lista. Erro comum: reenviar o tag_id de uma tag que já foi removida.",
-    curl: `curl -X DELETE "https://api.contact2sale.com/integration/leads/{id}/tags" \\
-  -H "Authorization: Bearer {token}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"tag_id":"{tag_id}"}'`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    videoGroup: "leads-delete"
   },
   {
     slug: "marcar-lead-lido",
@@ -574,6 +591,40 @@ const ENDPOINTS = [
   -d '{"tag":{"name":"Nova Tag","autofill":false}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
     videoGroup: "tags-post"
+  },
+  {
+    slug: "adicionar-tag-lead",
+    method: "POST",
+    path: "/integration/leads/:id/tags",
+    title: "Testar Adição de Tag ao Lead",
+    category: "Tags",
+    summary: "Adiciona uma tag já existente a um lead. Fisicamente é um endpoint de Leads, mas pedagogicamente pertence ao módulo Tags.",
+    quandoUsar: "Indicado quando o cliente relatar que a tag enviada pela integração dele não está sendo aplicada ao lead.",
+    ferramentas: ["postman", "api", "plataforma"],
+    testar: "Pegue o ID de uma tag em Investigar Lista de Tags antes de testar aqui (a tag precisa já existir na empresa). Depois de adicionar, confira em Investigar Tags de um Lead se ela aparece na lista, essa é a validação que fecha o teste. Erro comum: usar o nome da tag em vez do ID criptografado.",
+    curl: `curl -X POST "https://api.contact2sale.com/integration/leads/{id}/tags" \\
+  -H "Authorization: Bearer {token}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"tag_id":"{tag_id}"}'`,
+    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    videoGroup: "tags-post"
+  },
+  {
+    slug: "remover-tag-lead",
+    method: "DELETE",
+    path: "/integration/leads/:id/tags",
+    title: "Testar Remoção de Tag do Lead",
+    category: "Tags",
+    summary: "Remove uma ou mais tags de um lead. Aceita tag_id como string única ou array. Fisicamente é um endpoint de Leads, mas pedagogicamente pertence ao módulo Tags.",
+    quandoUsar: "Use quando uma tag precisar ser removida em massa, ou quando o cliente relatar que a remoção pela integração dele não está funcionando.",
+    ferramentas: ["postman", "api", "plataforma"],
+    testar: "Teste primeiro removendo uma única tag antes de testar com array de várias tags de uma vez. Depois de remover, confirme em Investigar Tags de um Lead que ela realmente sumiu da lista. Erro comum: reenviar o tag_id de uma tag que já foi removida.",
+    curl: `curl -X DELETE "https://api.contact2sale.com/integration/leads/{id}/tags" \\
+  -H "Authorization: Bearer {token}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"tag_id":"{tag_id}"}'`,
+    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    videoGroup: "tags-delete"
   },
 
   // ---------------- Distribuição ----------------
@@ -841,6 +892,19 @@ const CASOS = [
 
 // Changelog do projeto
 const CHANGELOG = [
+  {
+    versao: "4.0",
+    data: "01 Ago 2026",
+    itens: [
+      "Documentação reorganizada por módulo de negócio, não só por URL: Adicionar/Remover Tag do Lead saem de Leads e passam a viver em Tags, já que compartilham vídeo com os demais procedimentos de Tags",
+      "Vídeos adicionados: Autenticação (GET) e Leads (GET, cobrindo Listar Leads, Buscar Lead e Listar Tags de um Lead)",
+      "Botão de destaque para abrir o Postman na aba Postman, com espaço reservado para o link da Collection oficial",
+      "Player de vídeo do Loom redesenhado: tamanho grande, thumbnail em destaque, abre em nova aba ao clicar em qualquer área",
+      "Novo cabeçalho automático em toda página com vídeo: Objetivo, Endpoints abordados, Pré-requisitos e Tempo estimado, gerado a partir do VIDEO_GROUPS (sem duplicar conteúdo)",
+      "Barra lateral: dentro de cada categoria, os procedimentos agora aparecem agrupados por método HTTP (GET, POST, PUT, DELETE)",
+      "Nenhum procedimento foi removido; os 35 continuam existindo, cada um com sua própria página"
+    ]
+  },
   {
     versao: "3.0",
     data: "31 Jul 2026",

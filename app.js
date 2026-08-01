@@ -6,6 +6,8 @@
 const app = document.getElementById("app");
 const sidebarNav = document.getElementById("sidebar-nav");
 const OFFICIAL_DOCS_URL = "https://docs-api-leads.c2sapp.com/";
+const POSTMAN_URL = "https://www.postman.com/";
+const POSTMAN_COLLECTION_URL = ""; // cole aqui o link da Collection oficial quando ela existir
 
 // ---------- ícones (stroke, 1.5px, sem emoji) ----------
 const ICONS = {
@@ -28,7 +30,8 @@ const ICONS = {
   external: `<path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>`,
   sun: `<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>`,
   moon: `<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/>`,
-  arrowLeft: `<path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>`
+  arrowLeft: `<path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>`,
+  list: `<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.2" fill="currentColor" stroke="none"/>`
 };
 
 function icon(name, size = 16) {
@@ -62,6 +65,8 @@ function highlightJson(json) {
 }
 
 // ---------- sidebar ----------
+const METHOD_ORDER = ["GET", "POST", "PUT", "DELETE"];
+
 function renderSidebar() {
   const groupsHtml = [];
 
@@ -72,11 +77,23 @@ function renderSidebar() {
   CATEGORIES.forEach(cat => {
     const eps = ENDPOINTS.filter(e => e.category === cat);
     if (!eps.length) return;
-    const links = eps.map(ep => `
-      <div class="nav-link" data-route="endpoint/${ep.slug}">
-        <span class="method-tag method-${ep.method}">${ep.method}</span>
-        <span>${ep.title}</span>
-      </div>`).join("");
+
+    const methodsPresent = METHOD_ORDER.filter(m => eps.some(e => e.method === m));
+    const methodBlocks = methodsPresent.map(method => {
+      const items = eps.filter(e => e.method === method);
+      const links = items.map(ep => `
+        <div class="nav-link" data-route="endpoint/${ep.slug}">
+          <span>${ep.title}</span>
+        </div>`).join("");
+      return `
+        <div class="nav-method-group">
+          <div class="nav-method-label">
+            <span class="method-tag method-${method}">${method}</span>
+          </div>
+          ${links}
+        </div>`;
+    }).join("");
+
     groupsHtml.push(`
     <div class="nav-folder">
       <button class="nav-folder-toggle" data-folder="${cat}">
@@ -85,7 +102,7 @@ function renderSidebar() {
         <span class="nav-folder-count">${eps.length}</span>
       </button>
       <div class="nav-folder-items">
-        ${links}
+        ${methodBlocks}
       </div>
     </div>`);
   });
@@ -351,10 +368,39 @@ function renderFundamentos() {
 }
 
 function renderPostman() {
+  const collectionSection = POSTMAN_COLLECTION_URL ? `
+    <a class="docs-relation-btn" href="${POSTMAN_COLLECTION_URL}" target="_blank" rel="noopener">
+      ${icon("api", 18)}
+      <span>Abrir Collection Oficial</span>
+      ${icon("external", 15)}
+    </a>` : `
+    <div class="collection-placeholder">
+      ${icon("api", 16)}
+      <span>Link da Collection oficial ainda não adicionado. Quando existir, cole em POSTMAN_COLLECTION_URL no topo do app.js.</span>
+    </div>`;
+
   app.innerHTML = `
     <span class="eyebrow">Ferramenta</span>
     <h1 class="page-title">Postman</h1>
     <p class="page-lede">Postman é onde você testa a API sem precisar escrever código, ótimo pra validar um caso antes de decidir se escala ou não.</p>
+
+    <div class="docs-relation">
+      <div class="docs-relation-copy">
+        <div class="status-block-label">Ainda não tem o Postman instalado?</div>
+        <p>Baixe ou acesse o Postman pelo navegador para começar a testar a API do C2S sem precisar escrever código.</p>
+      </div>
+      <a class="docs-relation-btn" href="${POSTMAN_URL}" target="_blank" rel="noopener">
+        ${icon("mail", 18)}
+        <span>Abrir Postman</span>
+        ${icon("external", 15)}
+      </a>
+    </div>
+
+    <div class="section">
+      <h2>Collection oficial</h2>
+      <p>Assim que a Collection oficial da C2S existir, o link fica disponível aqui.</p>
+      ${collectionSection}
+    </div>
 
     <div class="section">
       <h2>Configurando o Environment</h2>
@@ -471,29 +517,74 @@ function renderChecklist() {
   });
 }
 
+// ---------- cabeçalho automático do vídeo (gerado a partir de VIDEO_GROUPS) ----------
+function videoInfoBlock(group) {
+  const endpointsAbordados = [group.exemploPrincipal, ...group.outrosExemplos];
+  return `
+  <div class="video-info-block">
+    <div class="video-info-item">
+      ${icon("target", 16)}
+      <div>
+        <div class="video-info-label">Objetivo</div>
+        <div class="video-info-value">${group.resumo}</div>
+      </div>
+    </div>
+    <div class="video-info-item">
+      ${icon("list", 16)}
+      <div>
+        <div class="video-info-label">Endpoints abordados</div>
+        <div class="video-info-value">${endpointsAbordados.join(", ")}</div>
+      </div>
+    </div>
+    <div class="video-info-item">
+      ${icon("check", 16)}
+      <div>
+        <div class="video-info-label">Pré-requisitos</div>
+        <div class="video-info-value">${group.preRequisitos.join(", ")}</div>
+      </div>
+    </div>
+    <div class="video-info-item">
+      ${icon("clock", 16)}
+      <div>
+        <div class="video-info-label">Tempo estimado</div>
+        <div class="video-info-value">${group.duracao}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------- player grande do Loom (thumbnail em destaque, abre em nova aba) ----------
+function extractLoomId(url) {
+  const m = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+  return m ? m[1] : null;
+}
+
+function bigLoomPlayer(group) {
+  if (!group.video) {
+    return `
+    <div class="loom-player loom-player-empty">
+      ${icon("play", 32)}
+      <span>${group.titulo} (vídeo ainda não adicionado)</span>
+    </div>`;
+  }
+  const loomId = extractLoomId(group.video);
+  const thumb = loomId ? `https://cdn.loom.com/sessions/thumbnails/${loomId}-with-play.gif` : "";
+  return `
+  <a class="loom-player" href="${escapeHtml(group.video)}" target="_blank" rel="noopener" aria-label="Assistir: ${group.titulo}">
+    ${thumb ? `<img class="loom-player-thumb" src="${thumb}" alt="Miniatura do vídeo: ${group.titulo}" loading="lazy">` : `<div class="loom-player-fallback">${icon("play", 40)}</div>`}
+    <div class="loom-player-overlay">${icon("play", 30)}</div>
+  </a>
+  <a class="loom-watch-btn" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
+    ${icon("external", 14)}
+    <span>Assistir no Loom</span>
+  </a>`;
+}
+
 function renderEndpointDetail(slug) {
   const ep = ENDPOINTS.find(e => e.slug === slug);
   if (!ep) { app.innerHTML = `<p>Procedimento não encontrado.</p>`; return; }
 
   const group = VIDEO_GROUPS[ep.videoGroup];
-  const videoSection = group.video ? `
-    <a class="video-card" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
-      ${icon("play", 22)}
-      <div>
-        <div class="video-card-title">Assistir: ${group.titulo}</div>
-        <div class="video-card-sub">${group.resumo}</div>
-      </div>
-    </a>` : `
-    <a class="video-card video-card-empty">
-      ${icon("play", 22)}
-      <div>
-        <div class="video-card-title">${group.titulo} (vídeo ainda não adicionado)</div>
-        <div class="video-card-sub">${group.resumo}</div>
-      </div>
-    </a>`;
-
-  const outros = group.outrosExemplos.length
-    ? `<span>Também aparece como exemplo no vídeo: ${group.outrosExemplos.join(", ")}.</span>` : "";
 
   app.innerHTML = `
     <span class="eyebrow">${ep.category}</span>
@@ -521,13 +612,9 @@ function renderEndpointDetail(slug) {
 
     <div class="section">
       <h2>Vídeo relacionado</h2>
-      ${videoSection}
-      <div class="video-group-note">
-        <span class="video-group-note-label">Esse vídeo cobre o recurso ${ep.category} + ${ep.method}, não é exclusivo deste endpoint</span>
-        <span>Exemplo principal mostrado no vídeo: ${group.exemploPrincipal}.</span>
-        ${outros}
-        <ul>${group.ensina.map(i => `<li>${i}</li>`).join("")}</ul>
-      </div>
+      <p class="video-shared-note">Esse vídeo cobre o recurso ${ep.category} + ${ep.method}, não é exclusivo deste endpoint.</p>
+      ${videoInfoBlock(group)}
+      ${bigLoomPlayer(group)}
     </div>
 
     <a class="official-docs-link" href="${OFFICIAL_DOCS_URL}" target="_blank" rel="noopener">

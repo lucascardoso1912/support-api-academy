@@ -1,6 +1,6 @@
 # Support API Academy
 
-Trilha técnica de APIs e Integrações do Suporte C2S, versão 1.1.
+Trilha técnica de APIs e Integrações do Suporte C2S, versão 4.0.
 
 Site estático (HTML/CSS/JS puro, sem build step), então dá pra publicar em minutos sem precisar instalar nada.
 
@@ -37,15 +37,18 @@ Qualquer uma das duas opções é gratuita e não exige saber programar além de
 - Favicon (`favicon.svg`) segue a mesma identidade: quadrado azul com o símbolo `</>`.
 - Botão "Voltar" aparece automaticamente no topo de toda página que não seja a Home, útil especialmente para quem acessa pelo celular (iPhone/Android), onde nem sempre tem um gesto óbvio de voltar. Ele usa o histórico do navegador; se não houver histórico (ex: abriu um link direto), volta para a Home.
 - Tema claro/escuro: o botão fica no topo da barra lateral, ao lado do nome do site. A escolha é salva no navegador da pessoa (`localStorage`), então persiste entre visitas. Se a pessoa nunca escolheu, o site usa a preferência do sistema operacional dela.
-- Categorias de procedimento na barra lateral funcionam como pastas: clique no nome da categoria para abrir/fechar. A categoria do procedimento atual abre sozinha; buscar no campo de busca também abre as pastas com resultado.
+- Categorias de procedimento na barra lateral funcionam como pastas: clique no nome da categoria para abrir/fechar. Dentro de cada pasta, os procedimentos aparecem agrupados por método HTTP (GET, POST, PUT, DELETE), já que é por aí que os vídeos são compartilhados. A categoria do procedimento atual abre sozinha; buscar no campo de busca também abre as pastas com resultado.
 - Paleta grafite + azul (cor de marca do C2S), sem laranja/âmbar.
 - Zero emoji na interface: todos os ícones são SVG monocromático, definidos em `ICONS` no topo do `app.js`. Pra trocar um ícone de alguma página, é só apontar para uma chave diferente desse objeto (ou adicionar um novo `path` SVG lá).
 - Tokens de cor, tipografia e espaçamento ficam centralizados no topo do `style.css` (`:root { ... }`), qualquer ajuste de paleta é feito só ali.
 - O link para a documentação oficial da API fica numa constante só, `OFFICIAL_DOCS_URL` no topo do `app.js`. Se o endereço mudar, é só trocar ali; ele é usado tanto no botão da home quanto no link de cada procedimento.
+- O link do Postman (`POSTMAN_URL`) e da Collection oficial (`POSTMAN_COLLECTION_URL`, ainda vazia) também ficam em constantes no topo do `app.js`.
 
-## Como adicionar um vídeo (por recurso + método HTTP)
+## Como adicionar um vídeo (por módulo de negócio + método HTTP)
 
-Feedback da liderança: gravar 1 vídeo por endpoint gera muito conteúdo repetitivo, já que vários endpoints do mesmo recurso seguem o mesmo padrão de teste. Por isso os vídeos agora cobrem **um recurso (categoria) + um método HTTP**, por exemplo "Leads: requisições GET" ou "Vendedores: requisições PUT". Todos os vídeos serão hospedados no Loom.
+Feedback da liderança: gravar 1 vídeo por endpoint gera muito conteúdo repetitivo, já que vários endpoints do mesmo módulo seguem o mesmo padrão de teste. Por isso os vídeos cobrem **um módulo de negócio (categoria) + um método HTTP**, por exemplo "Leads: requisições GET" ou "Tags: requisições POST". Todos os vídeos são hospedados no Loom.
+
+**Importante: a organização é por módulo de negócio, não só por URL.** Um exemplo real do projeto: "Adicionar Tag ao Lead" e "Remover Tag do Lead" usam fisicamente o endpoint `/integration/leads/:id/tags`, mas pedagogicamente pertencem ao módulo **Tags**, não a Leads, porque fazem parte do mesmo fluxo de aprendizado dos outros procedimentos de Tags (criar tag, listar tags). Por isso a `category` desses dois é `"Tags"`, mesmo o `path` continuando dentro de `/leads`.
 
 Os grupos vivem no objeto `VIDEO_GROUPS`, no topo do `data.js`, antes do array `ENDPOINTS`:
 
@@ -53,10 +56,12 @@ Os grupos vivem no objeto `VIDEO_GROUPS`, no topo do `data.js`, antes do array `
 const VIDEO_GROUPS = {
   "leads-get": {
     titulo: "Leads: requisições GET",
-    resumo: "...",
+    resumo: "...",                    // vira o campo "Objetivo" no cabeçalho da página
     exemploPrincipal: "Investigar Listagem de Leads",
     outrosExemplos: ["Investigar Lead Específico", "Investigar Tags de um Lead"],
-    ensina: ["...", "..."],
+    ensina: ["...", "..."],           // roteiro interno de gravação, não aparece na página
+    preRequisitos: ["Token válido", "Um lead de teste já existente"],
+    duracao: "8-10 min",
     video: "https://www.loom.com/share/xxxxxxxx"   // cole o link aqui quando gravar
   },
   // ... outros 17 grupos
@@ -65,17 +70,17 @@ const VIDEO_GROUPS = {
 
 Para publicar um vídeo, grave no Loom, copie o link de compartilhamento e cole no campo `video` do grupo correspondente. Ele passa a valer automaticamente para **todos os procedimentos daquele grupo**, sem precisar editar cada um.
 
-Hoje existem 18 grupos, um para cada combinação de categoria + método que a API realmente usa (ex: `leads-get`, `leads-post`, `leads-put`, `leads-delete`, `vendedores-get`, `webhooks-post` etc). Cada procedimento aponta para o grupo dele através do campo `videoGroup`:
+Hoje existem 18 grupos. Cada procedimento aponta para o grupo dele através do campo `videoGroup`:
 
 ```js
 videoGroup: "leads-get"
 ```
 
-Se um novo endpoint seguir um padrão já coberto (mesma categoria e mesmo método), é só apontar pro grupo existente, sem gravar vídeo novo.
+Se um novo endpoint seguir um padrão já coberto (mesmo módulo e mesmo método), é só apontar pro grupo existente, sem gravar vídeo novo.
 
-**Sobre o conteúdo do vídeo:** cada grupo tem um `exemploPrincipal` (o endpoint que deve aparecer sendo testado na tela, do início ao fim) e uma lista de `outrosExemplos` (os endpoints parecidos que vale citar rapidamente durante a gravação, sem precisar repetir o teste completo). Isso já está definido em cada grupo, é só seguir o roteiro ao gravar.
+**Cabeçalho automático:** toda página de procedimento gera sozinha, a partir do grupo, um bloco com Objetivo (`resumo`), Endpoints abordados (`exemploPrincipal` + `outrosExemplos`), Pré-requisitos (`preRequisitos`) e Tempo estimado (`duracao`). Isso é feito pela função `videoInfoBlock()` em `app.js`, que só lê o `VIDEO_GROUPS`, nada é hardcoded lá. Editar qualquer um desses campos no `data.js` atualiza a página automaticamente.
 
-Se o campo `video` de um grupo estiver vazio (`""`), toda página que usa aquele grupo mostra um aviso discreto de que o vídeo ainda não foi gravado.
+**Player do vídeo:** quando o grupo tem `video` preenchido, a página mostra um player grande (função `bigLoomPlayer()`), com a miniatura oficial do Loom, formato quase quadrado e ocupando a largura do conteúdo. Clicar em qualquer parte do player, ou no botão "Assistir no Loom" logo abaixo, abre o vídeo em uma nova aba. A miniatura é montada automaticamente a partir do ID do vídeo (extraído do link), sem precisar fazer upload de imagem nenhuma. Se o campo `video` estiver vazio, aparece um espaço reservado discreto no mesmo formato.
 
 ## Sobre o selo de status (importante)
 

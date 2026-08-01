@@ -232,6 +232,10 @@ h1, h2, h3, h4 {
 }
 .nav-folder.open .nav-folder-items { max-height: 2000px; }
 
+.nav-method-group { margin: 6px 0 10px; padding-left: 6px; }
+.nav-method-label { padding: 2px 8px 5px; }
+.nav-method-group .nav-link { padding-left: 20px; font-size: 13px; }
+
 /* ---- main ---- */
 .main {
   flex: 1;
@@ -561,47 +565,111 @@ tr:last-child td { border-bottom: none; }
 .status-item.revisao .icon { color: var(--text-faint); }
 .tool-item .icon { color: var(--accent); }
 
-/* video card */
-.video-card {
-  display: flex;
-  align-items: center;
+/* nota de vídeo compartilhado */
+.video-shared-note { font-size: 12.5px; color: var(--text-faint); margin: -4px 0 14px; }
+
+/* cabeçalho automático do vídeo (Objetivo / Endpoints / Pré-requisitos / Tempo) */
+.video-info-block {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 14px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius);
-  padding: 14px 16px;
-  text-decoration: none;
-  color: var(--text);
+  padding: 16px 18px;
+  margin-bottom: 16px;
 }
-.video-card:hover { border-color: var(--accent); text-decoration: none; }
-.video-card .icon { color: var(--accent); }
-.video-card-title { font-size: 13.5px; font-weight: 500; color: var(--text); }
-.video-card-sub { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
-.video-card-empty { cursor: default; border-style: dashed; }
-.video-card-empty:hover { border-color: var(--border-soft); }
-.video-card-empty .icon { color: var(--text-faint); }
-.video-card-empty .video-card-title { color: var(--text-faint); }
-
-.video-group-note {
-  margin-top: 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius);
-  font-size: 12.5px;
-  color: var(--text-dim);
+@media (min-width: 640px) {
+  .video-info-block { grid-template-columns: 1fr 1fr; }
 }
-.video-group-note-label {
-  display: block;
+.video-info-item { display: flex; gap: 10px; align-items: flex-start; }
+.video-info-item .icon { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+.video-info-label {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-faint);
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
 }
-.video-group-note span { display: block; margin-top: 4px; }
-.video-group-note ul { margin: 8px 0 0; padding-left: 18px; }
-.video-group-note li { margin-bottom: 3px; }
+.video-info-value { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+/* player grande do Loom */
+.loom-player {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 560px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+}
+.loom-player-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+.loom-player-fallback {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-faint);
+}
+.loom-player-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(10, 13, 19, 0.15);
+  color: #fff;
+  transition: background 0.15s ease;
+  pointer-events: none;
+}
+.loom-player:hover .loom-player-overlay { background: rgba(10, 13, 19, 0.32); }
+.loom-player-overlay .icon {
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,.5));
+}
+.loom-player-empty {
+  aspect-ratio: 1 / 1;
+  max-height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--text-faint);
+  font-size: 13.5px;
+  text-align: center;
+  padding: 24px;
+}
+.loom-player-empty .icon { color: var(--text-faint); }
+
+.loom-watch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  text-decoration: none;
+}
+.loom-watch-btn:hover { text-decoration: none; opacity: 0.9; }
+
+/* placeholder da Collection do Postman, ainda sem link */
+.collection-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-faint);
+  font-size: 12.5px;
+}
+.collection-placeholder .icon { flex-shrink: 0; }
 
 /* endpoint detail layout */
 .endpoint-head {
