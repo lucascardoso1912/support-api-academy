@@ -563,15 +563,18 @@ function bigLoomPlayer(group) {
   if (!group.video) {
     return `
     <div class="loom-player loom-player-empty">
-      ${icon("play", 32)}
-      <span>${group.titulo} (vídeo ainda não adicionado)</span>
+      <img class="loom-player-thumb loom-player-cover" src="video-cover.svg" alt="Capa ilustrativa: vídeo ainda não adicionado" loading="lazy">
+      <div class="loom-player-overlay loom-player-overlay-empty">
+        ${icon("play", 30)}
+        <span class="loom-player-empty-label">${group.titulo}<br>vídeo ainda não adicionado</span>
+      </div>
     </div>`;
   }
   const loomId = extractLoomId(group.video);
   const thumb = loomId ? `https://cdn.loom.com/sessions/thumbnails/${loomId}-with-play.gif` : "";
   return `
   <a class="loom-player" href="${escapeHtml(group.video)}" target="_blank" rel="noopener" aria-label="Assistir: ${group.titulo}">
-    ${thumb ? `<img class="loom-player-thumb" src="${thumb}" alt="Miniatura do vídeo: ${group.titulo}" loading="lazy">` : `<div class="loom-player-fallback">${icon("play", 40)}</div>`}
+    ${thumb ? `<img class="loom-player-thumb" src="${thumb}" alt="Miniatura do vídeo: ${group.titulo}" loading="lazy">` : `<img class="loom-player-thumb loom-player-cover" src="video-cover.svg" alt="Capa ilustrativa do vídeo" loading="lazy">`}
     <div class="loom-player-overlay">${icon("play", 30)}</div>
   </a>
   <a class="loom-watch-btn" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">

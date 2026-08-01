@@ -607,11 +607,7 @@ tr:last-child td { border-bottom: none; }
   border: 1px solid var(--border);
 }
 .loom-player-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
-.loom-player-fallback {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-faint);
-}
+.loom-player-cover { opacity: 0.9; }
 .loom-player-overlay {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
@@ -625,21 +621,27 @@ tr:last-child td { border-bottom: none; }
   filter: drop-shadow(0 2px 10px rgba(0,0,0,.5));
 }
 .loom-player-empty {
+  position: relative;
   aspect-ratio: 1 / 1;
-  max-height: 420px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  border: 1px dashed var(--border);
+  max-height: 560px;
   border-radius: 12px;
-  color: var(--text-faint);
-  font-size: 13.5px;
-  text-align: center;
-  padding: 24px;
+  overflow: hidden;
+  border: 1px dashed var(--border);
+  background: var(--bg-code);
 }
-.loom-player-empty .icon { color: var(--text-faint); }
+.loom-player-overlay-empty {
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(10, 13, 19, 0.55);
+}
+.loom-player-empty-label {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.5;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,.5);
+}
 
 .loom-watch-btn {
   display: flex;
