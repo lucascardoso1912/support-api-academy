@@ -572,9 +572,10 @@ function bigLoomPlayer(group) {
   }
   const loomId = extractLoomId(group.video);
   const thumb = loomId ? `https://cdn.loom.com/sessions/thumbnails/${loomId}-with-play.gif` : "";
+  const fallbackAttr = `onerror="this.onerror=null;this.src='video-cover.svg';this.classList.add('loom-player-cover');this.alt='Capa ilustrativa do vídeo';"`;
   return `
   <a class="loom-player" href="${escapeHtml(group.video)}" target="_blank" rel="noopener" aria-label="Assistir: ${group.titulo}">
-    ${thumb ? `<img class="loom-player-thumb" src="${thumb}" alt="Miniatura do vídeo: ${group.titulo}" loading="lazy">` : `<img class="loom-player-thumb loom-player-cover" src="video-cover.svg" alt="Capa ilustrativa do vídeo" loading="lazy">`}
+    ${thumb ? `<img class="loom-player-thumb" src="${thumb}" alt="Miniatura do vídeo: ${group.titulo}" loading="lazy" ${fallbackAttr}>` : `<img class="loom-player-thumb loom-player-cover" src="video-cover.svg" alt="Capa ilustrativa do vídeo" loading="lazy">`}
     <div class="loom-player-overlay">${icon("play", 30)}</div>
   </a>
   <a class="loom-watch-btn" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
