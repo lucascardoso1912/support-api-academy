@@ -77,9 +77,16 @@ function renderSidebar() {
         <span class="method-tag method-${ep.method}">${ep.method}</span>
         <span>${ep.title}</span>
       </div>`).join("");
-    groupsHtml.push(`<div class="nav-group">
-      <div class="nav-group-label">${cat}</div>
-      ${links}
+    groupsHtml.push(`
+    <div class="nav-folder">
+      <button class="nav-folder-toggle" data-folder="${cat}">
+        ${icon("chevron", 13)}
+        <span class="nav-group-label">${cat}</span>
+        <span class="nav-folder-count">${eps.length}</span>
+      </button>
+      <div class="nav-folder-items">
+        ${links}
+      </div>
     </div>`);
   });
 
@@ -95,6 +102,12 @@ function renderSidebar() {
       closeMobileSidebar();
     });
   });
+
+  sidebarNav.querySelectorAll(".nav-folder-toggle").forEach(btn => {
+    btn.addEventListener("click", () => {
+      btn.parentElement.classList.toggle("open");
+    });
+  });
 }
 
 function navLinkHtml(p) {
@@ -105,6 +118,9 @@ function setActiveNav(route) {
   document.querySelectorAll(".nav-link").forEach(el => {
     el.classList.toggle("active", el.dataset.route === route);
   });
+  // abre a pasta do procedimento atual, sem mexer nas pastas já abertas manualmente
+  const activeLink = document.querySelector(".nav-link.active");
+  activeLink?.closest(".nav-folder")?.classList.add("open");
 }
 
 // ---------- code panel component ----------
@@ -153,9 +169,10 @@ function wireCodePanels(root) {
 
 // ---------- selo de status do procedimento ----------
 function statusBlock(ep) {
+  const hasVideo = !!VIDEO_GROUPS[ep.videoGroup]?.video;
   const items = [
     { done: !!ep.status.validado, label: "Validado pelo Suporte" },
-    { done: !!ep.video, label: "Vídeo disponível" },
+    { done: hasVideo, label: "Vídeo disponível" },
     { done: !!ep.status.testadoPostman, label: "Testado no Postman" }
   ];
   const itemsHtml = items.map(it => `
@@ -454,43 +471,29 @@ function renderChecklist() {
   });
 }
 
-// ---------- vídeo do procedimento (arquivo local com player embutido, ou link externo) ----------
-function videoBlock(video, title) {
-  if (!video) {
-    return `
-    <a class="video-card video-card-empty">
-      ${icon("play", 22)}
-      <div>
-        <div class="video-card-title">Vídeo ainda não adicionado</div>
-        <div class="video-card-sub">Assim que gravar, é só preencher o campo "video" deste procedimento no data.js</div>
-      </div>
-    </a>`;
-  }
-  const isExternal = /^https?:\/\//i.test(video);
-  if (isExternal) {
-    return `
-    <a class="video-card" href="${escapeHtml(video)}" target="_blank" rel="noopener">
-      ${icon("play", 22)}
-      <div>
-        <div class="video-card-title">Assistir demonstração: ${title}</div>
-        <div class="video-card-sub">Abre em uma nova aba</div>
-      </div>
-    </a>`;
-  }
-  return `
-    <div class="video-player-wrap">
-      <video class="video-player" controls preload="metadata">
-        <source src="${escapeHtml(video)}" type="video/mp4">
-        Seu navegador não suporta vídeo embutido. <a href="${escapeHtml(video)}">Baixe o vídeo aqui</a>.
-      </video>
-    </div>`;
-}
-
 function renderEndpointDetail(slug) {
   const ep = ENDPOINTS.find(e => e.slug === slug);
   if (!ep) { app.innerHTML = `<p>Procedimento não encontrado.</p>`; return; }
 
-  const videoSection = videoBlock(ep.video, ep.title);
+  const group = VIDEO_GROUPS[ep.videoGroup];
+  const videoSection = group.video ? `
+    <a class="video-card" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
+      ${icon("play", 22)}
+      <div>
+        <div class="video-card-title">Assistir: ${group.titulo}</div>
+        <div class="video-card-sub">${group.resumo}</div>
+      </div>
+    </a>` : `
+    <a class="video-card video-card-empty">
+      ${icon("play", 22)}
+      <div>
+        <div class="video-card-title">${group.titulo} (vídeo ainda não adicionado)</div>
+        <div class="video-card-sub">${group.resumo}</div>
+      </div>
+    </a>`;
+
+  const outros = group.outrosExemplos.length
+    ? `<span>Também aparece como exemplo no vídeo: ${group.outrosExemplos.join(", ")}.</span>` : "";
 
   app.innerHTML = `
     <span class="eyebrow">${ep.category}</span>
@@ -517,8 +520,14 @@ function renderEndpointDetail(slug) {
     </div>
 
     <div class="section">
-      <h2>Demonstração em vídeo</h2>
+      <h2>Vídeo relacionado</h2>
       ${videoSection}
+      <div class="video-group-note">
+        <span class="video-group-note-label">Esse vídeo cobre o recurso ${ep.category} + ${ep.method}, não é exclusivo deste endpoint</span>
+        <span>Exemplo principal mostrado no vídeo: ${group.exemploPrincipal}.</span>
+        ${outros}
+        <ul>${group.ensina.map(i => `<li>${i}</li>`).join("")}</ul>
+      </div>
     </div>
 
     <a class="official-docs-link" href="${OFFICIAL_DOCS_URL}" target="_blank" rel="noopener">
@@ -618,5 +627,16 @@ function wireSearch() {
       const text = el.textContent.toLowerCase();
       el.style.display = !q || text.includes(q) ? "flex" : "none";
     });
+    if (q) {
+      // com busca ativa, abre toda pasta que tiver algum resultado visível
+      document.querySelectorAll(".nav-folder").forEach(folder => {
+        const hasMatch = !!folder.querySelector('.nav-link[style*="flex"]');
+        folder.classList.toggle("open", hasMatch);
+      });
+    } else {
+      // busca limpa: fecha tudo, exceto a pasta do procedimento atual
+      document.querySelectorAll(".nav-folder").forEach(folder => folder.classList.remove("open"));
+      document.querySelector(".nav-link.active")?.closest(".nav-folder")?.classList.add("open");
+    }
   });
 }

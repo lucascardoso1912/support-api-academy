@@ -13,7 +13,6 @@ support-api-academy/
 ├── data.js      → onde ficam os ENDPOINTS, CASOS e CHANGELOG
 ├── app.js       → roteamento e renderização das páginas
 ├── favicon.svg  → ícone da aba do navegador
-├── videos/      → arquivos de vídeo locais (opcional, ver seção de vídeo abaixo)
 └── README.md
 ```
 
@@ -38,37 +37,45 @@ Qualquer uma das duas opções é gratuita e não exige saber programar além de
 - Favicon (`favicon.svg`) segue a mesma identidade: quadrado azul com o símbolo `</>`.
 - Botão "Voltar" aparece automaticamente no topo de toda página que não seja a Home, útil especialmente para quem acessa pelo celular (iPhone/Android), onde nem sempre tem um gesto óbvio de voltar. Ele usa o histórico do navegador; se não houver histórico (ex: abriu um link direto), volta para a Home.
 - Tema claro/escuro: o botão fica no topo da barra lateral, ao lado do nome do site. A escolha é salva no navegador da pessoa (`localStorage`), então persiste entre visitas. Se a pessoa nunca escolheu, o site usa a preferência do sistema operacional dela.
+- Categorias de procedimento na barra lateral funcionam como pastas: clique no nome da categoria para abrir/fechar. A categoria do procedimento atual abre sozinha; buscar no campo de busca também abre as pastas com resultado.
 - Paleta grafite + azul (cor de marca do C2S), sem laranja/âmbar.
 - Zero emoji na interface: todos os ícones são SVG monocromático, definidos em `ICONS` no topo do `app.js`. Pra trocar um ícone de alguma página, é só apontar para uma chave diferente desse objeto (ou adicionar um novo `path` SVG lá).
 - Tokens de cor, tipografia e espaçamento ficam centralizados no topo do `style.css` (`:root { ... }`), qualquer ajuste de paleta é feito só ali.
 - O link para a documentação oficial da API fica numa constante só, `OFFICIAL_DOCS_URL` no topo do `app.js`. Se o endereço mudar, é só trocar ali; ele é usado tanto no botão da home quanto no link de cada procedimento.
 
-## Como adicionar um vídeo a um procedimento
+## Como adicionar um vídeo (por recurso + método HTTP)
 
-Cada procedimento tem seu próprio campo `video` em `data.js`. Existem duas formas de preencher:
+Feedback da liderança: gravar 1 vídeo por endpoint gera muito conteúdo repetitivo, já que vários endpoints do mesmo recurso seguem o mesmo padrão de teste. Por isso os vídeos agora cobrem **um recurso (categoria) + um método HTTP**, por exemplo "Leads: requisições GET" ou "Vendedores: requisições PUT". Todos os vídeos serão hospedados no Loom.
 
-**1. Link externo** (Loom, YouTube não-listado, Google Drive, Streamable etc):
-
-```js
-video: "https://www.loom.com/share/xxxxxxxx"
-```
-
-Nesse caso a página mostra um cartão que abre o vídeo em uma nova aba.
-
-**2. Arquivo de vídeo local**, incluído dentro do próprio projeto na pasta `videos/`:
+Os grupos vivem no objeto `VIDEO_GROUPS`, no topo do `data.js`, antes do array `ENDPOINTS`:
 
 ```js
-video: "videos/validar-autenticacao.mp4"
+const VIDEO_GROUPS = {
+  "leads-get": {
+    titulo: "Leads: requisições GET",
+    resumo: "...",
+    exemploPrincipal: "Investigar Listagem de Leads",
+    outrosExemplos: ["Investigar Lead Específico", "Investigar Tags de um Lead"],
+    ensina: ["...", "..."],
+    video: "https://www.loom.com/share/xxxxxxxx"   // cole o link aqui quando gravar
+  },
+  // ... outros 17 grupos
+}
 ```
 
-Nesse caso o vídeo toca direto na página, com um player embutido (sem precisar sair do site). Para adicionar um vídeo local:
+Para publicar um vídeo, grave no Loom, copie o link de compartilhamento e cole no campo `video` do grupo correspondente. Ele passa a valer automaticamente para **todos os procedimentos daquele grupo**, sem precisar editar cada um.
 
-1. Coloque o arquivo `.mp4` dentro da pasta `videos/`.
-2. Aponte o campo `video` do procedimento pro caminho relativo do arquivo (ex: `videos/nome-do-arquivo.mp4`).
+Hoje existem 18 grupos, um para cada combinação de categoria + método que a API realmente usa (ex: `leads-get`, `leads-post`, `leads-put`, `leads-delete`, `vendedores-get`, `webhooks-post` etc). Cada procedimento aponta para o grupo dele através do campo `videoGroup`:
 
-**Atenção ao tamanho:** o GitHub recusa arquivos acima de 100MB e já avisa a partir de 50MB. Um vídeo de uns 90-100MB (como o de Validar Autenticação) ainda sobe, mas deixa o repositório mais pesado para clonar. Se a ideia é gravar vários vídeos assim, vale considerar comprimir mais (ex: 720p, bitrate menor) ou migrar para um link externo (Loom/YouTube não-listado), que não pesa o repositório e ainda permite embutir.
+```js
+videoGroup: "leads-get"
+```
 
-Se o campo `video` estiver vazio (`""`), a página mostra um aviso discreto de que o vídeo ainda não foi gravado.
+Se um novo endpoint seguir um padrão já coberto (mesma categoria e mesmo método), é só apontar pro grupo existente, sem gravar vídeo novo.
+
+**Sobre o conteúdo do vídeo:** cada grupo tem um `exemploPrincipal` (o endpoint que deve aparecer sendo testado na tela, do início ao fim) e uma lista de `outrosExemplos` (os endpoints parecidos que vale citar rapidamente durante a gravação, sem precisar repetir o teste completo). Isso já está definido em cada grupo, é só seguir o roteiro ao gravar.
+
+Se o campo `video` de um grupo estiver vazio (`""`), toda página que usa aquele grupo mostra um aviso discreto de que o vídeo ainda não foi gravado.
 
 ## Sobre o selo de status (importante)
 
@@ -97,11 +104,11 @@ Abra `data.js` e copie um dos objetos dentro do array `ENDPOINTS`, ajustando os 
   testar: "Dica prática de como testar esse procedimento.",
   curl: `curl ...`,
   status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-  video: ""   // link externo, caminho local em videos/, ou "" se ainda não gravou
+  videoGroup: "leads-post"  // aponta pra um grupo existente em VIDEO_GROUPS (ou crie um novo grupo lá se for uma combinação categoria+método nova)
 }
 ```
 
-Salve o arquivo e o procedimento aparece automaticamente no menu lateral (agrupado pela categoria), na busca e ganha sua própria página. Não precisa mexer em `app.js`.
+Salve o arquivo e o procedimento aparece automaticamente no menu lateral (dentro da pasta da categoria certa), na busca e ganha sua própria página. Não precisa mexer em `app.js`.
 
 O mesmo vale para novos **casos reais** (array `CASOS`) e para o **changelog** (array `CHANGELOG`).
 

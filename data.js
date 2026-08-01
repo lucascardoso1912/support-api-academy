@@ -38,10 +38,191 @@ const TOOLS = {
 };
 
 // ============================================================
-// Cada procedimento tem seu próprio campo "video" (link ou
-// caminho de arquivo local dentro de /videos). Deixe "" se
-// ainda não gravou.
+// VÍDEOS por recurso (URL) + método HTTP.
+//
+// Feedback da liderança: não faz sentido gravar um vídeo pra
+// cada endpoint, muitos são bem parecidos entre si. Então os
+// vídeos agora cobrem "esse recurso + esse método" (ex: Leads
+// GET, Leads POST), mostrando o exemplo principal na tela e
+// citando os outros endpoints parecidos como exemplo extra.
+//
+// Todos os vídeos serão hospedados no Loom. Cole o link no
+// campo "video" do grupo correspondente quando estiver pronto,
+// ele passa a valer pra todos os procedimentos daquele grupo.
 // ============================================================
+const VIDEO_GROUPS = {
+  "autenticacao-get": {
+    titulo: "Autenticação: validando o token (GET)",
+    resumo: "Como confirmar que um token é válido antes de investigar qualquer outra coisa.",
+    exemploPrincipal: "Validar Autenticação",
+    outrosExemplos: [],
+    ensina: [
+      "Como montar uma requisição GET",
+      "Como usar o header Authorization Bearer",
+      "Como interpretar HTTP 200 e HTTP 403"
+    ],
+    video: ""
+  },
+  "leads-get": {
+    titulo: "Leads: requisições GET",
+    resumo: "Como investigar leads, seja em listagem, busca por ID ou consulta de tags.",
+    exemploPrincipal: "Investigar Listagem de Leads",
+    outrosExemplos: ["Investigar Lead Específico", "Investigar Tags de um Lead"],
+    ensina: [
+      "Como montar a requisição e usar filtros",
+      "Como interpretar HTTP 200 e HTTP 403",
+      "Como validar o retorno contra a Plataforma C2S",
+      "Erros comuns em requisições GET de Leads"
+    ],
+    video: ""
+  },
+  "leads-post": {
+    titulo: "Leads: requisições POST",
+    resumo: "Como criar e registrar informações em um lead usando body JSON.",
+    exemploPrincipal: "Testar Criação de Lead",
+    outrosExemplos: ["Testar Adição de Tag", "Testar Criação de Mensagem", "Testar Criação de Atividade", "Testar Fechamento de Negócio"],
+    ensina: [
+      "Como montar o body em JSON",
+      "Campos obrigatórios x opcionais",
+      "Validação do resultado na Plataforma C2S",
+      "Erros comuns (400, 422, 423)"
+    ],
+    video: ""
+  },
+  "leads-put": {
+    titulo: "Leads: requisições PUT",
+    resumo: "Como atualizar um lead existente e confirmar que a mudança foi aplicada.",
+    exemploPrincipal: "Testar Atualização de Lead",
+    outrosExemplos: ["Testar Encaminhamento de Lead", "Testar Marcação de Lead como Lido", "Testar Atualização de Status"],
+    ensina: [
+      "Diferença entre atualizar um campo simples e um body completo",
+      "Validação do resultado após a atualização",
+      "Erros comuns em requisições PUT de Leads"
+    ],
+    video: ""
+  },
+  "leads-delete": {
+    titulo: "Leads: requisição DELETE",
+    resumo: "Como remover uma tag de um lead e confirmar que ela realmente saiu.",
+    exemploPrincipal: "Testar Remoção de Tag",
+    outrosExemplos: [],
+    ensina: [
+      "Como montar uma requisição DELETE com body",
+      "Diferença entre remover 1 tag e remover várias de uma vez",
+      "Como validar a remoção"
+    ],
+    video: ""
+  },
+  "vendedores-get": {
+    titulo: "Vendedores: requisição GET",
+    resumo: "Como investigar a lista de vendedores da empresa.",
+    exemploPrincipal: "Investigar Lista de Vendedores",
+    outrosExemplos: [],
+    ensina: ["Como montar a requisição", "Como usar o ID retornado em outras chamadas (encaminhar lead, filas etc)"],
+    video: ""
+  },
+  "vendedores-post": {
+    titulo: "Vendedores: requisição POST",
+    resumo: "Como criar um vendedor novo na empresa.",
+    exemploPrincipal: "Testar Criação de Vendedor",
+    outrosExemplos: [],
+    ensina: ["Como montar o body em JSON", "Campo company_id e erros comuns de empresa errada"],
+    video: ""
+  },
+  "vendedores-put": {
+    titulo: "Vendedores: requisições PUT",
+    resumo: "Como atualizar dados de um vendedor, individualmente ou em lote.",
+    exemploPrincipal: "Testar Atualização de Vendedor",
+    outrosExemplos: ["Testar Atualização de Rotação em Lote"],
+    ensina: ["Atualização de campo simples x campos de rotação/distribuição", "Como testar em lote com segurança"],
+    video: ""
+  },
+  "empresas-get": {
+    titulo: "Empresas: requisição GET",
+    resumo: "Como investigar as empresas do grupo (filiais) de uma hierarquia.",
+    exemploPrincipal: "Investigar Empresas do Grupo",
+    outrosExemplos: [],
+    ensina: ["Como montar a requisição", "Quando usar isso como primeiro passo de uma investigação de hierarquia"],
+    video: ""
+  },
+  "tags-get": {
+    titulo: "Tags: requisição GET",
+    resumo: "Como investigar as tags cadastradas na empresa.",
+    exemploPrincipal: "Investigar Lista de Tags",
+    outrosExemplos: [],
+    ensina: ["Como montar a requisição e usar os filtros", "Como usar o ID retornado para Adicionar Tag a um lead"],
+    video: ""
+  },
+  "tags-post": {
+    titulo: "Tags: requisição POST",
+    resumo: "Como criar uma tag nova e o comportamento de deduplicação.",
+    exemploPrincipal: "Testar Criação de Tag",
+    outrosExemplos: [],
+    ensina: ["Como montar o body em JSON", "Comportamento ao criar uma tag repetida (201 com chave errors)"],
+    video: ""
+  },
+  "distribuicao-get": {
+    titulo: "Distribuição: requisições GET",
+    resumo: "Como investigar regras e filas de distribuição de leads entre vendedores.",
+    exemploPrincipal: "Investigar Regras de Distribuição",
+    outrosExemplos: ["Investigar Filas de Distribuição", "Investigar Vendedores de uma Fila"],
+    ensina: ["Como montar a requisição", "Como ler os headers de paginação", "Como comparar o retorno com o painel"],
+    video: ""
+  },
+  "distribuicao-post": {
+    titulo: "Distribuição: requisições POST",
+    resumo: "Como criar uma regra de distribuição e redistribuir um lead manualmente.",
+    exemploPrincipal: "Testar Criação de Regra de Distribuição",
+    outrosExemplos: ["Testar Redistribuição de Lead"],
+    ensina: ["Como montar o body em JSON", "Como validar o efeito da regra no painel"],
+    video: ""
+  },
+  "distribuicao-put": {
+    titulo: "Distribuição: requisições PUT",
+    resumo: "Como atualizar prioridades de uma fila e definir o próximo vendedor da rotação.",
+    exemploPrincipal: "Testar Atualização de Prioridades",
+    outrosExemplos: ["Testar Definição do Próximo Vendedor"],
+    ensina: ["Como montar o body em JSON", "Erros comuns quando o vendedor não está habilitado na fila"],
+    video: ""
+  },
+  "webhooks-post": {
+    titulo: "Webhooks: assinatura e cancelamento",
+    resumo: "Como configurar, testar e confirmar o recebimento de eventos de webhook.",
+    exemploPrincipal: "Testar Assinatura de Webhook",
+    outrosExemplos: ["Testar Cancelamento de Webhook"],
+    ensina: [
+      "Como assinar um gatilho (on_create_lead, on_update_lead, on_close_lead)",
+      "A regra de 1 endpoint por token",
+      "Como confirmar o recebimento no servidor do cliente",
+      "Erros comuns de configuração"
+    ],
+    video: ""
+  },
+  "stand-de-vendas-get": {
+    titulo: "Stand de Vendas: requisições GET",
+    resumo: "Como investigar estandes, leads capturados e resumo de presenças.",
+    exemploPrincipal: "Investigar Lista de Estandes",
+    outrosExemplos: ["Investigar Leads do Estande", "Investigar Resumo de Presenças"],
+    ensina: ["Por que sempre começar por Listar Estandes", "Como usar os IDs retornados nos outros dois endpoints do módulo"],
+    video: ""
+  },
+  "blocklist-get": {
+    titulo: "Blocklist: requisição GET",
+    resumo: "Como investigar a blocklist de contatos de uma hierarquia.",
+    exemploPrincipal: "Investigar Blocklist",
+    outrosExemplos: [],
+    ensina: ["Como montar a requisição", "Escopo por hierarquia"],
+    video: ""
+  },
+  "blocklist-post": {
+    titulo: "Blocklist: requisição POST",
+    resumo: "Como adicionar um contato à blocklist e o comportamento de duplicidade.",
+    exemploPrincipal: "Testar Inclusão na Blocklist",
+    outrosExemplos: [],
+    ensina: ["Como montar o body em JSON", "Como o telefone é normalizado", "Erro 409 de contato já bloqueado"],
+    video: ""
+  }
+};
 
 const ENDPOINTS = [
   // ---------------- Autenticação ----------------
@@ -58,7 +239,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: "videos/validar-autenticacao.mp4"
+    videoGroup: "autenticacao-get"
   },
 
   // ---------------- Leads ----------------
@@ -75,7 +256,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads?status=em_negociacao&perpage=50" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-get"
   },
   {
     slug: "buscar-lead",
@@ -90,7 +271,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads/{id}" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-get"
   },
   {
     slug: "criar-lead",
@@ -107,7 +288,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"data":{"type":"lead","attributes":{"name":"Teste","phone":"11999999999"}}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-post"
   },
   {
     slug: "atualizar-lead",
@@ -124,7 +305,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"lead":{"customer":{"name":"Nome Atualizado"}}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-put"
   },
   {
     slug: "encaminhar-lead",
@@ -141,7 +322,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"seller_from_id":"{id_origem}","seller_to_id":"{id_destino}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-put"
   },
   {
     slug: "listar-tags-lead",
@@ -156,7 +337,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads/{id}/tags" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-get"
   },
   {
     slug: "adicionar-tag-lead",
@@ -173,7 +354,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"tag_id":"{tag_id}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-post"
   },
   {
     slug: "remover-tag-lead",
@@ -190,7 +371,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"tag_id":"{tag_id}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-delete"
   },
   {
     slug: "marcar-lead-lido",
@@ -205,7 +386,7 @@ const ENDPOINTS = [
     curl: `curl -X PUT "https://api.contact2sale.com/integration/leads/{id}/read" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-put"
   },
   {
     slug: "criar-mensagem-lead",
@@ -222,7 +403,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"body":"Mensagem de teste","from":"bot"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-post"
   },
   {
     slug: "criar-atividade-lead",
@@ -239,7 +420,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"date":"2026-08-01T14:00:00Z","type":{"activity":true},"body":"Retornar contato"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-post"
   },
   {
     slug: "atualizar-status-lead",
@@ -256,7 +437,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"status":3,"message":"Cliente sem interesse","lost_reason_ids":[12]}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-put"
   },
   {
     slug: "fechar-negocio-lead",
@@ -273,7 +454,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"done_type_negotiation":"sale","value":"500000"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "leads-post"
   },
 
   // ---------------- Vendedores ----------------
@@ -290,7 +471,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/sellers" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "vendedores-get"
   },
   {
     slug: "criar-vendedor",
@@ -307,7 +488,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"company_id":"{company_id}","name":"Novo Vendedor","email":"vendedor@exemplo.com"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "vendedores-post"
   },
   {
     slug: "atualizar-vendedor",
@@ -324,7 +505,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"name":"Vendedor Atualizado"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "vendedores-put"
   },
   {
     slug: "timeshift-vendedores",
@@ -341,7 +522,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"seller_ids":["{id_1}","{id_2}"]}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "vendedores-put"
   },
 
   // ---------------- Empresas ----------------
@@ -358,7 +539,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/companies" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "empresas-get"
   },
 
   // ---------------- Tags ----------------
@@ -375,7 +556,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/tags" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "tags-get"
   },
   {
     slug: "criar-tag",
@@ -392,7 +573,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"tag":{"name":"Nova Tag","autofill":false}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "tags-post"
   },
 
   // ---------------- Distribuição ----------------
@@ -409,7 +590,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/distribution_rules" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "distribuicao-get"
   },
   {
     slug: "criar-regra-distribuicao",
@@ -426,7 +607,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"cod_1":"SP","cod_2":"São Paulo","priority":1,"type_rule":"rotation","seller_id":"{seller_id}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "distribuicao-post"
   },
   {
     slug: "listar-filas-distribuicao",
@@ -441,7 +622,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/distribution_queues" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "distribuicao-get"
   },
   {
     slug: "listar-vendedores-fila",
@@ -456,7 +637,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/distribution_queues/{id}/sellers" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "distribuicao-get"
   },
   {
     slug: "atualizar-prioridades-fila",
@@ -473,7 +654,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{ }'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "distribuicao-put"
   },
   {
     slug: "redistribuir-lead",
@@ -490,7 +671,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"id":"{lead_id}"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "distribuicao-post"
   },
   {
     slug: "definir-proximo-vendedor",
@@ -507,7 +688,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"next_queue_seller_id":123}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "distribuicao-put"
   },
 
   // ---------------- Webhooks ----------------
@@ -526,7 +707,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"hook_action":"on_create_lead","hook_url":"https://seu-servidor.com/webhook"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "webhooks-post"
   },
   {
     slug: "cancelar-webhook",
@@ -543,7 +724,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"hook_action":"on_create_lead"}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "webhooks-post"
   },
 
   // ---------------- Stand de Vendas ----------------
@@ -560,7 +741,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/stands" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "stand-de-vendas-get"
   },
   {
     slug: "listar-leads-estande",
@@ -575,7 +756,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/leads?start_date=2026-07-01&end_date=2026-07-26" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "stand-de-vendas-get"
   },
   {
     slug: "resumo-presencas-estande",
@@ -590,7 +771,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/sales_stand/attendance_summaries?start_date=2026-07-01&end_date=2026-07-26" \\
   -H "Authorization: Bearer {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "stand-de-vendas-get"
   },
 
   // ---------------- Blocklist ----------------
@@ -607,7 +788,7 @@ const ENDPOINTS = [
     curl: `curl -X GET "https://api.contact2sale.com/integration/hierarchy_blocklists" \\
   -H "Authorization: {token}"`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "blocklist-get"
   },
   {
     slug: "adicionar-blocklist",
@@ -624,7 +805,7 @@ const ENDPOINTS = [
   -H "Content-Type: application/json" \\
   -d '{"hierarchy_blocklist":{"phone":"11999998888","remove_leads":true}}'`,
     status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
-    video: ""
+    videoGroup: "blocklist-post"
   }
 ];
 
@@ -660,6 +841,17 @@ const CASOS = [
 
 // Changelog do projeto
 const CHANGELOG = [
+  {
+    versao: "3.0",
+    data: "31 Jul 2026",
+    itens: [
+      "Vídeos reorganizados por recurso + método HTTP (ex: Leads GET, Vendedores PUT), 18 grupos no total, a pedido da liderança do suporte",
+      "Cada página de procedimento mostra o exemplo principal do vídeo e cita os outros endpoints parecidos abordados nele",
+      "Categorias da barra lateral viraram pastas clicáveis (abre/fecha), a categoria do procedimento atual abre sozinha",
+      "Removido o suporte a vídeo local embutido: todos os vídeos passam a ser link (Loom)",
+      "Nenhum procedimento foi removido; os 35 continuam existindo, cada um com sua própria página"
+    ]
+  },
   {
     versao: "2.1",
     data: "31 Jul 2026",
