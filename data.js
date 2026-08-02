@@ -893,6 +893,18 @@ const CASOS = [
 // Changelog do projeto
 const CHANGELOG = [
   {
+    versao: "5.0",
+    data: "01 Ago 2026",
+    itens: [
+      "Sistema de design elevado: sombras/elevação consistentes, curva de easing premium, brilho de destaque sutil (glow) usado com critério",
+      "Microinterações: cards com lift ao passar o mouse, botões com feedback de clique, thumbnail do Loom com zoom sutil, checkbox customizado e animado no Checklist",
+      "Transição de entrada suave (fade + slide) a cada navegação entre páginas",
+      "Indicador de item ativo na barra lateral com barra de destaque à esquerda",
+      "Hero da home com brilho radial discreto e título com leve gradiente, sem aplicar esse efeito nas páginas de trabalho (procedimentos, tabelas, código) para manter a legibilidade em uso prolongado",
+      "Scrollbar customizada, hover em linhas de tabela, sombra e transições refinadas em botões e blocos de informação"
+    ]
+  },
+  {
     versao: "4.0",
     data: "01 Ago 2026",
     itens: [
