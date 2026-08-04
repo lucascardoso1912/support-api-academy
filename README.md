@@ -1,6 +1,6 @@
 # Support API Academy
 
-Trilha técnica de APIs e Integrações do Suporte C2S, versão 4.0.
+Trilha técnica de APIs e Integrações do Suporte C2S, versão 5.0.
 
 Site estático (HTML/CSS/JS puro, sem build step), então dá pra publicar em minutos sem precisar instalar nada.
 
