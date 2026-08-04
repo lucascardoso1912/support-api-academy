@@ -117,9 +117,4 @@ Salve o arquivo e o procedimento aparece automaticamente no menu lateral (dentro
 
 O mesmo vale para novos **casos reais** (array `CASOS`) e para o **changelog** (array `CHANGELOG`).
 
-## Próximas versões (sugestão)
 
-- Mais endpoints (webhooks, criar/atualizar lead, vendedores, filas)
-- Busca global melhorada (hoje filtra só pelo texto visível no menu)
-- Exercícios/quiz para onboarding de novos colaboradores
-- Assistente de IA respondendo com base nesta documentação
