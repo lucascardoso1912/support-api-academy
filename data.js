@@ -893,6 +893,14 @@ const CASOS = [
 // Changelog do projeto
 const CHANGELOG = [
   {
+    versao: "5.1",
+    data: "11 Ago 2026",
+    itens: [
+      "Capa ilustrativa (video-cover.svg) adicionada, no estilo de um frame pausado de gravação do Loom: navegador com abas, a estrutura real da documentação (Leads, Tags, Webhooks etc) e um círculo de câmera genérico no canto",
+      "Essa capa aparece quando um vídeo ainda não foi gravado, e também como reserva automática se a miniatura real do Loom falhar ao carregar"
+    ]
+  },
+  {
     versao: "5.0",
     data: "11 Ago 2026",
     itens: [
