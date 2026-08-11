@@ -1,6 +1,6 @@
 # Support API Academy
 
-Trilha técnica de APIs e Integrações do Suporte C2S, versão 4.0.
+Trilha técnica de APIs e Integrações do Suporte C2S, versão 5.0.
 
 Site estático (HTML/CSS/JS puro, sem build step), então dá pra publicar em minutos sem precisar instalar nada.
 
@@ -43,6 +43,7 @@ Qualquer uma das duas opções é gratuita e não exige saber programar além de
 - Tokens de cor, tipografia e espaçamento ficam centralizados no topo do `style.css` (`:root { ... }`), qualquer ajuste de paleta é feito só ali.
 - O link para a documentação oficial da API fica numa constante só, `OFFICIAL_DOCS_URL` no topo do `app.js`. Se o endereço mudar, é só trocar ali; ele é usado tanto no botão da home quanto no link de cada procedimento.
 - O link do Postman (`POSTMAN_URL`) e da Collection oficial (`POSTMAN_COLLECTION_URL`, ainda vazia) também ficam em constantes no topo do `app.js`.
+- Sistema de design com elevação (sombras), curva de easing premium e microinterações: cards sobem e brilham no hover, botões dão feedback de clique, thumbnail do Loom faz zoom sutil, checkbox do Checklist é customizado e animado, e cada navegação entre páginas tem uma transição suave de entrada. O único lugar com brilho radial de fundo é o hero da home, de propósito: nas páginas de trabalho (procedimentos, tabelas, código) isso atrapalharia a leitura em uso prolongado.
 
 ## Como adicionar um vídeo (por módulo de negócio + método HTTP)
 

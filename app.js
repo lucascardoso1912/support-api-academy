@@ -651,6 +651,11 @@ function router() {
         <span>Voltar</span>
       </button>`);
   }
+
+  // microinteração: reanima o fade/slide de entrada a cada navegação
+  app.classList.remove("page-enter");
+  void app.offsetWidth; // força reflow pra reiniciar a animação CSS
+  app.classList.add("page-enter");
 }
 
 // clique no botão de voltar funciona mesmo depois que a página é re-renderizada,
