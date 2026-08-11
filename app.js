@@ -1,15 +1,13 @@
 // ============================================================
-// SUPPORT ACADEMY - app.js
+// SUPPORT API ACADEMY - app.js
 // SPA simples com roteamento por hash. Sem build step.
-//
-// Arquitetura: nenhuma função aqui é específica de uma trilha.
-// Tudo lê de TRILHAS e CONTEUDOS (data.js). Pra adicionar uma
-// trilha ou um conteúdo novo, mexe só no data.js.
 // ============================================================
 
 const app = document.getElementById("app");
 const sidebarNav = document.getElementById("sidebar-nav");
 const OFFICIAL_DOCS_URL = "https://docs-api-leads.c2sapp.com/";
+const POSTMAN_URL = "https://www.postman.com/";
+const POSTMAN_COLLECTION_URL = ""; // cole aqui o link da Collection oficial quando ela existir
 
 // ---------- ícones (stroke, 1.5px, sem emoji) ----------
 const ICONS = {
@@ -33,26 +31,20 @@ const ICONS = {
   sun: `<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>`,
   moon: `<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/>`,
   arrowLeft: `<path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>`,
-  arrowRight: `<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>`,
-  list: `<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.2" fill="currentColor" stroke="none"/>`,
-  plug: `<path d="M9 7V3M15 7V3M7 10h10a1 1 0 0 1 1 1v2a5 5 0 0 1-5 5h-4a5 5 0 0 1-5-5v-2a1 1 0 0 1 1-1Z"/><path d="M10 18v3M14 18v3"/>`,
-  playbook: `<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6M9 19h3"/>`,
-  shield: `<path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/>`,
-  wrench: `<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2 2.8-2.8Z"/>`,
-  star: `<path d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1L6.6 19.3l1.3-6L3.3 9.2l6.1-.6L12 3Z"/>`,
-  dashboard: `<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/>`
+  list: `<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.2" fill="currentColor" stroke="none"/>`
 };
 
 function icon(name, size = 16) {
   return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ""}</svg>`;
 }
 
-const STATIC_PAGES_TOP = [
+const STATIC_PAGES = [
   { slug: "home", label: "Início", icon: "home" },
-  { slug: "favoritos", label: "Favoritos", icon: "star" }
-];
-const STATIC_PAGES_BOTTOM = [
-  { slug: "atualizacoes", label: "Atualizações", icon: "clock" }
+  { slug: "fundamentos", label: "Fundamentos", icon: "book" },
+  { slug: "postman", label: "Postman", icon: "mail" },
+  { slug: "troubleshooting", label: "Troubleshooting", icon: "warning" },
+  { slug: "casos-reais", label: "Casos Reais", icon: "case" },
+  { slug: "checklist", label: "Checklist", icon: "check" }
 ];
 
 function escapeHtml(str) {
@@ -62,6 +54,7 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;");
 }
 
+// ---------- syntax highlight (bem simples, so pra JSON) ----------
 function highlightJson(json) {
   const escaped = escapeHtml(json);
   return escaped
@@ -71,119 +64,51 @@ function highlightJson(json) {
     .replace(/: (true|false|null)/g, ': <span class="n">$1</span>');
 }
 
-// ============================================================
-// Camada de dados (helpers sobre TRILHAS / CONTEUDOS / VIDEO_GROUPS)
-// ============================================================
-function trilhaBySlug(slug) { return TRILHAS.find(t => t.slug === slug); }
-function contentBySlug(slug) { return CONTEUDOS.find(c => c.slug === slug); }
-function contentsByTrilha(trilhaSlug) { return CONTEUDOS.filter(c => c.trilha === trilhaSlug); }
-
-function groupByCategoria(items) {
-  const map = {};
-  items.forEach(it => { (map[it.categoria] = map[it.categoria] || []).push(it); });
-  return map;
-}
-
-function prevNext(item) {
-  const siblings = CONTEUDOS
-    .filter(c => c.trilha === item.trilha && c.categoria === item.categoria)
-    .sort((a, b) => a.ordem - b.ordem);
-  const idx = siblings.findIndex(c => c.slug === item.slug);
-  return { prev: siblings[idx - 1] || null, next: siblings[idx + 1] || null };
-}
-
-// ============================================================
-// Favoritos e progresso (localStorage, por navegador)
-// ============================================================
-const LS_FAV = "sa-favorites";
-const LS_PROGRESS = "sa-progress";
-
-function getFavorites() {
-  try { return JSON.parse(localStorage.getItem(LS_FAV)) || []; } catch (e) { return []; }
-}
-function isFavorite(slug) { return getFavorites().includes(slug); }
-function toggleFavorite(slug) {
-  const favs = getFavorites();
-  const idx = favs.indexOf(slug);
-  if (idx === -1) favs.push(slug); else favs.splice(idx, 1);
-  try { localStorage.setItem(LS_FAV, JSON.stringify(favs)); } catch (e) {}
-  return favs.includes(slug);
-}
-
-function getProgressMap() {
-  try { return JSON.parse(localStorage.getItem(LS_PROGRESS)) || {}; } catch (e) { return {}; }
-}
-function getProgress(slug) { return getProgressMap()[slug] || "nao-iniciado"; }
-function setProgress(slug, status) {
-  const map = getProgressMap();
-  map[slug] = status;
-  try { localStorage.setItem(LS_PROGRESS, JSON.stringify(map)); } catch (e) {}
-}
-const PROGRESS_LABELS = {
-  "nao-iniciado": "Não iniciado",
-  "em-andamento": "Em andamento",
-  "concluido": "Concluído"
-};
-
-// ============================================================
-// Sidebar
-// ============================================================
+// ---------- sidebar ----------
 const METHOD_ORDER = ["GET", "POST", "PUT", "DELETE"];
 
 function renderSidebar() {
   const groupsHtml = [];
 
   groupsHtml.push(`<div class="nav-group">
-    ${STATIC_PAGES_TOP.map(navLinkHtml).join("")}
+    ${STATIC_PAGES.slice(0, 2).map(navLinkHtml).join("")}
   </div>`);
 
-  const trilhasOrdenadas = [...TRILHAS].sort((a, b) => a.ordem - b.ordem);
-  trilhasOrdenadas.forEach(trilha => {
-    const items = contentsByTrilha(trilha.slug);
-    const porCategoria = groupByCategoria(items);
-    const categorias = Object.keys(porCategoria);
-    if (!categorias.length) return;
+  CATEGORIES.forEach(cat => {
+    const eps = ENDPOINTS.filter(e => e.category === cat);
+    if (!eps.length) return;
 
-    const categoriaBlocks = categorias.map(cat => {
-      const catItems = porCategoria[cat];
-      if (trilha.slug === "api") {
-        const methodsPresent = METHOD_ORDER.filter(m => catItems.some(c => c.method === m));
-        const methodBlocks = methodsPresent.map(method => {
-          const links = catItems.filter(c => c.method === method).map(contentLinkHtml).join("");
-          return `
-            <div class="nav-method-group">
-              <div class="nav-method-label"><span class="method-tag method-${method}">${method}</span></div>
-              ${links}
-            </div>`;
-        }).join("");
-        return `<div class="nav-categoria-group">
-          <div class="nav-categoria-label">${cat}</div>
-          ${methodBlocks}
+    const methodsPresent = METHOD_ORDER.filter(m => eps.some(e => e.method === m));
+    const methodBlocks = methodsPresent.map(method => {
+      const items = eps.filter(e => e.method === method);
+      const links = items.map(ep => `
+        <div class="nav-link" data-route="endpoint/${ep.slug}">
+          <span>${ep.title}</span>
+        </div>`).join("");
+      return `
+        <div class="nav-method-group">
+          <div class="nav-method-label">
+            <span class="method-tag method-${method}">${method}</span>
+          </div>
+          ${links}
         </div>`;
-      }
-      const links = catItems.map(contentLinkHtml).join("");
-      return `<div class="nav-categoria-group">
-        <div class="nav-categoria-label">${cat}</div>
-        ${links}
-      </div>`;
     }).join("");
 
     groupsHtml.push(`
     <div class="nav-folder">
-      <button class="nav-folder-toggle" data-folder="${trilha.slug}">
+      <button class="nav-folder-toggle" data-folder="${cat}">
         ${icon("chevron", 13)}
-        ${icon(trilha.icon, 14)}
-        <span class="nav-group-label">${trilha.titulo}</span>
-        <span class="nav-folder-count">${items.length}</span>
+        <span class="nav-group-label">${cat}</span>
+        <span class="nav-folder-count">${eps.length}</span>
       </button>
       <div class="nav-folder-items">
-        ${categoriaBlocks}
+        ${methodBlocks}
       </div>
     </div>`);
   });
 
   groupsHtml.push(`<div class="nav-group">
-    ${STATIC_PAGES_BOTTOM.map(navLinkHtml).join("")}
+    ${STATIC_PAGES.slice(2).map(navLinkHtml).join("")}
   </div>`);
 
   sidebarNav.innerHTML = groupsHtml.join("");
@@ -202,13 +127,6 @@ function renderSidebar() {
   });
 }
 
-function contentLinkHtml(item) {
-  return `
-    <div class="nav-link" data-route="conteudo/${item.slug}">
-      <span>${item.titulo}</span>
-    </div>`;
-}
-
 function navLinkHtml(p) {
   return `<div class="nav-link" data-route="${p.slug}">${icon(p.icon, 15)}<span>${p.label}</span></div>`;
 }
@@ -217,13 +135,12 @@ function setActiveNav(route) {
   document.querySelectorAll(".nav-link").forEach(el => {
     el.classList.toggle("active", el.dataset.route === route);
   });
+  // abre a pasta do procedimento atual, sem mexer nas pastas já abertas manualmente
   const activeLink = document.querySelector(".nav-link.active");
   activeLink?.closest(".nav-folder")?.classList.add("open");
 }
 
-// ============================================================
-// Componentes reutilizáveis
-// ============================================================
+// ---------- code panel component ----------
 function codePanel({ tabs }) {
   const id = "cp-" + Math.random().toString(36).slice(2, 8);
   const tabButtons = tabs.map((t, i) =>
@@ -267,12 +184,13 @@ function wireCodePanels(root) {
   });
 }
 
-function statusBlock(item) {
-  const hasVideo = !!VIDEO_GROUPS[item.videoGroup]?.video;
+// ---------- selo de status do procedimento ----------
+function statusBlock(ep) {
+  const hasVideo = !!VIDEO_GROUPS[ep.videoGroup]?.video;
   const items = [
-    { done: !!item.status.validado, label: "Validado pelo Suporte" },
+    { done: !!ep.status.validado, label: "Validado pelo Suporte" },
     { done: hasVideo, label: "Vídeo disponível" },
-    { done: !!item.status.testadoPostman, label: "Testado no Postman" }
+    { done: !!ep.status.testadoPostman, label: "Testado no Postman" }
   ];
   const itemsHtml = items.map(it => `
     <div class="status-item ${it.done ? "done" : "pending"}">
@@ -287,17 +205,17 @@ function statusBlock(item) {
       ${itemsHtml}
       <div class="status-item revisao">
         ${icon("clock", 15)}
-        <span>Última revisão: ${item.status.revisao}</span>
+        <span>Última revisão: ${ep.status.revisao}</span>
       </div>
     </div>
   </div>`;
 }
 
+// ---------- bloco de ferramentas necessárias ----------
 const TOOL_ICONS = { postman: "mail", api: "api", plataforma: "platform", logs: "logs" };
 
-function toolsBlock(item) {
-  if (!item.ferramentas || !item.ferramentas.length) return "";
-  const items = item.ferramentas.map(key => `
+function toolsBlock(ep) {
+  const items = ep.ferramentas.map(key => `
     <div class="tool-item">
       ${icon(TOOL_ICONS[key] || "check", 15)}
       <span>${TOOLS[key]?.label || key}</span>
@@ -309,293 +227,19 @@ function toolsBlock(item) {
   </div>`;
 }
 
-function videoInfoBlock(group) {
-  const endpointsAbordados = [group.exemploPrincipal, ...group.outrosExemplos];
-  return `
-  <div class="video-info-block">
-    <div class="video-info-item">
-      ${icon("target", 16)}
-      <div><div class="video-info-label">Objetivo</div><div class="video-info-value">${group.resumo}</div></div>
-    </div>
-    <div class="video-info-item">
-      ${icon("list", 16)}
-      <div><div class="video-info-label">Endpoints abordados</div><div class="video-info-value">${endpointsAbordados.join(", ")}</div></div>
-    </div>
-    <div class="video-info-item">
-      ${icon("check", 16)}
-      <div><div class="video-info-label">Pré-requisitos</div><div class="video-info-value">${group.preRequisitos.join(", ")}</div></div>
-    </div>
-    <div class="video-info-item">
-      ${icon("clock", 16)}
-      <div><div class="video-info-label">Tempo estimado</div><div class="video-info-value">${group.duracao}</div></div>
-    </div>
-  </div>`;
-}
-
-function extractLoomId(url) {
-  const m = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
-  return m ? m[1] : null;
-}
-
-function bigLoomPlayer(group) {
-  if (!group.video) {
-    return `
-    <div class="loom-player loom-player-empty">
-      <img class="loom-player-thumb loom-player-cover" src="video-cover.svg" alt="Capa ilustrativa: vídeo ainda não adicionado" loading="lazy">
-      <div class="loom-player-overlay loom-player-overlay-empty">
-        ${icon("play", 30)}
-        <span class="loom-player-empty-label">${group.titulo}<br>vídeo ainda não adicionado</span>
-      </div>
-    </div>`;
-  }
-  const loomId = extractLoomId(group.video);
-  const thumb = loomId ? `https://cdn.loom.com/sessions/thumbnails/${loomId}-with-play.gif` : "";
-  const fallbackAttr = `onerror="this.onerror=null;this.src='video-cover.svg';this.classList.add('loom-player-cover');this.alt='Capa ilustrativa do vídeo';"`;
-  return `
-  <a class="loom-player" href="${escapeHtml(group.video)}" target="_blank" rel="noopener" aria-label="Assistir: ${group.titulo}">
-    ${thumb ? `<img class="loom-player-thumb" src="${thumb}" alt="Miniatura do vídeo: ${group.titulo}" loading="lazy" ${fallbackAttr}>` : `<img class="loom-player-thumb loom-player-cover" src="video-cover.svg" alt="Capa ilustrativa do vídeo" loading="lazy">`}
-    <div class="loom-player-overlay">${icon("play", 30)}</div>
-  </a>
-  <a class="loom-watch-btn" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
-    ${icon("external", 14)}
-    <span>Assistir no Loom</span>
-  </a>`;
-}
-
-function breadcrumb(item) {
-  const trilha = trilhaBySlug(item.trilha);
-  const parts = [
-    `<a href="#/home">Início</a>`,
-    `<a href="#/trilha/${item.trilha}">${trilha ? trilha.titulo : item.trilha}</a>`,
-    `<span>${item.categoria}</span>`,
-    `<span class="breadcrumb-current">${item.titulo}</span>`
-  ];
-  return `<nav class="breadcrumb">${parts.join('<span class="breadcrumb-sep">/</span>')}</nav>`;
-}
-
-function favoriteButton(item) {
-  if (!item.favoritavel) return "";
-  const active = isFavorite(item.slug);
-  return `
-    <button class="favorite-btn ${active ? "active" : ""}" data-favorite="${item.slug}" aria-label="Favoritar">
-      ${icon("star", 17)}
-    </button>`;
-}
-
-function progressControl(item) {
-  const current = getProgress(item.slug);
-  const options = ["nao-iniciado", "em-andamento", "concluido"];
-  const buttons = options.map(opt => `
-    <button class="progress-btn ${current === opt ? "active" : ""} progress-${opt}" data-progress="${item.slug}" data-status="${opt}">
-      ${PROGRESS_LABELS[opt]}
-    </button>`).join("");
-  return `<div class="progress-control">${buttons}</div>`;
-}
-
-function prevNextNav(item) {
-  const { prev, next } = prevNext(item);
-  if (!prev && !next) return "";
-  return `
-  <div class="prev-next-nav">
-    ${prev ? `<a class="prev-next-link prev" href="#/conteudo/${prev.slug}">${icon("arrowLeft", 15)}<div><span class="prev-next-label">Conteúdo anterior</span><span class="prev-next-title">${prev.titulo}</span></div></a>` : `<span></span>`}
-    ${next ? `<a class="prev-next-link next" href="#/conteudo/${next.slug}"><div><span class="prev-next-label">Próximo conteúdo</span><span class="prev-next-title">${next.titulo}</span></div>${icon("arrowRight", 15)}</a>` : `<span></span>`}
-  </div>`;
-}
-
-function dicasBlock(item) {
-  if (!item.dicas || !item.dicas.length) return "";
-  return `
-  <div class="section">
-    <h2>Dicas</h2>
-    <ul class="tip-list">${item.dicas.map(d => `<li>${d}</li>`).join("")}</ul>
-  </div>`;
-}
-
-function problemasComunsBlock(item) {
-  if (!item.problemasComuns || !item.problemasComuns.length) return "";
-  return `
-  <div class="section">
-    <h2>Problemas comuns</h2>
-    <ul class="tip-list">${item.problemasComuns.map(d => `<li>${d}</li>`).join("")}</ul>
-  </div>`;
-}
-
-// ============================================================
-// Corpo específico por tipo de conteúdo
-// ============================================================
-function corpoProcedimento(item) {
-  return `
-    <div class="endpoint-head">
-      <span class="method-tag method-${item.method}" style="font-size:12px;padding:4px 8px">${item.method}</span>
-      <span class="endpoint-path">${item.path}</span>
-    </div>
-    ${toolsBlock(item)}
-    <div class="section">
-      <h2>Como testar</h2>
-      <p>${item.testar}</p>
-      ${codePanel({ tabs: [{ label: "cURL", html: escapeHtml(item.curl) }] })}
-    </div>`;
-}
-
-function corpoConceito(item) {
-  const paragrafos = item.conteudo.map(p => `<p>${p}</p>`).join("");
-  const exemplo = item.exemplo ? `
-    <div class="section"><h2>Exemplo</h2>${codePanel({ tabs: [{ label: "Exemplo", html: highlightJson(item.exemplo) }] })}</div>` : "";
-  return `<div class="section">${paragrafos}</div>${exemplo}`;
-}
-
-function corpoErro(item) {
-  return `
-    ${toolsBlock(item)}
-    <div class="section">
-      <h2>Causa mais comum</h2>
-      <p>${item.causaComum}</p>
-    </div>
-    <div class="section">
-      <h2>Como investigar</h2>
-      <ol class="step-list">${item.comoInvestigar.map(s => `<li>${s}</li>`).join("")}</ol>
-    </div>
-    <div class="section">
-      <h2>Como resolver</h2>
-      <p>${item.comoResolver}</p>
-    </div>`;
-}
-
-function corpoPlaybook(item) {
-  return `
-    <div class="section">
-      <h2>Passo a passo</h2>
-      <ul class="checklist" style="list-style:none">${item.passos.map(p => `<li><span>${p}</span></li>`).join("")}</ul>
-    </div>`;
-}
-
-function corpoCaso(item) {
-  const statusClass = item.statusCaso === "Resolvido" ? "status-2" : "status-4";
-  return `
-    <div class="section">
-      <span class="status-chip ${statusClass}">${item.statusCaso}</span>
-    </div>
-    <div class="section"><h2>Problema</h2><p>${item.problema}</p></div>
-    <div class="section"><h2>Causa</h2><p>${item.causa}</p></div>
-    <div class="section">
-      <h2>Investigação</h2>
-      <ol class="step-list">${item.investigacao.map(s => `<li>${s}</li>`).join("")}</ol>
-    </div>
-    <div class="section"><h2>Solução</h2><p>${item.solucao}</p></div>
-    <div class="section"><h2>Aprendizados</h2><p>${item.aprendizados}</p></div>
-    <div class="section">
-      <h2>Palavras-chave</h2>
-      <div class="keyword-chips">${item.palavrasChave.map(k => `<span class="keyword-chip">${k}</span>`).join("")}</div>
-    </div>`;
-}
-
-function corpoFerramenta(item) {
-  const collection = item.collectionUrl ? `
-    <a class="docs-relation-btn" href="${item.collectionUrl}" target="_blank" rel="noopener">
-      ${icon("api", 18)}<span>Abrir Collection Oficial</span>${icon("external", 15)}
-    </a>` : `
-    <div class="collection-placeholder">
-      ${icon("api", 16)}
-      <span>Link da Collection oficial ainda não adicionado. Quando existir, cole no campo collectionUrl deste item, no data.js.</span>
-    </div>`;
-  return `
-    <div class="docs-relation">
-      <div class="docs-relation-copy">
-        <div class="status-block-label">Acesso rápido</div>
-        <p>${item.resumo}</p>
-      </div>
-      <a class="docs-relation-btn" href="${item.linkUrl}" target="_blank" rel="noopener">
-        ${icon("mail", 18)}<span>${item.linkLabel}</span>${icon("external", 15)}
-      </a>
-    </div>
-    <div class="section"><h2>Collection oficial</h2>${collection}</div>
-    <div class="section">
-      <h2>Passo a passo</h2>
-      <ul class="checklist" style="list-style:none">${item.passos.map(p => `<li><span>${p}</span></li>`).join("")}</ul>
-    </div>`;
-}
-
-const CORPO_RENDERERS = {
-  procedimento: corpoProcedimento,
-  conceito: corpoConceito,
-  erro: corpoErro,
-  playbook: corpoPlaybook,
-  caso: corpoCaso,
-  ferramenta: corpoFerramenta
-};
-
-// ============================================================
-// Página genérica de conteúdo
-// ============================================================
-function renderContentDetail(slug) {
-  const item = contentBySlug(slug);
-  if (!item) { app.innerHTML = `<p>Conteúdo não encontrado.</p>`; return; }
-
-  const statusSection = item.status ? statusBlock(item) : "";
-  const quandoUsarSection = item.quandoUsar ? `
-    <div class="section"><h2>Quando utilizar</h2><p>${item.quandoUsar}</p></div>` : "";
-
-  const group = item.videoGroup ? VIDEO_GROUPS[item.videoGroup] : null;
-  const videoSection = group ? `
-    <div class="section">
-      <h2>Vídeo relacionado</h2>
-      <p class="video-shared-note">Esse vídeo cobre o recurso ${item.categoria} + ${item.method}, não é exclusivo deste conteúdo.</p>
-      ${videoInfoBlock(group)}
-      ${bigLoomPlayer(group)}
-    </div>` : "";
-
-  const docOficialLink = item.docOficial ? `
-    <a class="official-docs-link" href="${OFFICIAL_DOCS_URL}" target="_blank" rel="noopener">
-      ${icon("external", 13)}<span>Ver especificação completa de ${item.path} na documentação oficial</span>
-    </a>` : "";
-
-  const corpoFn = CORPO_RENDERERS[item.tipo];
-
-  app.innerHTML = `
-    ${breadcrumb(item)}
-    <span class="eyebrow">${item.categoria}</span>
-    <div class="content-title-row">
-      <h1 class="page-title">${item.titulo}</h1>
-      ${favoriteButton(item)}
-    </div>
-    <p class="page-lede">${item.resumo}</p>
-
-    ${progressControl(item)}
-    ${statusSection}
-    ${quandoUsarSection}
-    ${corpoFn ? corpoFn(item) : ""}
-    ${videoSection}
-    ${dicasBlock(item)}
-    ${problemasComunsBlock(item)}
-    ${docOficialLink}
-    ${prevNextNav(item)}
-  `;
-  wireCodePanels(app);
-}
-
-// ============================================================
-// Home
-// ============================================================
+// ---------- pages ----------
 function renderHome() {
-  const totalProcedimentos = CONTEUDOS.filter(c => c.tipo === "procedimento").length;
-  const totalVideosPublicados = Object.values(VIDEO_GROUPS).filter(g => g.video).length;
-  const totalTrilhas = TRILHAS.length;
-  const totalCasos = CONTEUDOS.filter(c => c.tipo === "caso").length;
-
   app.innerHTML = `
     <span class="version-badge">Versão <b>${CHANGELOG[0].versao}</b> · atualizado em ${CHANGELOG[0].data}</span>
     <div class="hero">
       <div class="hero-copy">
-        <span class="eyebrow">Suporte C2S</span>
-        <h1>Support Academy</h1>
-        <p>Central de conhecimento do time de Suporte. Aprenda a investigar problemas, testar integrações, entender a API, consultar playbooks, estudar casos reais e evoluir continuamente.</p>
-        <div class="hero-actions">
-          <a class="docs-relation-btn" href="#/trilha/api">
-            <span>Começar</span>${icon("arrowRight", 15)}
-          </a>
-          <a class="hero-secondary-btn" href="#/favoritos">
-            <span>Explorar conteúdos</span>
-          </a>
+        <span class="eyebrow">Suporte C2S · Trilha Técnica</span>
+        <h1>Support API Academy</h1>
+        <p>Documentação viva de APIs e integrações do C2S, feita para que o suporte investigue e resolva casos técnicos sem precisar escalar toda dúvida básica. Endpoints, exemplos prontos, troubleshooting e casos reais, tudo num lugar só.</p>
+        <div class="stat-row">
+          <div class="stat"><div class="stat-num">${ENDPOINTS.length}</div><div class="stat-label">procedimentos guiados</div></div>
+          <div class="stat"><div class="stat-num">${CATEGORIES.length}</div><div class="stat-label">categorias</div></div>
+          <div class="stat"><div class="stat-num">${CASOS.length}</div><div class="stat-label">casos reais</div></div>
         </div>
       </div>
       <div class="hero-terminal">
@@ -609,39 +253,41 @@ function renderHome() {
       </div>
     </div>
 
-    <div class="dashboard-grid">
-      <div class="dash-card"><div class="dash-num">${totalProcedimentos}</div><div class="dash-label">Procedimentos</div></div>
-      <div class="dash-card"><div class="dash-num">${totalVideosPublicados}</div><div class="dash-label">Vídeos publicados</div></div>
-      <div class="dash-card"><div class="dash-num">${totalTrilhas}</div><div class="dash-label">Trilhas</div></div>
-      <div class="dash-card"><div class="dash-num">${totalCasos}</div><div class="dash-label">Casos Reais</div></div>
-    </div>
-
     <div class="docs-relation">
       <div class="docs-relation-copy">
         <div class="status-block-label">Documentação Oficial da API</div>
         <p>A documentação oficial reúne todas as informações técnicas da API: endpoints, parâmetros, autenticação, exemplos de requisição e de resposta. É a fonte de referência.</p>
-        <p>A Support Academy complementa essa documentação, mostrando como usar esses recursos em cenários reais de suporte.</p>
+        <p>A Support API Academy complementa essa documentação, mostrando como usar esses recursos em cenários reais de suporte: quando investigar, com o que testar, e o teste sendo feito em vídeo.</p>
       </div>
       <a class="docs-relation-btn" href="${OFFICIAL_DOCS_URL}" target="_blank" rel="noopener">
-        ${icon("book", 18)}<span>Acessar Documentação Oficial da API</span>${icon("external", 15)}
+        ${icon("book", 18)}
+        <span>Acessar Documentação Oficial da API</span>
+        ${icon("external", 15)}
       </a>
     </div>
 
     <div class="section">
-      <span class="eyebrow">Navegue pela plataforma</span>
-      <h2>Trilhas</h2>
-      <div class="card-grid" id="home-trilhas"></div>
+      <span class="eyebrow">Navegue pela trilha</span>
+      <h2>Por onde começar</h2>
+      <div class="card-grid" id="home-cards"></div>
     </div>
   `;
 
-  const trilhasOrdenadas = [...TRILHAS].sort((a, b) => a.ordem - b.ordem);
-  document.getElementById("home-trilhas").innerHTML = trilhasOrdenadas.map(t => `
-    <div class="card" data-route="trilha/${t.slug}">
-      <span class="card-icon">${icon(t.icon, 20)}</span>
-      <div class="card-title">${t.titulo}</div>
-      <div class="card-desc">${t.descricao}</div>
+  const cards = [
+    { icon: "book", title: "Fundamentos", desc: "HTTP, REST, JSON, autenticação: a base antes de investigar qualquer caso.", route: "fundamentos" },
+    { icon: "api", title: "Procedimentos", desc: "Investigações e testes guiados por endpoint, com status de validação e vídeo.", route: "endpoint/" + (ENDPOINTS[0]?.slug || "") },
+    { icon: "mail", title: "Postman", desc: "Como importar a collection, configurar environment e testar sem escalar.", route: "postman" },
+    { icon: "warning", title: "Troubleshooting", desc: "Tabela de erros comuns: causa provável, como validar, quando escalar.", route: "troubleshooting" },
+    { icon: "case", title: "Casos Reais", desc: "Investigações reais documentadas, passo a passo, prontas para consultar.", route: "casos-reais" },
+    { icon: "check", title: "Checklist", desc: "Confirme os pontos essenciais antes de escalar qualquer chamado técnico.", route: "checklist" }
+  ];
+  document.getElementById("home-cards").innerHTML = cards.map(c => `
+    <div class="card" data-route="${c.route}">
+      <span class="card-icon">${icon(c.icon, 20)}</span>
+      <div class="card-title">${c.title}</div>
+      <div class="card-desc">${c.desc}</div>
     </div>`).join("");
-  document.querySelectorAll("#home-trilhas .card").forEach(el => {
+  document.querySelectorAll("#home-cards .card").forEach(el => {
     el.addEventListener("click", () => location.hash = "#/" + el.dataset.route);
   });
 
@@ -670,107 +316,331 @@ function typeTerminal() {
   step();
 }
 
-// ============================================================
-// Página de índice de trilha
-// ============================================================
-function renderTrilhaIndex(trilhaSlug) {
-  const trilha = trilhaBySlug(trilhaSlug);
-  if (!trilha) { app.innerHTML = `<p>Trilha não encontrada.</p>`; return; }
-
-  const items = contentsByTrilha(trilhaSlug);
-  const porCategoria = groupByCategoria(items);
-  const categorias = Object.keys(porCategoria);
-
+function renderFundamentos() {
   app.innerHTML = `
-    <nav class="breadcrumb"><a href="#/home">Início</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">${trilha.titulo}</span></nav>
-    <span class="eyebrow">Trilha</span>
-    <h1 class="page-title">${trilha.titulo}</h1>
-    <p class="page-lede">${trilha.descricao}</p>
+    <span class="eyebrow">Base teórica</span>
+    <h1 class="page-title">Fundamentos</h1>
+    <p class="page-lede">O mínimo necessário para entender qualquer chamada de API do C2S, sem precisar decorar, só o suficiente pra investigar um caso com segurança.</p>
 
-    ${categorias.length ? categorias.map(cat => `
-      <div class="section">
-        <h2>${cat}</h2>
-        <div class="card-grid">
-          ${porCategoria[cat].map(it => `
-            <div class="card" data-route="conteudo/${it.slug}">
-              ${it.method ? `<span class="method-tag method-${it.method}" style="margin-bottom:8px;display:inline-block">${it.method}</span>` : ""}
-              <div class="card-title">${it.titulo}</div>
-              <div class="card-desc">${it.resumo}</div>
-            </div>`).join("")}
-        </div>
-      </div>`).join("") : `
-      <div class="section"><p>Nenhum conteúdo publicado ainda nessa trilha.</p></div>`}
-  `;
-
-  app.querySelectorAll(".card[data-route]").forEach(el => {
-    el.addEventListener("click", () => location.hash = "#/" + el.dataset.route);
-  });
-}
-
-// ============================================================
-// Favoritos
-// ============================================================
-function renderFavoritos() {
-  const favs = getFavorites();
-  const items = favs.map(contentBySlug).filter(Boolean);
-
-  app.innerHTML = `
-    <span class="eyebrow">Sua seleção</span>
-    <h1 class="page-title">Favoritos</h1>
-    <p class="page-lede">Salvo só neste navegador. Clique na estrela em qualquer conteúdo para adicionar ou remover daqui.</p>
     <div class="section">
-      ${items.length ? `<div class="card-grid">
-        ${items.map(it => `
-          <div class="card" data-route="conteudo/${it.slug}">
-            <span class="card-icon">${icon(trilhaBySlug(it.trilha)?.icon || "book", 18)}</span>
-            <div class="card-title">${it.titulo}</div>
-            <div class="card-desc">${it.resumo}</div>
-          </div>`).join("")}
-      </div>` : `<p>Você ainda não favoritou nada. Abra qualquer conteúdo e clique na estrela ao lado do título.</p>`}
+      <h2>O que é HTTP</h2>
+      <p>É o protocolo usado para o seu sistema (ou o do cliente) conversar com o C2S pela internet. Toda chamada de API é uma requisição HTTP: você manda uma pergunta ou um comando, e o servidor responde com um resultado e um código de status.</p>
+    </div>
+
+    <div class="section">
+      <h2>O que é REST / API</h2>
+      <p>A API do C2S segue o padrão REST: cada tipo de informação (leads, vendedores, filas) tem um endereço próprio (endpoint), e você usa métodos HTTP diferentes pra dizer o que quer fazer com aquele recurso.</p>
+      <table>
+        <thead><tr><th>Método</th><th>Uso</th></tr></thead>
+        <tbody>
+          <tr><td><span class="method-tag method-GET">GET</span></td><td>Buscar/listar informação (ex: listar leads)</td></tr>
+          <tr><td><span class="method-tag method-POST">POST</span></td><td>Criar um novo registro (ex: criar lead)</td></tr>
+          <tr><td><span class="method-tag method-PUT">PUT</span></td><td>Atualizar um registro existente</td></tr>
+          <tr><td><span class="method-tag method-DELETE">DELETE</span></td><td>Remover um registro</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>JSON</h2>
+      <p>É o formato dos dados que a API manda e recebe: pares de chave e valor, parecido com um dicionário. Toda resposta da API do C2S vem em JSON.</p>
+      ${codePanel({ tabs: [{ label: "exemplo.json", html: highlightJson(`{\n  "nome": "João Silva",\n  "status": "em_negociacao",\n  "ativo": true\n}`) }] })}
+    </div>
+
+    <div class="section">
+      <h2>Autenticação (Bearer Token)</h2>
+      <p>Toda chamada precisa de um token, enviado no header <code>Authorization</code> (preferencial) ou <code>Authentication</code> (alternativo). Sem token válido, a API responde <code>403</code> com <code>not_authorized</code>.</p>
+    </div>
+
+    <div class="section">
+      <h2>Status Code: o essencial</h2>
+      <table>
+        <thead><tr><th>Faixa</th><th>Significado</th></tr></thead>
+        <tbody>
+          <tr><td><span class="status-chip status-2">2xx</span></td><td>Sucesso, a requisição funcionou</td></tr>
+          <tr><td><span class="status-chip status-4">4xx</span></td><td>Erro do lado de quem chamou (token, dado inválido, etc.)</td></tr>
+          <tr><td><span class="status-chip status-5">5xx</span></td><td>Erro do lado do servidor, aqui normalmente se escala</td></tr>
+        </tbody>
+      </table>
     </div>
   `;
-  app.querySelectorAll(".card[data-route]").forEach(el => {
-    el.addEventListener("click", () => location.hash = "#/" + el.dataset.route);
-  });
+  wireCodePanels(app);
 }
 
-// ============================================================
-// Atualizações (changelog)
-// ============================================================
-function renderAtualizacoes() {
+function renderPostman() {
+  const collectionSection = POSTMAN_COLLECTION_URL ? `
+    <a class="docs-relation-btn" href="${POSTMAN_COLLECTION_URL}" target="_blank" rel="noopener">
+      ${icon("api", 18)}
+      <span>Abrir Collection Oficial</span>
+      ${icon("external", 15)}
+    </a>` : `
+    <div class="collection-placeholder">
+      ${icon("api", 16)}
+      <span>Link da Collection oficial ainda não adicionado. Quando existir, cole em POSTMAN_COLLECTION_URL no topo do app.js.</span>
+    </div>`;
+
   app.innerHTML = `
-    <span class="eyebrow">Histórico</span>
-    <h1 class="page-title">Atualizações</h1>
-    <p class="page-lede">Como a plataforma evolui, versão a versão.</p>
+    <span class="eyebrow">Ferramenta</span>
+    <h1 class="page-title">Postman</h1>
+    <p class="page-lede">Postman é onde você testa a API sem precisar escrever código, ótimo pra validar um caso antes de decidir se escala ou não.</p>
+
+    <div class="docs-relation">
+      <div class="docs-relation-copy">
+        <div class="status-block-label">Ainda não tem o Postman instalado?</div>
+        <p>Baixe ou acesse o Postman pelo navegador para começar a testar a API do C2S sem precisar escrever código.</p>
+      </div>
+      <a class="docs-relation-btn" href="${POSTMAN_URL}" target="_blank" rel="noopener">
+        ${icon("mail", 18)}
+        <span>Abrir Postman</span>
+        ${icon("external", 15)}
+      </a>
+    </div>
+
     <div class="section">
-      ${CHANGELOG.map(c => `
+      <h2>Collection oficial</h2>
+      <p>Assim que a Collection oficial da C2S existir, o link fica disponível aqui.</p>
+      ${collectionSection}
+    </div>
+
+    <div class="section">
+      <h2>Configurando o Environment</h2>
+      <p>Crie um Environment com duas variáveis:</p>
+      <table>
+        <thead><tr><th>Variável</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td><code>base_url</code></td><td>https://api.contact2sale.com/integration</td></tr>
+          <tr><td><code>token</code></td><td>o token do cliente que está sendo investigado</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Configurando a Authorization</h2>
+      <p>Na aba <b>Authorization</b> da requisição, selecione <b>Bearer Token</b> e cole <code>{{token}}</code>. Isso evita ficar reescrevendo o header em cada chamada.</p>
+    </div>
+
+    <div class="section">
+      <h2>Passo a passo rápido</h2>
+      <ul class="checklist" style="list-style:none">
+        <li>1. Criar uma Collection nova chamada "C2S API"</li>
+        <li>2. Criar o Environment com <code>base_url</code> e <code>token</code></li>
+        <li>3. Criar a primeira requisição: GET {{base_url}} para validar o token</li>
+        <li>4. Se vier 200 com os dados da empresa, o token está OK</li>
+        <li>5. Duplicar a requisição para testar os outros endpoints</li>
+      </ul>
+    </div>
+  `;
+}
+
+function renderTroubleshooting() {
+  const rows = [
+    { code: "400", classe: "4", causa: "Payload inválido / mal formatado", validar: "Conferir se o body está em JSON válido" },
+    { code: "401", classe: "4", causa: "Token ausente ou header errado", validar: "Testar em GET /integration isoladamente" },
+    { code: "403", classe: "4", causa: "Token inválido, expirado ou sem permissão", validar: "Verificar se o token foi regenerado no painel" },
+    { code: "404", classe: "4", causa: "Endpoint ou recurso não existe", validar: "Conferir a URL e o ID usado" },
+    { code: "409", classe: "4", causa: "Conflito, registro duplicado", validar: "Verificar se o recurso já existe" },
+    { code: "422", classe: "4", causa: "Campo obrigatório ausente ou inválido", validar: "Conferir os campos exigidos pelo endpoint" },
+    { code: "500", classe: "5", causa: "Erro interno do servidor", validar: "Reproduzir o caso e escalar com prints" }
+  ];
+  app.innerHTML = `
+    <span class="eyebrow">Investigação</span>
+    <h1 class="page-title">Troubleshooting</h1>
+    <p class="page-lede">A página que você mais vai abrir. Antes de escalar, confirme aqui a causa mais provável e como validar sozinho.</p>
+
+    <div class="section">
+      <table>
+        <thead><tr><th>Status</th><th>Causa provável</th><th>Como validar</th><th>Escalar?</th></tr></thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td><span class="status-chip status-${r.classe}">${r.code}</span></td>
+              <td>${r.causa}</td>
+              <td>${r.validar}</td>
+              <td>${r.classe === "5" ? "Sim, com prints do request/response" : "Só se validado e persistir"}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderCasosReais() {
+  app.innerHTML = `
+    <span class="eyebrow">Base de conhecimento</span>
+    <h1 class="page-title">Casos Reais</h1>
+    <p class="page-lede">Investigações documentadas passo a passo. Cresce a cada caso novo resolvido pelo time.</p>
+
+    <div class="section">
+      ${CASOS.map(c => `
         <div class="caso-card">
-          <span class="caso-id">v${c.versao} · ${c.data}</span>
-          <ul style="margin:10px 0 0; padding-left:18px; color:var(--text-dim)">
-            ${c.itens.map(i => `<li style="margin-bottom:5px">${i}</li>`).join("")}
-          </ul>
+          <span class="caso-id">${c.id}</span>
+          <h3>${c.titulo}</h3>
+          <p style="margin:0 0 8px">${c.problema}</p>
+          <div class="label">Como investigar</div>
+          <ol>${c.passos.map(p => `<li>${p}</li>`).join("")}</ol>
+          <div class="label">Causa raiz mais comum</div>
+          <p style="margin:0">${c.causaRaiz}</p>
+          <div class="label">Quando escalar</div>
+          <p style="margin:0">${c.escalar}</p>
         </div>
       `).join("")}
     </div>
   `;
 }
 
-// ============================================================
-// router
-// ============================================================
+function renderChecklist() {
+  const items = [
+    "Testei o token em GET /integration isoladamente?",
+    "Confirmei o header correto (Authorization vs Authentication)?",
+    "Reproduzi o erro no Postman, fora do sistema do cliente?",
+    "Conferi o status code e a página de Troubleshooting?",
+    "Verifiquei se é 4xx (provável erro de quem chama) ou 5xx (servidor)?",
+    "Busquei um caso parecido em Casos Reais?",
+    "Se vou escalar: tenho prints do request e do response completos?"
+  ];
+  app.innerHTML = `
+    <span class="eyebrow">Antes de escalar</span>
+    <h1 class="page-title">Checklist</h1>
+    <p class="page-lede">Passe por esses pontos antes de abrir um chamado técnico. Resolve a maior parte dos casos sem precisar escalar.</p>
+    <ul class="checklist" id="checklist-list">
+      ${items.map((t, i) => `
+        <li data-i="${i}">
+          <input type="checkbox" id="chk-${i}" />
+          <label for="chk-${i}" style="cursor:pointer"><span>${t}</span></label>
+        </li>`).join("")}
+    </ul>
+  `;
+  app.querySelectorAll('#checklist-list input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener("change", () => {
+      cb.closest("li").classList.toggle("checked", cb.checked);
+    });
+  });
+}
+
+// ---------- cabeçalho automático do vídeo (gerado a partir de VIDEO_GROUPS) ----------
+function videoInfoBlock(group) {
+  const endpointsAbordados = [group.exemploPrincipal, ...group.outrosExemplos];
+  return `
+  <div class="video-info-block">
+    <div class="video-info-item">
+      ${icon("target", 16)}
+      <div>
+        <div class="video-info-label">Objetivo</div>
+        <div class="video-info-value">${group.resumo}</div>
+      </div>
+    </div>
+    <div class="video-info-item">
+      ${icon("list", 16)}
+      <div>
+        <div class="video-info-label">Endpoints abordados</div>
+        <div class="video-info-value">${endpointsAbordados.join(", ")}</div>
+      </div>
+    </div>
+    <div class="video-info-item">
+      ${icon("check", 16)}
+      <div>
+        <div class="video-info-label">Pré-requisitos</div>
+        <div class="video-info-value">${group.preRequisitos.join(", ")}</div>
+      </div>
+    </div>
+    <div class="video-info-item">
+      ${icon("clock", 16)}
+      <div>
+        <div class="video-info-label">Tempo estimado</div>
+        <div class="video-info-value">${group.duracao}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------- player grande do Loom (thumbnail em destaque, abre em nova aba) ----------
+function extractLoomId(url) {
+  const m = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+  return m ? m[1] : null;
+}
+
+function bigLoomPlayer(group) {
+  if (!group.video) {
+    return `
+    <div class="loom-player loom-player-empty">
+      ${icon("play", 32)}
+      <span>${group.titulo} (vídeo ainda não adicionado)</span>
+    </div>`;
+  }
+  const loomId = extractLoomId(group.video);
+  const thumb = loomId ? `https://cdn.loom.com/sessions/thumbnails/${loomId}-with-play.gif` : "";
+  return `
+  <a class="loom-player" href="${escapeHtml(group.video)}" target="_blank" rel="noopener" aria-label="Assistir: ${group.titulo}">
+    ${thumb ? `<img class="loom-player-thumb" src="${thumb}" alt="Miniatura do vídeo: ${group.titulo}" loading="lazy">` : `<div class="loom-player-fallback">${icon("play", 40)}</div>`}
+    <div class="loom-player-overlay">${icon("play", 30)}</div>
+  </a>
+  <a class="loom-watch-btn" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
+    ${icon("external", 14)}
+    <span>Assistir no Loom</span>
+  </a>`;
+}
+
+function renderEndpointDetail(slug) {
+  const ep = ENDPOINTS.find(e => e.slug === slug);
+  if (!ep) { app.innerHTML = `<p>Procedimento não encontrado.</p>`; return; }
+
+  const group = VIDEO_GROUPS[ep.videoGroup];
+
+  app.innerHTML = `
+    <span class="eyebrow">${ep.category}</span>
+    <div class="endpoint-head">
+      <span class="method-tag method-${ep.method}" style="font-size:12px;padding:4px 8px">${ep.method}</span>
+      <span class="endpoint-path">${ep.path}</span>
+    </div>
+    <h1 class="page-title">${ep.title}</h1>
+    <p class="page-lede">${ep.summary}</p>
+
+    ${statusBlock(ep)}
+
+    <div class="section">
+      <h2>Quando utilizar</h2>
+      <p>${ep.quandoUsar}</p>
+    </div>
+
+    ${toolsBlock(ep)}
+
+    <div class="section">
+      <h2>Como testar</h2>
+      <p>${ep.testar}</p>
+      ${codePanel({ tabs: [{ label: "cURL", html: escapeHtml(ep.curl) }] })}
+    </div>
+
+    <div class="section">
+      <h2>Vídeo relacionado</h2>
+      <p class="video-shared-note">Esse vídeo cobre o recurso ${ep.category} + ${ep.method}, não é exclusivo deste endpoint.</p>
+      ${videoInfoBlock(group)}
+      ${bigLoomPlayer(group)}
+    </div>
+
+    <a class="official-docs-link" href="${OFFICIAL_DOCS_URL}" target="_blank" rel="noopener">
+      ${icon("external", 13)}
+      <span>Ver especificação completa de ${ep.path} na documentação oficial</span>
+    </a>
+  `;
+  wireCodePanels(app);
+}
+
+// ---------- router ----------
 function router() {
   const hash = location.hash.replace("#/", "") || "home";
-  const [section, sub] = hash.split(/\/(.+)/); // sub pode conter mais barras (slug com /)
+  const [section, sub] = hash.split("/");
 
   setActiveNav(sub ? `${section}/${sub}` : section);
   window.scrollTo(0, 0);
 
   switch (section) {
     case "home": renderHome(); break;
-    case "trilha": renderTrilhaIndex(sub); break;
-    case "conteudo": renderContentDetail(sub); break;
-    case "favoritos": renderFavoritos(); break;
-    case "atualizacoes": renderAtualizacoes(); break;
+    case "fundamentos": renderFundamentos(); break;
+    case "postman": renderPostman(); break;
+    case "troubleshooting": renderTroubleshooting(); break;
+    case "casos-reais": renderCasosReais(); break;
+    case "checklist": renderChecklist(); break;
+    case "endpoint": renderEndpointDetail(sub); break;
     default: renderHome();
   }
 
@@ -781,32 +651,15 @@ function router() {
         <span>Voltar</span>
       </button>`);
   }
-
-  app.classList.remove("page-enter");
-  void app.offsetWidth;
-  app.classList.add("page-enter");
 }
 
+// clique no botão de voltar funciona mesmo depois que a página é re-renderizada,
+// por isso o listener fica no document (delegação) em vez de no botão direto
 document.addEventListener("click", (e) => {
-  const backBtn = e.target.closest("[data-back]");
-  if (backBtn) {
-    if (window.history.length > 1) window.history.back();
-    else location.hash = "#/home";
-    return;
-  }
-  const favBtn = e.target.closest("[data-favorite]");
-  if (favBtn) {
-    const active = toggleFavorite(favBtn.dataset.favorite);
-    favBtn.classList.toggle("active", active);
-    return;
-  }
-  const progressBtn = e.target.closest("[data-progress]");
-  if (progressBtn) {
-    setProgress(progressBtn.dataset.progress, progressBtn.dataset.status);
-    progressBtn.parentElement.querySelectorAll(".progress-btn").forEach(b =>
-      b.classList.toggle("active", b === progressBtn));
-    return;
-  }
+  const btn = e.target.closest("[data-back]");
+  if (!btn) return;
+  if (window.history.length > 1) window.history.back();
+  else location.hash = "#/home";
 });
 
 window.addEventListener("hashchange", router);
@@ -851,7 +704,7 @@ function closeMobileSidebar() {
   document.getElementById("sidebar")?.classList.remove("open");
 }
 
-// ---------- busca global (cobre todas as trilhas, não só API) ----------
+// ---------- search ----------
 function wireSearch() {
   const input = document.getElementById("nav-search");
   if (!input) return;
@@ -862,11 +715,13 @@ function wireSearch() {
       el.style.display = !q || text.includes(q) ? "flex" : "none";
     });
     if (q) {
+      // com busca ativa, abre toda pasta que tiver algum resultado visível
       document.querySelectorAll(".nav-folder").forEach(folder => {
         const hasMatch = !!folder.querySelector('.nav-link[style*="flex"]');
         folder.classList.toggle("open", hasMatch);
       });
     } else {
+      // busca limpa: fecha tudo, exceto a pasta do procedimento atual
       document.querySelectorAll(".nav-folder").forEach(folder => folder.classList.remove("open"));
       document.querySelector(".nav-link.active")?.closest(".nav-folder")?.classList.add("open");
     }
