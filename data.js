@@ -289,7 +289,7 @@ const ENDPOINTS = [
     testar: "Chame o endpoint sozinho, sem mais nada. Se voltar 200 com o nome da empresa, o token está válido. Se voltar 403, o problema é o token, antes mesmo de qualquer outra investigação.",
     curl: `curl -X GET "https://api.contact2sale.com/integration" \\
   -H "Authorization: Bearer {token}"`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    status: { validado: true, testadoPostman: true, revisao: "11 Ago 2026" },
     videoGroup: "autenticacao-get"
   },
 
@@ -306,7 +306,7 @@ const ENDPOINTS = [
     testar: "Teste filtrando por phone ou email do cliente reclamado, é o jeito mais rápido de achar um lead específico numa investigação.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads?status=em_negociacao&perpage=50" \\
   -H "Authorization: Bearer {token}"`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    status: { validado: true, testadoPostman: true, revisao: "11 Ago 2026" },
     videoGroup: "leads-get"
   },
   {
@@ -321,7 +321,7 @@ const ENDPOINTS = [
     testar: "Pegue o ID de um lead retornado em Investigar Listagem de Leads e chame este endpoint para conferir o detalhe completo dele.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads/{id}" \\
   -H "Authorization: Bearer {token}"`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    status: { validado: true, testadoPostman: true, revisao: "11 Ago 2026" },
     videoGroup: "leads-get"
   },
   {
@@ -338,7 +338,7 @@ const ENDPOINTS = [
   -H "Authorization: Bearer {token}" \\
   -H "Content-Type: application/json" \\
   -d '{"data":{"type":"lead","attributes":{"name":"Teste","phone":"11999999999"}}}'`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    status: { validado: true, testadoPostman: true, revisao: "11 Ago 2026" },
     videoGroup: "leads-post"
   },
   {
@@ -387,7 +387,7 @@ const ENDPOINTS = [
     testar: "Use num lead que você já sabe que tem tag para confirmar visualmente que a resposta bate com o painel do C2S. Esse endpoint é o que você usa para validar qualquer teste de Adicionar ou Remover Tag.",
     curl: `curl -X GET "https://api.contact2sale.com/integration/leads/{id}/tags" \\
   -H "Authorization: Bearer {token}"`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    status: { validado: true, testadoPostman: true, revisao: "11 Ago 2026" },
     videoGroup: "leads-get"
   },
   {
@@ -419,7 +419,7 @@ const ENDPOINTS = [
   -H "Authorization: Bearer {token}" \\
   -H "Content-Type: application/json" \\
   -d '{"body":"Mensagem de teste","from":"bot"}'`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    status: { validado: true, testadoPostman: true, revisao: "11 Ago 2026" },
     videoGroup: "leads-post"
   },
   {
@@ -436,7 +436,7 @@ const ENDPOINTS = [
   -H "Authorization: Bearer {token}" \\
   -H "Content-Type: application/json" \\
   -d '{"date":"2026-08-01T14:00:00Z","type":{"activity":true},"body":"Retornar contato"}'`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    status: { validado: true, testadoPostman: true, revisao: "11 Ago 2026" },
     videoGroup: "leads-post"
   },
   {
@@ -470,7 +470,7 @@ const ENDPOINTS = [
   -H "Authorization: Bearer {token}" \\
   -H "Content-Type: application/json" \\
   -d '{"done_type_negotiation":"sale","value":"500000"}'`,
-    status: { validado: false, testadoPostman: false, revisao: "Jul/2026" },
+    status: { validado: true, testadoPostman: true, revisao: "11 Ago 2026" },
     videoGroup: "leads-post"
   },
 
