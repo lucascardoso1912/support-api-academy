@@ -560,14 +560,26 @@ function extractLoomId(url) {
 }
 
 function bigLoomPlayer(group) {
+  const controls = `
+    <div class="loom-player-controls">
+      <div class="loom-progress"><div class="loom-progress-fill"></div></div>
+      <div class="loom-controls-row">
+        <span class="loom-duration">${icon("clock", 12)}${group.video ? group.duracao : "Ainda não gravado"}</span>
+        <span class="loom-cta">${group.video ? "Assistir agora" : "Em breve"}</span>
+      </div>
+    </div>`;
+  const badge = `<div class="loom-player-badge">${icon("play", 11)}<span>LOOM</span></div>`;
+
   if (!group.video) {
     return `
     <div class="loom-player loom-player-empty">
       <img class="loom-player-thumb loom-player-cover" src="video-cover.svg" alt="Capa ilustrativa: vídeo ainda não adicionado" loading="lazy">
+      ${badge}
       <div class="loom-player-overlay loom-player-overlay-empty">
-        ${icon("play", 30)}
+        <div class="loom-play-ring loom-play-ring-empty">${icon("play", 30)}</div>
         <span class="loom-player-empty-label">${group.titulo}<br>vídeo ainda não adicionado</span>
       </div>
+      ${controls}
     </div>`;
   }
   const loomId = extractLoomId(group.video);
@@ -576,7 +588,11 @@ function bigLoomPlayer(group) {
   return `
   <a class="loom-player" href="${escapeHtml(group.video)}" target="_blank" rel="noopener" aria-label="Assistir: ${group.titulo}">
     ${thumb ? `<img class="loom-player-thumb" src="${thumb}" alt="Miniatura do vídeo: ${group.titulo}" loading="lazy" ${fallbackAttr}>` : `<img class="loom-player-thumb loom-player-cover" src="video-cover.svg" alt="Capa ilustrativa do vídeo" loading="lazy">`}
-    <div class="loom-player-overlay">${icon("play", 30)}</div>
+    ${badge}
+    <div class="loom-player-overlay">
+      <div class="loom-play-ring">${icon("play", 34)}</div>
+    </div>
+    ${controls}
   </a>
   <a class="loom-watch-btn" href="${escapeHtml(group.video)}" target="_blank" rel="noopener">
     ${icon("external", 14)}
@@ -599,6 +615,12 @@ function renderEndpointDetail(slug) {
     <h1 class="page-title">${ep.title}</h1>
     <p class="page-lede">${ep.summary}</p>
 
+    <div class="section video-hero-section">
+      <p class="video-shared-note">Esse vídeo cobre o recurso ${ep.category} + ${ep.method}, não é exclusivo deste endpoint.</p>
+      ${bigLoomPlayer(group)}
+      ${videoInfoBlock(group)}
+    </div>
+
     ${statusBlock(ep)}
 
     <div class="section">
@@ -612,13 +634,6 @@ function renderEndpointDetail(slug) {
       <h2>Como testar</h2>
       <p>${ep.testar}</p>
       ${codePanel({ tabs: [{ label: "cURL", html: escapeHtml(ep.curl) }] })}
-    </div>
-
-    <div class="section">
-      <h2>Vídeo relacionado</h2>
-      <p class="video-shared-note">Esse vídeo cobre o recurso ${ep.category} + ${ep.method}, não é exclusivo deste endpoint.</p>
-      ${videoInfoBlock(group)}
-      ${bigLoomPlayer(group)}
     </div>
 
     <a class="official-docs-link" href="${OFFICIAL_DOCS_URL}" target="_blank" rel="noopener">

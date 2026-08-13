@@ -893,6 +893,16 @@ const CASOS = [
 // Changelog do projeto
 const CHANGELOG = [
   {
+    versao: "5.2",
+    data: "11 Ago 2026",
+    itens: [
+      "Player de vídeo movido para o topo da página de cada procedimento, logo abaixo do resumo, já que é o conteúdo mais rico",
+      "Player redesenhado com cara de player de verdade: badge \"LOOM\", anel de play com brilho pulsante, borda azul de destaque e barra de controles (progresso + duração) na parte de baixo",
+      "Barra lateral bem mais visível: fontes maiores, mais contraste, alvos de clique maiores, nomes de categoria e método mais legíveis",
+      "Sidebar um pouco mais larga (264px para 296px) para o texto não ficar espremido"
+    ]
+  },
+  {
     versao: "5.1",
     data: "11 Ago 2026",
     itens: [
