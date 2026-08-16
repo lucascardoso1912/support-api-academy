@@ -1,0 +1,7 @@
+# Guia interno de manutenção (arquitetura, como adicionar procedimentos/vídeos, etc)
+# Não deve ir para o repositório público. Fica só localmente.
+GUIA-INTERNO.md
+
+# Arquivos de sistema comuns
+.DS_Store
+Thumbs.db
