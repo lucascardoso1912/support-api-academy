@@ -1,0 +1,14 @@
+# Local Postman environments with real tokens (keep only the empty template in the repo)
+*.local.postman_environment.json
+*.env
+.env*
+
+# Deployment and editor folders
+.vercel/
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+desktop.ini
+.DS_Store
