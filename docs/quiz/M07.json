@@ -1,0 +1,42 @@
+{
+  "aulas": {
+    "7.1": [
+      { "q": "O que o Collection Runner faz?", "o": ["Executa as requests de uma pasta em ordem, com os testes", "Gera tokens", "Publica a collection", "Cria webhooks"], "e": "Simula o sistema do cliente de ponta a ponta." },
+      { "q": "Qual Delay usar no Runner?", "o": ["7000 ms, por causa do limite de 10 chamadas por minuto", "0 ms", "500 ms", "60000 ms"], "e": "Assim você fica abaixo do limite mesmo repetindo o endpoint." },
+      { "q": "Como parar o Runner quando uma request falha?", "o": ["pm.execution.setNextRequest(null) no Post-response", "Fechando o Postman", "Removendo o token", "Com Ctrl+S"], "e": "Controle de fluxo pelo script." },
+      { "q": "Como os IDs passam de uma request para a outra no Runner?", "o": ["Por variáveis salvas com pm.environment.set", "Copiando e colando", "Pelo History", "Pelo Console"], "e": "Por isso cada request precisa do seu script." }
+    ],
+    "7.2": [
+      { "q": "Como trazer para o Postman a chamada exata que o cliente faz?", "o": ["Import → colar o cURL", "Digitando tudo de novo", "Pelo History do cliente", "Pelo webhook.site"], "e": "O cURL é o idioma comum entre Suporte, cliente e Dev." },
+      { "q": "Como devolver a chamada corrigida ao cliente na linguagem dele?", "o": ["Pelo Code snippet (</>), escolhendo a linguagem", "Mandando o arquivo da collection", "Mandando um print", "Pelo Console"], "e": "cURL, JavaScript, Python, PHP..." },
+      { "q": "Num Make, Zapier ou n8n, o que o cliente configura para criar lead?", "o": ["Um módulo HTTP com POST, header Authorization e body JSON com a casca", "Uma inscrição de webhook no C2S", "Uma fila de distribuição", "Uma tag"], "e": "Igual ao Criar Lead no Postman." },
+      { "q": "O cliente passou o token dele. Onde usar?", "o": ["No Environment 'C2S - Cliente X'", "No Environment da conta de teste", "No body", "Na URL"], "e": "Separado do token de teste." }
+    ],
+    "7.3": [
+      { "q": "Qual o primeiro passo do roteiro de diagnóstico?", "o": ["Coletar endpoint, body, resposta e horário", "Escalar para o Dev", "Gerar um token novo", "Criar um lead de teste"], "e": "Sem isso não dá para reproduzir." },
+      { "q": "Qual o segundo passo?", "o": ["Validar o token com GET /me", "Reinstalar o Postman", "Assinar um webhook", "Apagar o lead"], "e": "Se o token falhar, nada mais funciona." },
+      { "q": "O que anexar ao escalar?", "o": ["cURL sem o token, resposta, status, horário e company_id", "Só um print da tela", "O token do cliente em texto", "Nada, só descrever"], "e": "Evidências fecham o caso mais rápido." },
+      { "q": "Em que passo quase todo caso termina?", "o": ["Enviar ao cliente o snippet corrigido", "Escalar", "Trocar o token", "Recriar a conta"], "e": "A maioria é erro de formato do lado do cliente." }
+    ],
+    "7.4": [
+      { "q": "Quais seções ficam fora do roteiro de testes?", "o": ["Stand de Vendas e Blocklist", "Leads e Tags", "Usuários e Empresas", "Webhooks"], "e": "Elas são só explicadas." },
+      { "q": "Por que olhar as filas de distribuição antes de criar o lead de teste?", "o": ["Uma fila pode mandar o lead para outra empresa, fora do alcance do token", "Porque filas bloqueiam o token", "Porque o lead precisa de fila", "Não é preciso olhar"], "e": "Aí a criação dá 200 e o resto dá 404." },
+      { "q": "No teste de Atualizar Prioridades dos Vendedores, o que nunca esquecer?", "o": ["\"status\": 1 em cada item", "O token no body", "O lead_id", "A data"], "e": "Sem status, o vendedor é desativado." },
+      { "q": "Por onde começar o roteiro?", "o": ["Pelas chamadas de leitura (GET)", "Pelo Fechar Negócio", "Pelos webhooks", "Pela Blocklist"], "e": "Leitura primeiro: não altera nada." }
+    ]
+  },
+  "teste": [
+    { "q": "Qual Delay usar no Collection Runner?", "o": ["7000 ms", "0 ms", "500 ms", "100 ms"], "e": "A API aceita 10 chamadas por minuto por endpoint." },
+    { "q": "O que o erro 429 indica?", "o": ["Limite de 10 chamadas por minuto no endpoint", "Token inválido", "Lead sem contato", "Servidor fora"], "e": "Espere 1 minuto (Retry-After)." },
+    { "q": "O cliente passou o token dele para o teste. Onde usar?", "o": ["No Environment C2S - Cliente X", "No Environment da conta de teste", "No body", "Na URL"], "e": "Separado do token de teste." },
+    { "q": "Como importar a chamada do cliente?", "o": ["Import → cURL", "Pelo History", "Pelo Environment", "Pelo webhook.site"], "e": "Depois compare com a aula do endpoint." },
+    { "q": "Como devolver a solução ao cliente em Python?", "o": ["Code snippet → Python - Requests", "Export da collection", "Print da tela", "Console → Copy"], "e": "Troque o token por SEU_TOKEN." },
+    { "q": "Primeiro passo do diagnóstico:", "o": ["Coletar endpoint, body, resposta e horário", "Validar com GET /me", "Escalar", "Criar um lead"], "e": "Depois valide o token." },
+    { "q": "O que não pode faltar ao escalar?", "o": ["Status, resposta, horário e company_id", "O token do cliente em texto", "Um print da tela", "A senha do C2S"], "e": "Mande o cURL sem o token." },
+    { "q": "Por que um lead de teste pode dar 404 logo depois de criado?", "o": ["A distribuição mandou o lead para outra empresa do grupo", "O token expirou", "O lead ficou sem tag", "A API está fora do ar"], "e": "Confira company na resposta da criação." },
+    { "q": "No roteiro de testes, Stand de Vendas e Blocklist:", "o": ["Não são executados", "São os primeiros", "São testados com remove_leads", "São testados só com GET"], "e": "Só explicados." },
+    { "q": "Cuidado principal em Atualizar Prioridades dos Vendedores:", "o": ["Mandar status 1 em cada item", "Mandar sem body", "Usar o ID criptografado", "Usar GET"], "e": "Sem status, o vendedor é desativado." },
+    { "q": "Filtro de data aceito em Listar Leads:", "o": ["UTC com Z, ex.: 2026-09-01T03:00:00Z", "Com -03:00", "DD/MM/AAAA", "Só a data"], "e": "Outros formatos dão 403 invalid date." },
+    { "q": "Ao terminar os testes de webhook, o que fazer?", "o": ["Cancelar as inscrições nos três gatilhos", "Apagar o token", "Nada", "Criar outro lead"], "e": "Evita deixar a URL de teste cadastrada." }
+  ]
+}

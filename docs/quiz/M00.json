@@ -1,0 +1,43 @@
+{
+  "_formato": "Em cada questão, a PRIMEIRA alternativa de 'o' é a correta. A página embaralha as alternativas a cada tentativa.",
+  "aulas": {
+    "0.1": [
+      { "q": "O que a API do C2S permite fazer?", "o": ["Que outro sistema leia ou grave dados no C2S enviando pedidos pela internet", "Que o vendedor acesse o C2S pelo celular", "Que o cliente final veja os leads sem fazer login", "Que o Suporte altere o visual da tela do C2S"], "e": "A API é a porta de entrada para sistemas: portais, sites, chatbots e BIs conversam com o C2S por ela." },
+      { "q": "Na analogia do banco, o token corresponde a:", "o": ["Cartão e senha", "Comprovante", "Menu do caixa eletrônico", "Funcionário da agência"], "e": "Sem o token certo, a API recusa o pedido antes de olhar o resto, como um cartão bloqueado." },
+      { "q": "Um BI que precisa puxar os leads de um período usa qual endpoint?", "o": ["GET /leads", "POST /leads", "done_deal", "POST /api/subscribe"], "e": "GET /leads consulta leads com filtros, sem alterar nada." },
+      { "q": "Na analogia, uma resposta com status 200 ou 201 equivale a:", "o": ["O comprovante", "O cartão bloqueado", "A senha inválida", "Apertar a opção errada do menu"], "e": "200/201 é a confirmação de que o pedido foi executado, junto com os dados do resultado." }
+    ],
+    "0.2": [
+      { "q": "Quais são as 4 partes de toda requisição HTTP?", "o": ["Método, URL, headers e body", "Token, login, senha e status", "Endpoint, resposta, JSON e erro", "Servidor, porta, cookie e sessão"], "e": "Método diz a ação, URL diz o recurso, headers levam o token e o body leva os dados." },
+      { "q": "Qual método apenas consulta, sem alterar dados?", "o": ["GET", "POST", "PUT", "PATCH"], "e": "GET é seguro para testar até com o cliente em linha: não grava nada." },
+      { "q": "Em {{base_url}}/leads/a1b2c3/tags?page=1, o trecho a1b2c3 é:", "o": ["Um path param (o :id do lead)", "Um query param", "Um header", "O token"], "e": "Path param identifica qual recurso; query params vêm depois do ? e são filtros." },
+      { "q": "Onde o token vai em toda chamada?", "o": ["No header Authorization", "No body", "Na URL, depois do ?", "No nome da request"], "e": "O token sempre vai no header Authorization (Bearer <token>)." }
+    ],
+    "0.3": [
+      { "q": "Qual destes é um JSON válido?", "o": ["{\"name\": \"Ana\", \"channel_id\": 1}", "{name: \"Ana\"}", "{'name': 'Ana'}", "{\"name\": \"Ana\",}"], "e": "Chaves e textos com aspas duplas, sem vírgula depois do último item." },
+      { "q": "Como o campo status deve ir no body do update_status?", "o": ["\"status\": 3", "\"status\": \"3\"", "status: 3", "\"status\": \"três\""], "e": "Quando a API espera número, o valor vai sem aspas." },
+      { "q": "Qual casca o POST /leads exige?", "o": ["data → type → attributes", "lead", "tag", "Nenhuma: os campos vão direto na raiz"], "e": "Só o Criar Lead usa o envelope data.attributes." },
+      { "q": "Qual casca o PUT /leads/:id usa?", "o": ["lead (com customer e product)", "data → attributes", "hierarchy_blocklist", "tag"], "e": "Casca errada é a causa nº 1 de erro de integração." }
+    ],
+    "0.4": [
+      { "q": "Um erro da família 4xx indica:", "o": ["Problema no pedido de quem chamou (token, URL ou body)", "Falha no servidor do C2S", "Que deu tudo certo", "Que o lead foi duplicado"], "e": "4xx quase nunca precisa de escalonamento: o pedido veio errado." },
+      { "q": "O que a API responde para um token inválido?", "o": ["403 {\"error\":\"access_denied\"}", "200 com a lista vazia", "423", "500"], "e": "Testado na API real: token ausente ou inválido dá 403 access_denied." },
+      { "q": "Criar lead sem telefone e sem e-mail retorna:", "o": ["423", "404", "409", "201"], "e": "423 = faltou informação obrigatória de contato." },
+      { "q": "O que fazer diante de um 429?", "o": ["Esperar 1 minuto: passou de 10 chamadas por minuto no mesmo endpoint", "Gerar um novo token", "Escalar para o Dev imediatamente", "Trocar o método para POST"], "e": "429 é o limite de requisições; a API avisa Retry-After: 1 minute." }
+    ]
+  },
+  "teste": [
+    { "q": "Em qual parte da requisição vão os dados do lead em JSON?", "o": ["Body", "Header", "URL", "Método"], "e": "O body carrega os dados; o header carrega o token." },
+    { "q": "Qual método o Encaminhar Lead usa?", "o": ["PATCH", "GET", "DELETE", "POST"], "e": "PATCH /leads/:id/forward atualiza parte do lead: o vendedor." },
+    { "q": "Em ?page=1&perpage=50, page e perpage são:", "o": ["Query params", "Path params", "Headers", "Campos do body"], "e": "Query params vêm depois do ? e são separados por &." },
+    { "q": "Qual destes erros quebra um JSON?", "o": ["Vírgula depois do último item", "Espaços entre as chaves", "Quebra de linha entre campos", "Usar true em minúsculo"], "e": "A vírgula sobrando invalida o JSON inteiro." },
+    { "q": "Em JSON, true é:", "o": ["Um booleano, escrito sem aspas", "Um texto", "Um número", "Um objeto"], "e": "Booleanos (true/false) vão sem aspas e em minúsculo." },
+    { "q": "Qual família de status normalmente é caso de escalar?", "o": ["5xx", "2xx", "4xx", "Nenhuma: nunca se escala"], "e": "5xx é falha do servidor; escale com evidências." },
+    { "q": "A API respondeu 403 com a mensagem 'perpage' must be less than or equal to 50. Qual a causa?", "o": ["Parâmetro inválido: pediu mais de 50 por página", "Token inválido", "Servidor fora do ar", "Lead duplicado"], "e": "Na API do C2S, erros de validação também voltam 403, com uma message explicando." },
+    { "q": "Qual Content-Type vai junto de um body JSON?", "o": ["application/json", "text/html", "multipart/form-data", "application/xml"], "e": "No Postman, raw → JSON já adiciona esse header." },
+    { "q": "Na analogia do banco, apertar 'saldo' querendo sacar equivale a:", "o": ["Usar o endpoint ou o método errado", "Esquecer o token", "Faltar o telefone do lead", "Receber um 201"], "e": "Endpoint e método escolhem a operação, como o menu do caixa." },
+    { "q": "Qual é a primeira coisa a pedir ao cliente num erro de API?", "o": ["O código e o corpo da resposta", "A senha do C2S dele", "Um print da tela de leads", "O nome do vendedor responsável"], "e": "Com o status e a mensagem você já sabe de quem é o problema." },
+    { "q": "Qual é a URL base da API de integração?", "o": ["https://api.contact2sale.com/integration", "https://api.contact2sale.com", "https://docs-api-leads.c2sapp.com", "https://app.contact2sale.com/api"], "e": "Todo endpoint vem depois dela, ex.: {{base_url}}/leads." },
+    { "q": "Qual status vários endpoints de escrita devolvem quando criam algo?", "o": ["201", "204", "301", "423"], "e": "201 = criado. Criar Lead é exceção e responde 200." }
+  ]
+}

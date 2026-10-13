@@ -1,0 +1,48 @@
+{
+  "aulas": {
+    "5.1": [
+      { "q": "O que os endpoints de Stand de Vendas exigem na conta?", "o": ["O módulo Stand de Vendas ativo", "Um webhook cadastrado", "Uma fila redistribuível", "Um vendedor Master"], "e": "Sem o módulo, eles não funcionam." },
+      { "q": "O que Listar Estandes devolve de cada estande?", "o": ["id, name, empresa e custom_lead_form_id", "Só o nome", "A lista de leads", "Os vendedores"], "e": "O custom_lead_form_id é usado em Listar Leads do Estande." },
+      { "q": "Como enviar o parâmetro company_ids[] com duas empresas no Postman?", "o": ["Uma linha por empresa na aba Params, repetindo a mesma key", "Separando por vírgula numa linha só", "No body", "No header"], "e": "A URL fica ?company_ids[]=A&company_ids[]=B." },
+      { "q": "Como o Stand de Vendas é tratado nos testes do Suporte?", "o": ["Só explicado: as chamadas não são executadas", "Testado com o token do cliente", "Testado em todos os endpoints", "Testado só às sextas"], "e": "Decisão do Suporte para esta trilha." }
+    ],
+    "5.2": [
+      { "q": "Qual o formato de data em Listar Leads do Estande?", "o": ["AAAA-MM-DD, sem hora", "ISO 8601 com hora e Z", "DD/MM/AAAA", "Timestamp"], "e": "Ex.: start_date=2026-09-01." },
+      { "q": "De onde vem o valor de custom_lead_form_ids[]?", "o": ["Do custom_lead_form_id em Listar Estandes", "Do lead_id", "Do company_id", "Do tag_id"], "e": "Filtra os leads de um formulário específico." },
+      { "q": "Sem start_date e end_date, qual período o Listar Leads do Estande usa?", "o": ["O último mês", "O último ano", "Só hoje", "Todo o histórico"], "e": "Padrão da documentação oficial." },
+      { "q": "O que cada item de Listar Leads do Estande traz?", "o": ["Cliente, vendedor, status e horários de entrada e saída", "Só o telefone", "As tags do lead", "O token usado"], "e": "Check-in e check-out do visitante." }
+    ],
+    "5.3": [
+      { "q": "Quais parâmetros são obrigatórios em Resumo de Presenças?", "o": ["start_date e end_date", "company_ids[]", "page", "Nenhum"], "e": "Sem as datas, a chamada falha." },
+      { "q": "O que Resumo de Presenças mostra?", "o": ["Atendimentos, leads e tempo médio por vendedor, gerente ou empresa", "A lista de estandes", "As tags dos leads", "Os webhooks"], "e": "É o resumo de atendimentos do plantão." },
+      { "q": "Qual o formato das datas?", "o": ["AAAA-MM-DD", "DD/MM/AAAA", "UTC com Z e hora", "Timestamp"], "e": "Igual a Listar Leads do Estande." },
+      { "q": "O que acontece se start_date for omitido?", "o": ["A chamada falha", "Usa o último mês", "Usa hoje", "Traz tudo"], "e": "Aqui as datas são obrigatórias." }
+    ],
+    "5.4": [
+      { "q": "Para que serve a Blocklist?", "o": ["Impedir que leads novos de certos telefones ou e-mails sejam distribuídos na hierarquia", "Bloquear vendedores", "Bloquear tokens", "Bloquear webhooks"], "e": "Usos: números de teste, funcionários, concorrentes, spam." },
+      { "q": "Cliente diz que 'o lead deste contato nunca chega'. O que conferir antes da integração?", "o": ["Se o contato está na Blocklist", "Se o token é Master", "Se existe webhook", "Se a tag existe"], "e": "Lead novo de contato bloqueado não é distribuído." },
+      { "q": "O que Listar Blocklist devolve?", "o": ["blocklists[], com telefone ou e-mail e datas", "A lista de leads bloqueados", "Os vendedores bloqueados", "Os tokens revogados"], "e": "Cada entrada tem phone ou email." },
+      { "q": "Como a Blocklist é tratada nos testes do Suporte?", "o": ["Só explicada: não é executada", "Testada com remove_leads true", "Testada na conta do cliente", "Testada em lote"], "e": "Decisão do Suporte para esta trilha." }
+    ],
+    "5.5": [
+      { "q": "Qual casca o Adicionar à Blocklist usa?", "o": ["hierarchy_blocklist", "data → attributes", "lead", "blocklist"], "e": "{ \"hierarchy_blocklist\": { \"phone\": \"...\" } }." },
+      { "q": "O que remove_leads: true faz?", "o": ["Também remove ou redistribui os leads existentes do contato", "Remove o contato da blocklist", "Não faz nada", "Arquiva o lead"], "e": "Nunca use sem autorização por escrito." },
+      { "q": "O que acontece ao bloquear um contato já bloqueado?", "o": ["409, inclusive se o telefone estiver em outra formatação", "200 de novo", "422", "404"], "e": "A API reconhece variações do mesmo telefone." },
+      { "q": "Qual informação é obrigatória para bloquear?", "o": ["phone ou email (ao menos um)", "name", "company_id", "lead_id"], "e": "Pode enviar os dois." }
+    ]
+  },
+  "teste": [
+    { "q": "O que os endpoints de Stand de Vendas exigem?", "o": ["Módulo Stand de Vendas ativo na conta", "Token Master", "Webhook ativo", "Fila redistribuível"], "e": "Sem o módulo, não funcionam." },
+    { "q": "Qual endpoint informa o custom_lead_form_id?", "o": ["Listar Estandes", "Listar Leads do Estande", "Resumo de Presenças", "Listar Blocklist"], "e": "Comece sempre por ele." },
+    { "q": "Em qual endpoint start_date e end_date são obrigatórios?", "o": ["Resumo de Presenças", "Listar Estandes", "Listar Leads do Estande", "Listar Blocklist"], "e": "Em Listar Leads do Estande são opcionais." },
+    { "q": "Formato de data nos endpoints de Stand de Vendas:", "o": ["AAAA-MM-DD", "UTC com Z", "DD/MM/AAAA", "Timestamp"], "e": "Sem hora." },
+    { "q": "Como enviar vários company_ids[]?", "o": ["Repetindo a key em várias linhas da aba Params", "Separando por ponto e vírgula", "No header", "No body"], "e": "Cada valor é uma linha." },
+    { "q": "Para que serve a Blocklist?", "o": ["Impedir que leads novos de certos contatos sejam distribuídos na hierarquia", "Bloquear vendedores inativos", "Bloquear o token", "Bloquear filas"], "e": "Vale para matriz e filiais." },
+    { "q": "Qual a casca do Adicionar à Blocklist?", "o": ["hierarchy_blocklist", "blocklist", "data", "lead"], "e": "Cada endpoint tem sua casca." },
+    { "q": "O que remove_leads: true faz?", "o": ["Remove ou redistribui os leads existentes do contato", "Desbloqueia o contato", "Arquiva os leads", "Nada"], "e": "Por isso a Blocklist não é executada nos testes." },
+    { "q": "Bloquear de novo um contato já bloqueado resulta em:", "o": ["409", "200", "404", "423"], "e": "Mesmo com o telefone em outra formatação." },
+    { "q": "Stand de Vendas e Blocklist nos testes do Suporte são:", "o": ["Só explicados, sem executar chamadas", "Testados em todas as contas", "Testados só com leitura", "Testados pelo cliente"], "e": "Decisão do Suporte." },
+    { "q": "'O lead deste contato nunca chega.' O que conferir antes de investigar a integração?", "o": ["Listar Blocklist", "Listar Tags", "Listar Filas", "Informações da Empresa"], "e": "Lead novo de contato bloqueado não é distribuído." },
+    { "q": "Adicionar à Blocklist devolveu 422 hierarchy_not_configured. O que significa?", "o": ["A conta não tem a função Hierarquia ativa", "O telefone já está bloqueado", "O token é inválido", "O body está sem casca"], "e": "Blocklist só funciona com Hierarquia; contato repetido dá 409." }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "aulas": {
+    "6.1": [
+      { "q": "O que é um webhook no C2S?", "o": ["O C2S faz um POST para uma URL do cliente quando algo acontece", "O cliente chama GET /leads de tempos em tempos", "Um tipo de token", "Uma fila de distribuição"], "e": "O C2S avisa sozinho, sem o cliente perguntar." },
+      { "q": "Quantos endpoints de webhook cabem por token?", "o": ["Um: cadastrar outra URL apaga a anterior", "Um por gatilho", "Ilimitados", "Três"], "e": "Causa mais comum de 'meu webhook parou'." },
+      { "q": "Quando dispara o on_close_lead?", "o": ["Quando o lead é arquivado ou o negócio é fechado", "Quando o lead é criado", "Quando o lead é lido", "Quando o vendedor sai"], "e": "Vale para perda e para venda." },
+      { "q": "Por que o polling (consultar de tempos em tempos) é pior?", "o": ["Gera muitas chamadas vazias, gasta o limite e atrasa o aviso", "Não funciona com token", "Só funciona à noite", "Apaga leads"], "e": "Webhook avisa na hora, com uma chamada por evento." }
+    ],
+    "6.2": [
+      { "q": "Quais campos o Assinar Webhook recebe?", "o": ["hook_action e hook_url", "lead_id e seller_id", "name e email", "tag_id"], "e": "O gatilho e o endereço que será avisado." },
+      { "q": "Como o Assinar Webhook responde quando dá certo?", "o": ["200 { \"success\": true, \"message\": \"Subscribed successfully\" }", "201 com o id do webhook", "204", "423"], "e": "Testado na API real." },
+      { "q": "Para que serve o webhook.site no teste?", "o": ["Criar uma URL que mostra na hora o que o C2S enviar", "Gerar tokens", "Criar leads", "Substituir o Postman"], "e": "Mostra método, headers e body recebidos." },
+      { "q": "Qual o caminho do Assinar Webhook?", "o": ["{{base_url}}/api/subscribe", "{{base_url}}/webhooks", "{{base_url}}/leads/subscribe", "https://webhook.site/subscribe"], "e": "Confirmado na documentação oficial." }
+    ],
+    "6.3": [
+      { "q": "Como inscrever os três gatilhos?", "o": ["Uma assinatura por gatilho, com a mesma URL", "Uma assinatura só com os três", "Uma URL diferente para cada gatilho", "Não é possível"], "e": "Trocar a URL apaga a inscrição anterior." },
+      { "q": "Quando dispara o on_update_lead?", "o": ["Quando é gerado um log de alteração no lead", "Só quando o lead é criado", "Só quando o lead é vendido", "A cada minuto"], "e": "Ex.: PUT, mudança de status, tag." },
+      { "q": "O que acontece ao assinar com outra URL no mesmo token?", "o": ["A inscrição anterior é apagada", "As duas URLs recebem", "A API recusa", "Nada muda"], "e": "Um endpoint por token." },
+      { "q": "O que acontece ao assinar um gatilho que não existe?", "o": ["422 hook_action not found", "200", "404", "403"], "e": "Visto no teste real." }
+    ],
+    "6.4": [
+      { "q": "Como cancelar um gatilho?", "o": ["POST /api/unsubscribe com o hook_action", "DELETE /api/subscribe", "Assinar com URL vazia", "Gerar outro token"], "e": "Um cancelamento por gatilho." },
+      { "q": "Quando cancelar as inscrições de teste?", "o": ["Sempre ao fim do teste", "Nunca", "Só se der erro", "Depois de uma semana"], "e": "Evita deixar a URL de teste cadastrada." },
+      { "q": "O evento chega no webhook.site, mas não no sistema do cliente. Onde está o problema?", "o": ["No servidor do cliente", "No token", "No C2S", "No Postman"], "e": "O C2S está enviando; o servidor dele não recebe." },
+      { "q": "Um formulário externo quer mandar leads 'por webhook' para o C2S. O que orientar?", "o": ["Converter os dados e chamar POST /leads no formato da API", "Assinar on_create_lead", "Usar o webhook.site", "Não há solução"], "e": "O C2S não recebe webhooks genéricos de entrada." }
+    ]
+  },
+  "teste": [
+    { "q": "Quem inicia a chamada num webhook?", "o": ["O C2S", "O sistema do cliente", "O Postman", "O vendedor"], "e": "No polling é o cliente que pergunta." },
+    { "q": "Quantas URLs de webhook um token pode ter?", "o": ["Uma", "Três, uma por gatilho", "Dez", "Ilimitadas"], "e": "Outra URL apaga a anterior." },
+    { "q": "Qual gatilho avisa quando um lead novo entra?", "o": ["on_create_lead", "on_update_lead", "on_close_lead", "on_new_lead"], "e": "Os três gatilhos: create, update e close." },
+    { "q": "Qual gatilho dispara na venda ou no arquivamento?", "o": ["on_close_lead", "on_update_lead", "on_create_lead", "on_done_deal"], "e": "Vale para perda e para venda." },
+    { "q": "Campos do Assinar Webhook:", "o": ["hook_action e hook_url", "hook_id e url", "action e callback", "event e endpoint"], "e": "Exatamente com esses nomes." },
+    { "q": "Resposta de sucesso do Cancelar Webhook:", "o": ["Unsubscribed successfully", "Deleted", "201 Created", "204 No Content"], "e": "Mesmo se já estava cancelado." },
+    { "q": "'Meu webhook parou de chegar.' Primeira pergunta:", "o": ["Alguém cadastrou outra URL com o mesmo token?", "O token é Master?", "O lead tem tag?", "A fila está ativa?"], "e": "Causa mais comum." },
+    { "q": "O teste no webhook.site recebeu o evento, mas o cliente não. Conclusão:", "o": ["O problema está no servidor do cliente", "O C2S está fora do ar", "O token está inválido", "O gatilho está errado"], "e": "O C2S enviou normalmente." },
+    { "q": "Gatilho inexistente no Assinar Webhook:", "o": ["422 hook_action not found", "200", "404", "500"], "e": "Visto no teste real." },
+    { "q": "O C2S aceita webhooks genéricos de entrada (de outro sistema)?", "o": ["Não: é preciso converter e chamar POST /leads", "Sim, em /api/subscribe", "Sim, em /webhooks/in", "Só do Zapier"], "e": "Make, Zapier e n8n precisam montar o body do Criar Lead." },
+    { "q": "O que o servidor do cliente precisa para receber o webhook?", "o": ["Uma URL pública que responda a POST, sem login", "Um token Master", "O Postman aberto", "Uma fila ativa"], "e": "URL com VPN ou login não recebe o aviso." },
+    { "q": "Você assinou os três gatilhos com o webhook.site. Qual ação dispara o on_close_lead?", "o": ["Fechar Negócio ou mudar o status para 3", "Criar Lead", "Adicionar Tag", "Marcar como Lido"], "e": "Venda ou arquivamento." }
+  ]
+}

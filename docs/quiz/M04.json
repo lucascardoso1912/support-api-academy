@@ -1,0 +1,60 @@
+{
+  "aulas": {
+    "4.1": [
+      { "q": "Quais campos formam uma regra de distribuição?", "o": ["cod_1, cod_2, cod_3, priority, type_rule, seller_id e company_id", "name, email e phone", "hook_action e hook_url", "tag_id e lead_id"], "e": "A regra liga códigos a um vendedor, com prioridade." },
+      { "q": "Quais valores o type_rule aceita?", "o": ["distribution ou rotation", "new ou lost", "GET ou POST", "enabled ou disabled"], "e": "Tipo de roteamento da regra." },
+      { "q": "Como vem a resposta do Listar Regras de Distribuição?", "o": ["Numa lista direta", "Dentro de data", "Dentro de distribution_queues", "Dentro de meta"], "e": "Cada item é uma regra." },
+      { "q": "Como descobrir o nome do vendedor de uma regra?", "o": ["Cruzar o seller_id com Listar Vendedores", "Olhar o cod_1", "Chamar Informações da Empresa", "Chamar Listar Tags"], "e": "A regra traz só o ID do vendedor." }
+    ],
+    "4.2": [
+      { "q": "Como o Criar Regra de Distribuição responde?", "o": ["201 com uma mensagem de sucesso, sem o ID da regra", "200 com o ID da regra", "204 sem corpo", "423"], "e": "Visto no teste real: 'Distribution rule created successfully'." },
+      { "q": "Num teste, qual cod_1 usar?", "o": ["Um código que não bate com nada, ex.: TESTE-SUPORTE", "O código mais usado da conta", "Vazio", "O telefone do cliente"], "e": "Assim a regra não desvia leads reais." },
+      { "q": "Como excluir uma regra criada pela API?", "o": ["Pela tela de distribuição: a API não exclui", "DELETE /distribution_rules/:id", "POST /distribution_rules com priority 0", "Não é possível excluir"], "e": "Por isso, identifique regras de teste." },
+      { "q": "O que acontece ao criar de novo uma regra com os mesmos códigos?", "o": ["422 Essa regra já está cadastrada", "201 com uma regra duplicada", "200 sem mudar nada", "404"], "e": "Não existem duas regras com os mesmos códigos." }
+    ],
+    "4.3": [
+      { "q": "Qual o formato dos IDs de fila?", "o": ["Números inteiros", "Texto criptografado de 32 caracteres", "O nome da fila", "O e-mail do gestor"], "e": "Diferente do resto da API." },
+      { "q": "O que next_seller indica numa fila?", "o": ["Quem recebe o próximo lead", "O último vendedor que recebeu", "O gestor da fila", "O vendedor desativado"], "e": "É o 'próximo da vez'." },
+      { "q": "Onde vem a lista de filas?", "o": ["Em distribution_queues", "Em data", "Numa lista direta", "Em queues"], "e": "A resposta também traz success." },
+      { "q": "Qual o nome do parâmetro de itens por página em Listar Filas?", "o": ["per_page (com underline)", "perpage", "limit", "size"], "e": "Em Listar Leads é perpage, sem underline." }
+    ],
+    "4.4": [
+      { "q": "Onde vem a lista do Listar Vendedores da Fila?", "o": ["Em distribution_queue_sellers", "Em data", "Em sellers", "Numa lista direta"], "e": "Cada item traz priority e status." },
+      { "q": "O id de cada item dessa lista é:", "o": ["O ID do vínculo vendedor-fila (numérico)", "O ID criptografado do vendedor", "O ID da fila", "O ID do lead"], "e": "Não confunda com o seller_id." },
+      { "q": "Em quais aulas esse id do vínculo é usado?", "o": ["Atualizar Prioridades dos Vendedores e Definir Próximo Vendedor", "Encaminhar Lead e Criar Lead", "Criar Tag e Listar Tags", "Assinar Webhook"], "e": "Os endpoints de fila usam o vínculo." },
+      { "q": "Quais valores de status aparecem para cada vendedor da fila?", "o": ["enabled ou disabled", "novo ou arquivado", "0 ou 3", "on ou off"], "e": "disabled = fora da rotação." }
+    ],
+    "4.5": [
+      { "q": "Qual o formato do body de Atualizar Prioridades dos Vendedores?", "o": ["{ \"distribution_queue_sellers\": [ { \"id\": 1, \"priority\": 1, \"status\": 1 } ] }", "{ \"sellers\": [1, 2, 3] }", "{ \"priority\": 1 }", "{ \"seller_ids\": [\"...\"] }"], "e": "Formato descoberto no teste real; a doc não informa." },
+      { "q": "O que acontece se o item for enviado sem o campo status?", "o": ["A API desativa o vendedor na fila", "Nada muda", "A API devolve 422", "O vendedor vira o próximo"], "e": "Sempre envie \"status\": 1." },
+      { "q": "status 1 no item significa:", "o": ["Vendedor ativo na fila", "Vendedor desativado", "Primeira posição", "Vendedor Master"], "e": "0 = desativado." },
+      { "q": "Como conferir o resultado?", "o": ["Rodando Listar Vendedores da Fila", "Rodando Listar Leads", "Rodando Informações da Empresa", "Rodando Listar Tags"], "e": "Confira prioridades e status." }
+    ],
+    "4.6": [
+      { "q": "No Redistribuir Lead, quem escolhe o novo vendedor?", "o": ["A fila", "Você, no body", "O cliente", "O vendedor atual"], "e": "É a diferença para o Encaminhar Lead." },
+      { "q": "Qual a diferença para o Encaminhar Lead?", "o": ["No Encaminhar você escolhe o vendedor; no Redistribuir, a fila escolhe", "Nenhuma", "O Redistribuir exige dois IDs de vendedor", "O Encaminhar usa ID numérico"], "e": "Forward precisa de seller_from_id e seller_to_id." },
+      { "q": "Qual o body do Redistribuir Lead?", "o": ["{ \"id\": \"<lead_id>\" }", "{ \"seller_to_id\": \"...\" }", "{ \"queue_id\": 1 }", "Sem body"], "e": "O ID do lead vai no campo id." },
+      { "q": "Depois de redistribuir, por que atualizar a variável lead_id?", "o": ["Porque o ID do lead pode mudar na redistribuição", "Porque o token muda", "Porque a fila é apagada", "Não é preciso"], "e": "A resposta traz o lead_id atual e o new_seller." }
+    ],
+    "4.7": [
+      { "q": "Qual campo o Definir Próximo Vendedor recebe?", "o": ["next_queue_seller_id (número, sem aspas)", "seller_id (texto)", "next_seller (nome)", "priority"], "e": "É o ID do vínculo vendedor-fila." },
+      { "q": "De onde vem o valor de next_queue_seller_id?", "o": ["Do id do vínculo em Listar Vendedores da Fila", "Do ID criptografado em Listar Vendedores", "Do company_id", "Do lead_id"], "e": "Número inteiro." },
+      { "q": "Como testar sem mudar a fila?", "o": ["Enviar o mesmo próximo vendedor que já estava", "Enviar 0", "Enviar o último vendedor", "Não enviar body"], "e": "Anote o next_seller antes." },
+      { "q": "No roteiro 'por que o lead foi para fulano?', qual o primeiro passo?", "o": ["Buscar Lead por ID: quem recebeu e quando", "Criar uma regra nova", "Definir o próximo vendedor", "Encaminhar o lead"], "e": "Depois: regras, filas, vendedores da fila e is_recipient." }
+    ]
+  },
+  "teste": [
+    { "q": "Qual campo da regra indica o vendedor que recebe?", "o": ["seller_id", "cod_1", "priority", "company_id"], "e": "Cruze com Listar Vendedores para ver o nome." },
+    { "q": "Criar Regra de Distribuição devolve o ID da regra?", "o": ["Não: só uma mensagem de sucesso", "Sim, em id", "Sim, em data.id", "Sim, em rule.id"], "e": "Visto no teste real." },
+    { "q": "IDs de fila e de vínculo são:", "o": ["Números inteiros", "Textos criptografados", "Nomes", "E-mails"], "e": "Diferente de leads, vendedores e tags." },
+    { "q": "O que é next_seller?", "o": ["O próximo vendedor da vez na fila", "O último vendedor que recebeu", "O gestor da fila", "Um vendedor desativado"], "e": "Aparece em Listar Filas de Distribuição." },
+    { "q": "O que acontece ao atualizar prioridades sem mandar status?", "o": ["O vendedor é desativado na fila", "Nada", "Erro 422", "O vendedor vira o próximo"], "e": "Mande \"status\": 1 em cada item." },
+    { "q": "Qual chave leva a lista no body de Atualizar Prioridades?", "o": ["distribution_queue_sellers", "sellers", "priorities", "queue"], "e": "Com id do vínculo, priority e status." },
+    { "q": "Em qual endpoint a fila escolhe o novo vendedor?", "o": ["Redistribuir Lead", "Encaminhar Lead", "Definir Próximo Vendedor", "Criar Regra de Distribuição"], "e": "No Encaminhar, quem escolhe é você." },
+    { "q": "Como testar Definir Próximo Vendedor sem alterar nada?", "o": ["Mandar o mesmo next_seller atual", "Mandar o vendedor desativado", "Mandar o ID do lead", "Mandar sem token"], "e": "Anote o estado antes de mexer." },
+    { "q": "Qual parâmetro de página o Listar Filas usa?", "o": ["per_page", "perpage", "limit", "count"], "e": "Em Listar Leads é perpage." },
+    { "q": "Depois de mexer numa fila, o que fazer?", "o": ["Rodar Listar Vendedores da Fila e conferir se tudo voltou como estava", "Criar um lead", "Gerar um token novo", "Assinar um webhook"], "e": "Filas afetam leads reais." },
+    { "q": "type_rule aceita:", "o": ["distribution ou rotation", "fila ou regra", "novo ou antigo", "true ou false"], "e": "Tipo de roteamento." },
+    { "q": "Primeiro passo para explicar 'por que o lead foi para fulano':", "o": ["Buscar Lead por ID", "Listar Tags", "Informações da Empresa", "Assinar Webhook"], "e": "Veja quem recebeu e quando, depois investigue regras e filas." }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "aulas": {
+    "3.1": [
+      { "q": "O que Informações da Empresa (GET /me) devolve?", "o": ["A empresa do token e as sub_companies", "A lista de leads", "Os vendedores da empresa", "As tags da empresa"], "e": "Mostra de qual empresa é o token." },
+      { "q": "O que Listar Empresas (GET /companies) devolve?", "o": ["As empresas do grupo, com id e name", "Os vendedores do grupo", "As tags do grupo", "As filas de distribuição"], "e": "Use para achar o company_id da unidade certa." },
+      { "q": "Cliente diz que 'o lead foi para a filial errada'. Primeiro passo:", "o": ["Conferir com GET /me de qual empresa é o token da integração", "Criar uma regra de distribuição", "Encaminhar o lead", "Gerar um token novo"], "e": "Token de matriz cria lead na matriz." },
+      { "q": "Em quais endpoints o company_id é usado?", "o": ["Criar Vendedor e Criar Regra de Distribuição", "Criar Lead e Atualizar Lead", "Assinar Webhook", "Listar Tags"], "e": "Eles precisam saber em qual empresa criar o cadastro." }
+    ],
+    "3.2": [
+      { "q": "O que Listar Vendedores (GET /sellers) devolve?", "o": ["Os vendedores, com ID criptografado, nome, e-mail e permissões", "As filas de distribuição", "As tags", "Os leads de cada vendedor"], "e": "A resposta é uma lista direta, sem data." },
+      { "q": "is_recipient igual a 1 significa:", "o": ["O vendedor recebe leads da distribuição", "O vendedor é Master", "O vendedor está inativo", "O vendedor é gerente"], "e": "Vem como 0 ou 1, não como true/false." },
+      { "q": "Para que você usa o ID de um vendedor?", "o": ["Encaminhar Lead e Criar Regra de Distribuição", "Criar Tag", "Assinar Webhook", "Listar Leads"], "e": "O ID criptografado vem desta listagem." },
+      { "q": "Em que formato vem o campo is_recipient?", "o": ["Número: 0 ou 1", "Booleano: true ou false", "Texto: 'sim' ou 'não'", "Sempre null"], "e": "Visto na API real." }
+    ],
+    "3.3": [
+      { "q": "Qual status o Criar Vendedor devolve quando dá certo?", "o": ["201", "200", "204", "423"], "e": "Guarde o id retornado." },
+      { "q": "Qual campo define em qual empresa o vendedor entra?", "o": ["company_id", "seller_id", "team", "external_id"], "e": "Criar na empresa errada é o erro mais comum aqui." },
+      { "q": "Numa conta de teste, como criar o vendedor para não atrapalhar?", "o": ["Com is_recipient false e show_in_metrics false", "Com is_master true", "Com is_rescue true", "Sem company_id"], "e": "Assim ele não recebe leads nem aparece nos relatórios." },
+      { "q": "Como excluir um vendedor criado pela API?", "o": ["Pela tela do C2S: a API não tem endpoint de exclusão", "DELETE /sellers/:id", "POST /sellers/remove", "PUT /sellers/:id com name vazio"], "e": "Por isso, crie vendedores de teste com cuidado." }
+    ],
+    "3.4": [
+      { "q": "Como tirar um vendedor da distribuição (ex.: férias)?", "o": ["PUT /sellers/:id com is_recipient false", "Excluir o vendedor", "Listar Vendedores", "Batch Update Timeshift"], "e": "Ele continua existindo, só para de receber leads." },
+      { "q": "Quais campos extras o Atualizar Vendedor aceita?", "o": ["recipient_rotation, recipient_distribution, recipient_memory e can_view_bucket", "lead_id e tag_id", "hook_url e hook_action", "cod_1, cod_2 e cod_3"], "e": "Além dos campos da criação." },
+      { "q": "Qual ID vai no caminho /sellers/:id?", "o": ["O ID criptografado do vendedor", "O ID numérico do vínculo na fila", "O company_id", "O e-mail do vendedor"], "e": "O mesmo que vem de Listar Vendedores." },
+      { "q": "Como conferir a alteração depois?", "o": ["Rodando Listar Vendedores", "Rodando Informações da Empresa", "Rodando Listar Tags", "Rodando Listar Leads"], "e": "Hábito: conferir com GET depois de todo PUT." }
+    ],
+    "3.5": [
+      { "q": "Para que serve o Batch Update Timeshift?", "o": ["Ajustar o rodízio de vários vendedores de uma vez", "Criar vários vendedores", "Excluir vendedores", "Listar vendedores por equipe"], "e": "Processa em ordem reversa e escalona o último lead recebido." },
+      { "q": "Qual campo o Batch Update Timeshift precisa receber?", "o": ["seller_ids (lista de IDs)", "company_id", "queue_id", "tag_id"], "e": "No teste real bastou seller_ids." },
+      { "q": "Como ele responde quando dá certo?", "o": ["{ \"success\": true }", "A lista de vendedores", "201 com um id", "204 sem corpo"], "e": "Visto no teste real." },
+      { "q": "Por que essa request fica separada, sem Path Variable?", "o": ["batch_update_timeshift ocupa o lugar do :id no caminho", "Porque é um GET", "Porque não precisa de token", "Porque usa outra URL base"], "e": "PUT /sellers/batch_update_timeshift." }
+    ],
+    "3.6": [
+      { "q": "O filtro name do Listar Tags diferencia maiúsculas?", "o": ["Não: quente acha Quente", "Sim: precisa da grafia exata", "Só diferencia acentos", "Depende da tag"], "e": "Testado na API real. Mas precisa do nome completo." },
+      { "q": "Onde vem a lista de tags?", "o": ["Em data[]", "Em tags[]", "Numa lista direta", "Em meta"], "e": "Cada item tem id e attributes." },
+      { "q": "Por que listar as tags antes de aplicar uma no lead?", "o": ["Para pegar o ID da tag", "Para criar a tag", "Para apagar tags antigas", "Para listar os leads"], "e": "Adicionar Tag ao Lead exige o ID." },
+      { "q": "O que autofill=true retorna?", "o": ["Só as tags de preenchimento automático", "Todas as tags", "Nenhuma tag", "As tags dos leads"], "e": "É um filtro opcional." }
+    ],
+    "3.7": [
+      { "q": "Qual casca o Criar Tag usa?", "o": ["tag", "data", "lead", "Nenhuma"], "e": "{ \"tag\": { \"name\": \"...\" } }." },
+      { "q": "O que acontece ao criar uma tag que já existe?", "o": ["A API devolve a mesma tag, com 201 e a chave errors", "Erro 409", "Uma tag duplicada é criada", "Erro 422"], "e": "Não é falha: é a deduplicação da API." },
+      { "q": "Onde está o ID da tag na resposta?", "o": ["tag.id", "id", "data.id", "tags[0]"], "e": "Copie esse id para usar nos endpoints de tag do lead." },
+      { "q": "Por que é seguro chamar Criar Tag antes de aplicar uma tag?", "o": ["Porque ela não duplica: cria ou devolve a existente", "Porque é um GET", "Porque apaga as tags antigas", "Porque renomeia as tags"], "e": "Fluxo 'garantir e aplicar tag'." }
+    ]
+  },
+  "teste": [
+    { "q": "Qual endpoint mostra de qual empresa é o token?", "o": ["Informações da Empresa (GET /me)", "Listar Empresas", "Listar Vendedores", "Listar Tags"], "e": "É o teste zero de todo caso." },
+    { "q": "Qual endpoint lista matriz e filiais?", "o": ["Listar Empresas (GET /companies)", "Informações da Empresa", "Listar Vendedores", "Listar Filas de Distribuição"], "e": "Traz id e name de cada empresa do grupo." },
+    { "q": "Qual campo indica se o vendedor recebe leads?", "o": ["is_recipient", "is_master", "can_view_bucket", "show_in_metrics"], "e": "1 = recebe; 0 = não recebe." },
+    { "q": "Qual status o Criar Vendedor devolve?", "o": ["201", "200", "423", "409"], "e": "Guarde o id criado." },
+    { "q": "Como excluir um vendedor ou uma regra criados pela API?", "o": ["Pela tela do C2S", "Com DELETE na API", "Com PUT e active false", "Não é possível excluir"], "e": "A API não tem endpoint de exclusão para eles." },
+    { "q": "Para tirar um vendedor de férias da distribuição, você usa:", "o": ["Atualizar Vendedor com is_recipient false", "Batch Update Timeshift", "Criar Regra de Distribuição", "Encaminhar Lead"], "e": "PUT /sellers/:id." },
+    { "q": "O que Batch Update Timeshift ajusta?", "o": ["O rodízio de vários vendedores", "As permissões de Master", "As tags dos vendedores", "O e-mail dos vendedores"], "e": "Em lote, com seller_ids." },
+    { "q": "Onde vem a lista do Listar Tags?", "o": ["data[]", "tags[]", "Lista direta", "meta.tags"], "e": "Diferente de Listar Vendedores, que é lista direta." },
+    { "q": "Criar uma tag repetida resulta em:", "o": ["201 com a tag existente e a chave errors", "409 conflito", "Tag duplicada", "422"], "e": "É seguro chamar sempre." },
+    { "q": "O ID da tag criada está em:", "o": ["tag.id", "data.id", "id", "tag_id"], "e": "A resposta vem dentro de tag." },
+    { "q": "Qual a casca do Criar Tag?", "o": ["tag", "lead", "data → attributes", "hierarchy_blocklist"], "e": "Cada endpoint tem sua casca." },
+    { "q": "O filtro name do Listar Tags:", "o": ["Não diferencia maiúsculas, mas precisa do nome completo", "Aceita parte do nome", "Diferencia maiúsculas", "Só funciona com autofill"], "e": "Testado na API real." }
+  ]
+}

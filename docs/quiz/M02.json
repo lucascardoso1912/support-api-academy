@@ -1,0 +1,84 @@
+{
+  "aulas": {
+    "2.1": [
+      { "q": "Em Listar Leads, onde vem a lista de leads?", "o": ["Em data", "Em pagination", "Em leads", "Em meta.list"], "e": "A lista vem em data[] e o total em meta.total." },
+      { "q": "Onde está o total de leads encontrados?", "o": ["meta.total", "pagination.total_count", "Header Total-entries", "data.length"], "e": "A doc oficial cita pagination, mas a API real devolve meta.total." },
+      { "q": "O que sort=-created_at faz?", "o": ["Traz os mais recentes primeiro", "Traz os mais antigos primeiro", "Filtra os criados hoje", "Ordena por nome"], "e": "O sinal de menos inverte a ordem (decrescente)." },
+      { "q": "O id que aparece em cada lead da lista é:", "o": ["O ID criptografado, diferente do número da tela", "O número que aparece na tela do C2S", "O telefone do cliente", "O ID do vendedor"], "e": "Use sempre o ID que vem da API nas próximas chamadas." }
+    ],
+    "2.2": [
+      { "q": "Qual formato o filtro created_gte aceita?", "o": ["2026-09-01T03:00:00Z (UTC com Z)", "2026-09-01T00:00:00-03:00", "01/09/2026", "2026-09-01"], "e": "Testado na API real: só UTC com Z. Meia-noite de Brasília = 03:00Z." },
+      { "q": "Qual valor de status filtra os leads novos?", "o": ["novo", "new", "0", "NEW"], "e": "status=new devolve 0 resultados, sem erro." },
+      { "q": "Com created_gte=2026-09-01T00:00:00-03:00, a API responde:", "o": ["403 invalid date or strptime format", "200 com os leads do período", "404", "423"], "e": "O fuso -03:00 é recusado; converta para UTC com Z." },
+      { "q": "Como achar o lead de um cliente específico?", "o": ["Filtrando por phone ou email", "Filtrando por status", "Ordenando por data", "Usando from_hierarchy_company"], "e": "Telefone ou e-mail são os filtros mais rápidos num caso de suporte." }
+    ],
+    "2.3": [
+      { "q": "Quantos leads, no máximo, vêm por página?", "o": ["50", "100", "10", "Não há limite"], "e": "perpage acima de 50 dá erro." },
+      { "q": "Como saber quantas páginas existem?", "o": ["meta.total ÷ perpage, arredondando para cima", "Lendo pagination.total_pages", "Lendo o header Total-pages", "São sempre 5 páginas"], "e": "A API não devolve o total de páginas: você calcula." },
+      { "q": "Pedir perpage=80 resulta em:", "o": ["403 com a mensagem de que o máximo é 50", "200 com 80 leads", "200 com 50 leads", "429"], "e": "Mensagem real: 'perpage' must be less than or equal to 50." },
+      { "q": "Cliente diz que 'a API só devolve 50 leads'. O que responder?", "o": ["Não é bug: o sistema precisa paginar usando meta.total", "É um bug, precisa escalar", "O token está errado", "Basta pedir perpage=1000"], "e": "O sistema do cliente deve repetir a chamada com page=2, 3..." }
+    ],
+    "2.4": [
+      { "q": "Em Buscar Lead por ID, onde vem o lead?", "o": ["Em data, com attributes, messages e schedulated_actions", "Em lead", "Em leads[0]", "Em meta"], "e": "É o detalhe completo de um lead." },
+      { "q": "O lead acabou de ser criado com 200, mas Buscar Lead por ID dá 404. Causa provável:", "o": ["A distribuição mandou o lead para outra empresa do grupo, fora do alcance do token", "O token é inválido", "O lead não tem telefone", "Passou do limite de requisições"], "e": "Confira company na resposta da criação e use o token da empresa que recebeu." },
+      { "q": "Por que usar a Path Variable :id?", "o": ["A request fica genérica: basta trocar o valor para abrir outro lead", "É obrigatório para a API", "A chamada fica mais rápida", "Esconde o ID do lead"], "e": "Não precisa editar a URL a cada lead." },
+      { "q": "Como está o parâmetro from_hierarchy_company=true hoje?", "o": ["Devolve erro na API: não use", "Traz os leads das filiais", "Acrescenta o nome da empresa sem problemas", "É obrigatório"], "e": "Em leads criados pela API, ele devolve erro interno (401 ou 403)." }
+    ],
+    "2.5": [
+      { "q": "Qual casca o Criar Lead exige?", "o": ["data → type → attributes", "lead", "tag", "Nenhuma"], "e": "Só este endpoint usa o envelope data.attributes." },
+      { "q": "Qual informação é obrigatória para criar um lead?", "o": ["phone ou email (ao menos um)", "name", "prop_ref", "description"], "e": "Sem nenhum dos dois, a API responde 423." },
+      { "q": "O que o campo received_by da resposta mostra?", "o": ["O vendedor que recebeu o lead", "Quem criou o lead", "A empresa do token", "O token usado"], "e": "É a resposta para 'para quem foi o lead?'." },
+      { "q": "Como o Criar Lead responde quando dá certo?", "o": ["200 com success e lead_id", "201 com o corpo vazio", "204", "423"], "e": "Guarde o lead_id no Environment pelo script." }
+    ],
+    "2.6": [
+      { "q": "Numa imobiliária, qual campo liga o lead ao imóvel?", "o": ["prop_ref", "brand", "license_plate", "channel_abbrev"], "e": "Sem prop_ref, o lead chega sem anúncio vinculado." },
+      { "q": "Numa revenda de veículos, year e km devem ir como:", "o": ["Números", "Textos entre aspas", "Objetos", "Listas"], "e": "Ex.: \"year\": 2022, \"km\": 35000." },
+      { "q": "Um chatbot que já conversou com o cliente envia:", "o": ["already_interacted: true", "closed: true", "pending: false", "status: 3"], "e": "Avisa que o cliente já foi atendido pelo bot." },
+      { "q": "Para a deduplicação, pedro.silva@exemplo.com e pedrosilva@exemplo.com são:", "o": ["O mesmo e-mail: a API remove os pontos antes do @", "E-mails diferentes", "E-mails inválidos", "E-mails bloqueados"], "e": "Por isso esses dois envios caem no mesmo cliente." }
+    ],
+    "2.7": [
+      { "q": "Qual casca o Atualizar Lead usa?", "o": ["lead, com customer e product", "data → attributes", "tag", "Nenhuma"], "e": "É diferente do Criar Lead." },
+      { "q": "Como o Atualizar Lead responde quando dá certo?", "o": ["200 com success e o objeto lead", "201 com data", "204", "423"], "e": "Testado na API real: { success, lead }." },
+      { "q": "Qual o hábito depois de todo PUT?", "o": ["Conferir o resultado com Buscar Lead por ID", "Criar outro lead", "Assinar um webhook", "Gerar um novo token"], "e": "Conferir com GET prova que a mudança foi gravada." },
+      { "q": "O que acontece ao mandar o body do POST (data.attributes) no PUT?", "o": ["A API ignora ou devolve erro", "Funciona normalmente", "Cria um lead novo", "Duplica o lead"], "e": "Casca errada é a causa nº 1 de erro de integração." }
+    ],
+    "2.8": [
+      { "q": "Quais IDs o Encaminhar Lead exige?", "o": ["seller_from_id e seller_to_id (criptografados)", "Só o ID do lead", "Os nomes dos vendedores", "O ID numérico do vínculo na fila"], "e": "Os dois vêm de Listar Vendedores ou do received_by." },
+      { "q": "Onde pegar os IDs dos vendedores?", "o": ["Em Listar Vendedores (GET /sellers) ou no received_by", "Em Listar Tags", "Em Informações da Empresa", "Em Listar Filas de Distribuição"], "e": "GET /sellers lista todos com ID criptografado." },
+      { "q": "Repetir a mesma transferência depois que ela deu certo resulta em:", "o": ["422 seller_from id not match", "200 de novo", "404", "429"], "e": "O dono já mudou, então o vendedor de origem não confere." },
+      { "q": "Qual método o Encaminhar Lead usa?", "o": ["PATCH", "POST", "PUT", "GET"], "e": "PATCH /leads/:id/forward." }
+    ],
+    "2.9": [
+      { "q": "O que o Adicionar Tag ao Lead exige?", "o": ["O ID da tag", "O nome da tag", "A cor da tag", "O ID do vendedor"], "e": "Pegue o ID em Listar Tags ou Criar Tag." },
+      { "q": "Enviar o nome da tag no lugar do ID resulta em:", "o": ["422 tag not found, please create one", "200", "403", "404"], "e": "É o erro mais comum de integração com tags." },
+      { "q": "O que Listar Tags do Lead devolve?", "o": ["Só IDs numéricos internos das tags", "Os nomes das tags", "Os IDs criptografados", "Nada, só o status"], "e": "Para saber o nome, compare com Listar Tags." },
+      { "q": "Como se remove uma tag de um lead?", "o": ["POST /leads/:id/remove_tag", "DELETE /leads/:id/tags", "PUT /leads/:id", "PATCH /leads/:id/tags"], "e": "Remover também é POST, num sub-caminho do lead." }
+    ],
+    "2.10": [
+      { "q": "Para que serve o Marcar Lead como Lido?", "o": ["Tirar o lead de 'não lido' quando o atendimento foi fora do C2S", "Arquivar o lead", "Transferir o lead", "Criar uma mensagem"], "e": "A resposta traz lead.read_at preenchido." },
+      { "q": "Em Criar Atividade no Lead, o campo type deve ser:", "o": ["{ \"activity\": true }", "\"activity\"", "1", "true"], "e": "É um objeto, não um texto." },
+      { "q": "Onde a atividade criada aparece no lead?", "o": ["Em schedulated_actions", "Em messages", "Em tags", "Em done_details"], "e": "Com essa grafia da própria API." },
+      { "q": "O que acontece com a data da atividade sem o fuso (-03:00)?", "o": ["A atividade pode aparecer com o horário deslocado", "A API recusa a atividade", "A API converte certo sozinha", "O campo é ignorado"], "e": "Envie a data com o fuso de Brasília." }
+    ],
+    "2.11": [
+      { "q": "No Atualizar Status do Lead, status 3 significa:", "o": ["Perdido / arquivado", "Em negociação", "Negócio fechado", "Novo"], "e": "Na tela aparece como 'Arquivado'." },
+      { "q": "E status 2 significa:", "o": ["Negócio fechado (converted)", "Arquivado", "Novo", "Em negociação"], "e": "Confirmado na API real." },
+      { "q": "O que acontece ao mandar o update_status sem o campo message?", "o": ["401 Message cannot be empty", "201 normalmente", "O status é ignorado", "423"], "e": "message é obrigatório." },
+      { "q": "Qual formato de data o Fechar Negócio do Lead usa?", "o": ["AAAA-MM-DD, sem hora", "ISO 8601 com hora", "DD/MM/AAAA", "Timestamp em segundos"], "e": "Ex.: \"date\": \"2026-09-23\"." }
+    ]
+  },
+  "teste": [
+    { "q": "Criar um lead sem telefone e sem e-mail resulta em:", "o": ["423", "201", "409", "404"], "e": "A mensagem real cita phone_or_email_or_wpp_username." },
+    { "q": "Em Listar Leads, onde está o total de resultados?", "o": ["meta.total", "pagination.total_count", "Header Total-entries", "data.total"], "e": "Não existe pagination na resposta real." },
+    { "q": "Qual filtro de data a API aceita?", "o": ["created_gte=2026-09-22T03:00:00Z", "created_gte=2026-09-22T00:00:00-03:00", "created_gte=22/09/2026", "created_gte=2026-09-22"], "e": "Só UTC com Z." },
+    { "q": "Qual casca o Atualizar Lead usa?", "o": ["lead", "data → attributes", "tag", "hierarchy_blocklist"], "e": "Criar usa data.attributes; atualizar usa lead." },
+    { "q": "Qual endpoint transfere um lead para outro vendedor?", "o": ["PATCH /leads/:id/forward", "PUT /leads/:id", "POST /leads/:id/update_status", "POST /distribution_queues/:id/next_seller"], "e": "Encaminhar Lead: você escolhe o vendedor." },
+    { "q": "Como aplicar uma tag a um lead?", "o": ["POST /leads/:id/create_tag com o tag_id", "POST /tags com o lead_id", "PUT /leads/:id com o nome da tag", "GET /leads/:id/tags"], "e": "Com o ID da tag, não o nome." },
+    { "q": "Qual endpoint um chatbot usa para gravar a conversa no lead?", "o": ["Criar Mensagem no Lead (create_message)", "Criar Atividade no Lead", "Atualizar Lead", "Marcar Lead como Lido"], "e": "Cada mensagem vira um item no histórico." },
+    { "q": "Como marcar um lead como perdido pela API?", "o": ["update_status com status 3 e message", "done_deal com value 0", "PUT /leads/:id com status lost", "remove_tag"], "e": "message é obrigatório." },
+    { "q": "Qual endpoint registra uma venda?", "o": ["Fechar Negócio do Lead (done_deal)", "Atualizar Status com status 1", "Criar Atividade no Lead", "Encaminhar Lead"], "e": "Confira no log do lead: 'Integração marcou como negócio fechado'." },
+    { "q": "O lead foi criado (200), mas o GET dá 404. O que conferir primeiro?", "o": ["O campo company da resposta: o lead pode ter ido para outra empresa do grupo", "Se o token está vencido", "Se o JSON tem vírgula sobrando", "Se o lead tem prop_ref"], "e": "A distribuição pode tirar o lead do alcance do token." },
+    { "q": "Qual é o limite de chamadas da API?", "o": ["10 por minuto em cada endpoint", "100 por minuto no total", "1 por segundo", "Não há limite"], "e": "A 11ª devolve 429 com Retry-After: 1 minute." },
+    { "q": "O que acontece ao pedir uma página além da última?", "o": ["A API devolve data vazio", "A API devolve 404", "A API volta para a página 1", "A API devolve 403"], "e": "É o sinal de fim da paginação." }
+  ]
+}

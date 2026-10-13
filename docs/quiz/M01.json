@@ -1,0 +1,42 @@
+{
+  "aulas": {
+    "1.1": [
+      { "q": "Para que serve o Postman no curso?", "o": ["Montar e enviar requisições à API sem escrever código", "Editar leads direto na tela do C2S", "Hospedar o webhook do cliente", "Gerar o token de integração"], "e": "O Postman é o 'navegador' de APIs do curso." },
+      { "q": "Onde você escolhe qual conjunto de variáveis está ativo?", "o": ["No seletor de Environment, no canto superior direito", "Na aba Body", "No Console", "No History"], "e": "Environment errado selecionado é a causa mais comum de variável em vermelho." },
+      { "q": "Onde você vê tudo que foi enviado e recebido, inclusive os headers?", "o": ["No Console", "No History", "Na aba Params", "Na aba Scripts"], "e": "O Console mostra a requisição real, com os headers enviados." },
+      { "q": "Por que usar o app desktop do Postman?", "o": ["A versão web pode exigir o Postman Agent para enviar chamadas", "A versão web não tem Collections", "O app desktop dispensa o token", "A versão web não aceita JSON"], "e": "No desktop as chamadas saem direto, sem agente extra." }
+    ],
+    "1.2": [
+      { "q": "Quem consegue gerar o token no C2S?", "o": ["Usuário com perfil Master", "Qualquer vendedor", "Somente o time de Suporte", "O cliente final, pelo site"], "e": "“Não acho onde gera o token” quase sempre é usuário sem perfil Master." },
+      { "q": "Onde o token é gerado?", "o": ["Integrações → Informações de integração por e-mail e API → Gerar Token", "Configurações → Meu perfil", "Leads → Exportar", "Relatórios → API"], "e": "O caminho fica no menu lateral, em Integrações." },
+      { "q": "O cliente perdeu o token. O que fazer?", "o": ["Gerar outro: o token aparece uma única vez", "Recuperar pela tela de Integrações", "Pedir ao Dev para mostrar o token antigo", "Buscar no histórico do navegador"], "e": "Não há como ver o token de novo; gere outro e atualize a integração." },
+      { "q": "Ao testar com o token de um cliente, qual o cuidado principal?", "o": ["Preferir leitura (GET): chamadas de escrita alteram a conta dele", "Nenhum: é igual ao token de teste", "Usar apenas POST", "Trocar o método para PATCH"], "e": "Assinar um webhook, por exemplo, substitui a URL que o cliente usa." }
+    ],
+    "1.3": [
+      { "q": "Onde configurar o Bearer Token para não repetir em cada request?", "o": ["Na aba Authorization da collection", "No Body de cada request", "No Console", "No History"], "e": "Configurado na collection, o token é herdado por todas as requests." },
+      { "q": "Qual opção de Authorization cada request deve usar?", "o": ["Inherit auth from parent", "No Auth", "API Key", "Basic Auth"], "e": "Assim ela usa o token configurado na collection." },
+      { "q": "Bearer Token = {{token}} vira qual header na chamada?", "o": ["Authorization: Bearer <token>", "Token: <token>", "X-Api-Key: <token>", "Cookie: <token>"], "e": "Dá para conferir nos headers ocultos da aba Headers." },
+      { "q": "Como organizar as pastas da collection?", "o": ["Uma por seção da documentação oficial (Leads, Usuários, Tags...)", "Uma por cliente atendido", "Uma por dia de teste", "Uma por código de status"], "e": "Mesmos nomes da doc oficial: fica fácil achar cada endpoint." }
+    ],
+    "1.4": [
+      { "q": "O que Informações da Empresa (GET /me) responde?", "o": ["A empresa dona do token e suas subempresas", "A lista de leads", "Os vendedores da empresa", "Os webhooks cadastrados"], "e": "Responde company_name, company_id e sub_companies." },
+      { "q": "Por que o GET /me é o 'teste zero' de todo caso?", "o": ["Se ele falhar, nada mais vai funcionar com esse token", "É o endpoint mais rápido", "É o único GET da API", "Ele cria o lead de teste"], "e": "Confirma token e empresa em segundos." },
+      { "q": "Com Authorization em No Auth, o GET /me devolve:", "o": ["403 {\"error\":\"access_denied\"}", "200 com a empresa", "404", "423"], "e": "Sem token, a API recusa antes de qualquer coisa." },
+      { "q": "Com 'No Environment' selecionado, o que acontece?", "o": ["{{base_url}} fica literal na URL e a chamada falha", "Funciona igual", "O Postman usa o token de outro cliente", "A API responde 201"], "e": "Sem Environment, as variáveis não têm valor." }
+    ]
+  },
+  "teste": [
+    { "q": "Qual variável guarda o começo de toda URL?", "o": ["base_url", "token", "lead_id", "queue_id"], "e": "base_url = https://api.contact2sale.com/integration." },
+    { "q": "Em qual aba você escolhe raw → JSON?", "o": ["Body", "Headers", "Params", "Scripts"], "e": "Ao escolher JSON, o Postman adiciona o Content-Type." },
+    { "q": "Qual atalho envia a request?", "o": ["Ctrl+Enter", "Ctrl+S", "Ctrl+D", "Ctrl+Z"], "e": "Ctrl+S salva e Ctrl+D duplica." },
+    { "q": "O que Ctrl+D faz numa request?", "o": ["Duplica a request", "Exclui a request", "Salva a request", "Envia a request"], "e": "Útil para criar variações de uma mesma chamada." },
+    { "q": "Onde fica o token no Environment do curso?", "o": ["Na variável token, do tipo secret", "No body de cada request", "Na URL", "No nome da collection"], "e": "Secret deixa o valor mascarado na tela." },
+    { "q": "Além de Authorization: Bearer <token>, qual header a API também aceita?", "o": ["Authentication: <token>", "X-Token: <token>", "Api-Key: <token>", "Cookie: <token>"], "e": "Testado na API real: o header alternativo funciona." },
+    { "q": "O token identifica:", "o": ["A empresa", "A pessoa que gerou", "O navegador", "O vendedor que recebe os leads"], "e": "Quem tem o token age como a empresa inteira na API." },
+    { "q": "O que fazer se {{base_url}} aparecer em vermelho na URL?", "o": ["Selecionar o Environment certo no canto superior direito", "Gerar outro token", "Apagar a collection", "Trocar o método"], "e": "Variável em vermelho não existe no Environment ativo." },
+    { "q": "Para que serve o Environment 'C2S - Cliente X'?", "o": ["Simular a conta de um cliente com o token dele", "Guardar os leads do cliente", "Receber webhooks", "Usar o Postman pela web"], "e": "Separa o token do cliente do token da conta de teste." },
+    { "q": "O que o History mostra?", "o": ["Toda chamada enviada, mesmo sem salvar", "Só as requests salvas na collection", "Os tokens já usados", "As variáveis do Environment"], "e": "Ótimo para recuperar uma chamada que você não salvou." },
+    { "q": "Por que anotar o company_id do GET /me?", "o": ["Algumas aulas pedem esse ID no body, como Criar Vendedor", "Para gerar o token", "Para ativar o Environment", "Não é usado no curso"], "e": "É o ID da empresa dona do token." },
+    { "q": "Qual o padrão de nome das requests na collection?", "o": ["MÉTODO caminho — nome do endpoint na doc oficial", "Nome do cliente atendido", "Data do teste", "Número da aula"], "e": "Ex.: POST /leads — Criar Lead." }
+  ]
+}
