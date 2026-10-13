@@ -1,67 +1,65 @@
-# CRM API Integration — Hands-on Course with Postman
+# Integração com API de CRM — Curso prático com Postman
 
-A practical, self-paced course on integrating with a CRM's REST API, written in Markdown and paired with a ready-to-import Postman collection. It covers leads, users and companies, lead distribution rules and queues, webhooks, automation with the Postman Collection Runner, and troubleshooting.
+Curso prático e autoguiado sobre integração com a API REST de um CRM, escrito em Markdown e acompanhado de uma collection do Postman pronta para importar. Cobre leads, usuários e empresas, regras e filas de distribuição, webhooks, automação com o Collection Runner do Postman e diagnóstico de problemas.
 
-It was created for a technical support team, so that analysts can reproduce, test and diagnose a customer's API integration on their own instead of escalating every API-related ticket.
+Foi criado para um time de suporte técnico, para que os analistas consigam reproduzir, testar e diagnosticar a integração de um cliente por conta própria, em vez de escalar todo chamado que envolve API.
 
-> **Independent educational material.** Based on the public API documentation of C2S (Contact2Sale): <https://docs-api-leads.c2sapp.com/>. This is not an official product and is not maintained by the company. Where the course notes differences between the documentation and the observed API behavior, those notes come from tests on a test account and may change over time.
+> **Material educacional independente.** Baseado na documentação pública da API da C2S (Contact2Sale): <https://docs-api-leads.c2sapp.com/>. Não é um produto oficial e não é mantido pela empresa. Quando o curso aponta diferenças entre a documentação e o comportamento observado da API, essas observações vêm de testes numa conta de teste e podem mudar com o tempo.
 
-The course content is in **Brazilian Portuguese**.
+## Estrutura do repositório
 
-## Repository structure
-
-| Path | Contents |
+| Caminho | Conteúdo |
 | --- | --- |
-| `docs/curso/` | The course: an overview plus 8 modules (46 lessons), from API fundamentals to diagnostics |
-| `docs/quiz/` | Quizzes in JSON: 4 questions per lesson and a 12-question bank per module |
-| `docs/00-referencia-api.md` | Quick reference: endpoints, payload shapes, webhooks, error codes and FAQ |
-| `postman/` | Postman collection (39 requests grouped as in the official docs) and an environment template |
-| `docs-site/index.html` | The whole course as a single static HTML page, with lesson quizzes, module tests and progress saved in the browser |
-| `tools/` | PowerShell scripts that generate the Postman files and the HTML page from the sources |
+| `docs/curso/` | O curso: visão geral e 8 módulos (46 aulas), dos fundamentos de API ao diagnóstico |
+| `docs/quiz/` | Questionários em JSON: 4 questões por aula e um banco de 12 questões por módulo |
+| `docs/00-referencia-api.md` | Referência rápida: endpoints, formatos de body, webhooks, códigos de erro e dúvidas frequentes |
+| `postman/` | Collection do Postman (39 requests, agrupadas como na documentação oficial) e um modelo de environment |
+| `docs-site/index.html` | O curso inteiro numa única página HTML estática, com questionários por aula, testes por módulo e progresso salvo no navegador |
+| `tools/` | Scripts em PowerShell que geram os arquivos do Postman e a página HTML a partir das fontes |
 
-| Module | Topic |
+| Módulo | Tema |
 | --- | --- |
-| M0 | API fundamentals: HTTP methods, URLs, headers, JSON, status codes |
-| M1 | Postman from scratch: environments, collections, inherited authentication |
-| M2 | Leads: list, filter, paginate, create, update, forward, tags, messages, status, closed deals |
-| M3 | Users, companies and tags |
-| M4 | Distribution rules and queues |
-| M5 | Sales stand and blocklist |
-| M6 | Webhooks: subscribing, testing and troubleshooting delivery |
-| M7 | Automation (Collection Runner), reproducing a customer's integration, diagnostics checklist |
+| M0 | Fundamentos de API: métodos HTTP, URLs, headers, JSON e códigos de status |
+| M1 | Postman do zero: environments, collections e autenticação herdada |
+| M2 | Leads: listar, filtrar, paginar, criar, atualizar, encaminhar, tags, mensagens, status e negócio fechado |
+| M3 | Usuários, empresas e tags |
+| M4 | Regras e filas de distribuição |
+| M5 | Stand de vendas e blocklist |
+| M6 | Webhooks: assinatura, testes e diagnóstico de entrega |
+| M7 | Automação (Collection Runner), simulação da integração do cliente e roteiro de diagnóstico |
 
-## How to use
+## Como usar
 
-1. Install [Postman](https://www.postman.com/downloads/) (desktop app).
-2. **Import** `postman/API-C2S.postman_collection.json` and `postman/C2S.postman_environment.json`.
-3. Select the environment and fill in `token` with a token from **your own test account**. Never use a customer's production token for practice.
-4. Start with read-only requests (`GET`). Write requests are blocked until you deliberately set `allow_writes = true` in the environment.
-5. Follow the lessons in `docs/curso/` in order, or open `docs-site/index.html` in a browser to take the course with quizzes.
+1. Instale o [Postman](https://www.postman.com/downloads/) (aplicativo desktop).
+2. **Importe** `postman/API-C2S.postman_collection.json` e `postman/C2S.postman_environment.json`.
+3. Selecione o environment e preencha `token` com um token da **sua própria conta de teste**. Nunca pratique com o token de produção de um cliente.
+4. Comece pelas requests de leitura (`GET`). As requests de escrita ficam bloqueadas até você definir, de propósito, `allow_writes = true` no environment.
+5. Siga as aulas de `docs/curso/` em ordem, ou abra `docs-site/index.html` no navegador para fazer o curso com os questionários.
 
-To regenerate the generated files after editing the sources (Windows PowerShell):
+Para gerar de novo os arquivos derivados depois de editar as fontes (Windows PowerShell):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools/build-postman.ps1   # postman/*.json
 powershell -ExecutionPolicy Bypass -File tools/build-trilha.ps1    # docs-site/index.html
 ```
 
-## API security practices covered
+## Boas práticas de segurança de API abordadas
 
-- **Bearer authentication:** every call sends `Authorization: Bearer <token>`. The collection sets it once at collection level and every request inherits it, so the token is never copied into individual requests.
-- **Tokens per account, kept out of files:** the token lives in an environment variable marked as *secret*; the environment template ships with it empty. The course explains that the token represents the whole company account, is shown only once, and should be replaced if exposed.
-- **Write protection:** a collection-level pre-request script refuses any non-`GET` request unless `allow_writes` is `true`, which prevents accidental changes on the wrong account.
-- **Reading errors before escalating:** how to tell a request problem (4xx) from a server problem (5xx), including this API's specifics (an invalid or missing token returns `403 access_denied`, validation errors also return `403` with a message, a missing required field can return `401`, and duplicates or mismatches return `422`), plus rate limiting (`429`, 10 calls per minute per endpoint).
-- **Webhooks:** subscribing and cancelling events, testing delivery with a request inspector, why one URL per token matters, and why the receiving endpoint should validate requests on its own side.
-- **Least-impact testing:** use a test account, prefix test data, prefer reads, restore queue settings after testing, and never paste real tokens into tickets or chats.
+- **Autenticação Bearer:** toda chamada envia `Authorization: Bearer <token>`. A collection configura isso uma vez, no nível da collection, e todas as requests herdam; o token nunca é copiado para requests individuais.
+- **Token por conta, fora dos arquivos:** o token fica numa variável do environment marcada como *secret*, e o modelo de environment vem com ela vazia. O curso explica que o token representa a conta inteira da empresa, aparece uma única vez e deve ser trocado se for exposto.
+- **Proteção de escrita:** um script de pré-requisição no nível da collection recusa qualquer request que não seja `GET` enquanto `allow_writes` não for `true`, evitando alterações acidentais na conta errada.
+- **Ler o erro antes de escalar:** como distinguir problema na requisição (4xx) de problema no servidor (5xx), incluindo as particularidades desta API (token inválido ou ausente devolve `403 access_denied`, erros de validação também devolvem `403` com uma mensagem, campo obrigatório ausente pode devolver `401`, e duplicidades ou dados que não conferem devolvem `422`), além do limite de requisições (`429`, 10 chamadas por minuto por endpoint).
+- **Webhooks:** assinar e cancelar eventos, testar a entrega com um inspetor de requisições, por que vale uma URL por token e por que o endpoint que recebe deve validar as requisições do seu lado.
+- **Testes de menor impacto:** usar conta de teste, identificar os dados de teste com prefixo, preferir leituras, restaurar as filas depois de testar e nunca colar tokens reais em chamados ou conversas.
 
-## What I learned building it
+## O que aprendi construindo o curso
 
-- Reading an API reference critically and validating it against real responses: pagination, date formats and error codes did not always match the documentation, and the course records those differences.
-- Turning repetitive support investigations into a step-by-step diagnostic routine (collect, validate the token, reproduce, compare, escalate with evidence).
-- Designing safe defaults for people who are learning, so that a mistake costs a blocked request instead of changed customer data.
+- Ler uma referência de API com olhar crítico e validá-la contra respostas reais: paginação, formatos de data e códigos de erro nem sempre batiam com a documentação, e o curso registra essas diferenças.
+- Transformar investigações repetitivas do suporte num roteiro de diagnóstico passo a passo: coletar, validar o token, reproduzir, comparar e escalar com evidências.
+- Definir padrões seguros para quem está aprendendo, para que um erro custe uma requisição bloqueada, e não dados de clientes alterados.
 
 ---
 
-### Resumo em português
+### English summary
 
-Curso prático, em Markdown e com collection do Postman, sobre integração com a API de um CRM: leads, cadastros, distribuição, webhooks, automação e diagnóstico. Foi criado para que o time de suporte técnico consiga testar e diagnosticar integrações de clientes sem depender de escalonamentos. Material educacional independente, baseado na documentação pública da API da C2S (<https://docs-api-leads.c2sapp.com/>); não é um produto oficial. Para usar, importe a collection e o environment no Postman, preencha o token da **sua própria conta de teste** e lembre que a escrita fica bloqueada até `allow_writes = true`.
+A hands-on course, in Markdown with a Postman collection, on integrating with a CRM's REST API: leads, users and companies, distribution rules and queues, webhooks, automation and troubleshooting. It was built so that a technical support team can test and diagnose customer integrations without escalating every API ticket. Independent educational material, based on the public API documentation of C2S (<https://docs-api-leads.c2sapp.com/>); not an official product. The course content is in Brazilian Portuguese. To use it, import the collection and the environment into Postman, fill in a token from **your own test account**, and note that write requests stay blocked until `allow_writes = true`.
