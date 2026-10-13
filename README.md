@@ -1,4 +1,4 @@
-# Integração com API de CRM — Curso prático com Postman
+# Integração com API de CRM | Curso prático com Postman
 
 Curso prático e autoguiado sobre integração com a API REST de um CRM, escrito em Markdown e acompanhado de uma collection do Postman pronta para importar. Cobre leads, usuários e empresas, regras e filas de distribuição, webhooks, automação com o Collection Runner do Postman e diagnóstico de problemas.
 
