@@ -1,0 +1,1962 @@
+{
+    "info":  {
+                 "name":  "API C2S",
+                 "description":  "Collection do time de Suporte C2S para testar a API de integração (https://docs-api-leads.c2sapp.com/).\n\n**Como usar**\n1. Importe também o environment `C2S` e preencha `token` (tipo secret).\n2. Rode **00 Setup → GET /me**. Se aparecer a empresa certa, o token está ok.\n3. Requests de escrita (POST/PUT/PATCH) ficam **bloqueados** até você definir `allow_writes = true`. Use só em conta de teste ou com autorização do cliente.\n4. As requests salvam IDs sozinhas (`lead_id`, `tag_id`, `queue_id`...). Veja o **Console** para as listas de IDs.\n\nItens marcados **[Validar]** ainda precisam de confirmação com Produto/Dev.\nGerada por `tools/build-postman.ps1` — edite o script e gere de novo em vez de editar o JSON à mão.",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "auth":  {
+                 "type":  "bearer",
+                 "bearer":  [
+                                {
+                                    "key":  "token",
+                                    "value":  "{{token}}",
+                                    "type":  "string"
+                                }
+                            ]
+             },
+    "event":  [
+                  {
+                      "listen":  "prerequest",
+                      "script":  {
+                                     "type":  "text/javascript",
+                                     "exec":  [
+                                                  "// Trava de segurança: requests de escrita só rodam com allow_writes = \"true\" no environment.",
+                                                  "const method = pm.request.method;",
+                                                  "if (method !== \"GET\" \u0026\u0026 pm.environment.get(\"allow_writes\") !== \"true\") {",
+                                                  "    throw new Error(\"Escrita bloqueada (\" + method + \"). Confirme que está numa conta de TESTE e defina allow_writes = true no environment.\");",
+                                                  "}"
+                                              ]
+                                 }
+                  },
+                  {
+                      "listen":  "test",
+                      "script":  {
+                                     "type":  "text/javascript",
+                                     "exec":  [
+                                                  "pm.test(\"Autenticado (não é 403)\", () =\u003e {",
+                                                  "    if (pm.response.code === 403) console.warn(\"403: se a resposta for access_denied, o token é inválido (teste com Informações da Empresa). Se vier \u0027message\u0027, é parâmetro inválido.\");",
+                                                  "    pm.expect(pm.response.code).to.not.eql(403);",
+                                                  "});",
+                                                  "pm.test(\"Tempo de resposta \u003c 10s\", () =\u003e pm.expect(pm.response.responseTime).to.be.below(10000));"
+                                              ]
+                                 }
+                  }
+              ],
+    "item":  [
+                 {
+                     "name":  "Informações Gerais",
+                     "description":  "Teste do token e da empresa dona dele.",
+                     "item":  [
+                                  {
+                                      "name":  "Informações da Empresa · GET /me",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/me",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "me"
+                                                                           ]
+                                                              },
+                                                      "description":  "**Primeiro teste de todo caso de API.** Confirma que o token funciona e a qual empresa pertence.\nSalva `company_id` no environment."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna company_name e company_id\", () =\u003e {",
+                                                                                    "    pm.expect(r).to.have.property(\"company_name\");",
+                                                                                    "    pm.expect(r).to.have.property(\"company_id\");",
+                                                                                    "});",
+                                                                                    "if (r.company_id) pm.environment.set(\"company_id\", r.company_id);",
+                                                                                    "console.log(\"Token pertence a: \" + r.company_name + \" (\" + r.company_id + \")\");"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Leads",
+                     "description":  "Rode Listar Leads ou Criar Lead primeiro para preencher `lead_id`.",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Leads · GET /leads",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads?sort=-created_at\u0026perpage=10",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "sort",
+                                                                                    "value":  "-created_at",
+                                                                                    "disabled":  false,
+                                                                                    "description":  "Mais recentes primeiro"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "perpage",
+                                                                                    "value":  "10",
+                                                                                    "disabled":  false,
+                                                                                    "description":  "Máximo 50"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page",
+                                                                                    "value":  "1",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Página"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "phone",
+                                                                                    "value":  "{{test_phone}}",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Telefone do cliente"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "email",
+                                                                                    "value":  "pedro@exemplo.com",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "E-mail do cliente"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "created_gte",
+                                                                                    "value":  "2026-09-01T03:00:00Z",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Criados a partir de (inclusive). Só UTC com Z"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "created_lt",
+                                                                                    "value":  "2026-10-01T03:00:00Z",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Criados antes de. Só UTC com Z"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "updated_gte",
+                                                                                    "value":  "2026-09-01T03:00:00Z",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Atualizados a partir de. Só UTC com Z"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "updated_lt",
+                                                                                    "value":  "2026-10-01T03:00:00Z",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Atualizados antes de. Só UTC com Z"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "status",
+                                                                                    "value":  "novo",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "novo, em_negociacao, arquivado... (status=new devolve 0)"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "tags",
+                                                                                    "value":  "Quente",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Nomes de tags separados por vírgula"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Busca leads. Ative só os filtros que precisar na aba **Params**. Máximo 50 por página.\n`status` aceita: novo, em_negociacao, convertido, negocio_fechado, arquivado, resgatado, pendente, recusado, finalizado.\n`sort` aceita created_at / updated_at (prefixo `-` = decrescente).\nSalva o `id` do primeiro resultado em `lead_id`."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna data[] e meta.total\", () =\u003e {",
+                                                                                    "    pm.expect(r.data).to.be.an(\"array\");",
+                                                                                    "    pm.expect(r.meta).to.have.property(\"total\");",
+                                                                                    "});",
+                                                                                    "if (r.meta) {",
+                                                                                    "    const perpage = Number(pm.request.url.query.get(\"perpage\")) || 10;",
+                                                                                    "    console.log(\"Total: \" + r.meta.total + \" lead(s) em \" + Math.ceil(r.meta.total / perpage) + \" página(s) de \" + perpage);",
+                                                                                    "}",
+                                                                                    "if (r.data \u0026\u0026 r.data.length) pm.environment.set(\"lead_id\", r.data[0].id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Buscar Lead por ID · GET /leads/:id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Lead completo: cliente, produto, vendedor, status, mensagens, atividades (`schedulated_actions`) e tags. 404 = o lead está em outra empresa do grupo. Não use `from_hierarchy_company` (erro na API)."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna data.id igual ao lead_id\", () =\u003e pm.expect(r.data.id).to.eql(pm.environment.get(\"lead_id\")));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Criar Lead · POST /leads",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads"
+                                                                           ]
+                                                              },
+                                                      "description":  "Cria um lead. **Único endpoint com envelope `data.type.attributes`.**\nObrigatório: `phone` **ou** `email` (sem os dois → 423).\n`received_by` na resposta = vendedor que recebeu o lead. Salva `lead_id`.\nValores de `channel_id`: 1 a 5 (1 = Internet, padrão).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"data\": {\n    \"type\": \"lead\",\n    \"attributes\": {\n      \"name\": \"Pedro Silva (TESTE SUPORTE)\",\n      \"email\": \"pedro.teste+{{$timestamp}}@exemplo.com\",\n      \"phone\": \"{{test_phone}}\",\n      \"description\": \"Apartamento 2 quartos\",\n      \"prop_ref\": \"AP12345\",\n      \"price\": \"R$ 250.000,00\",\n      \"city\": \"Campinas\",\n      \"neighbourhood\": \"Botafogo\",\n      \"channel_id\": 1,\n      \"body\": \"Olá, tenho interesse no imóvel.\",\n      \"source\": \"suporte_postman\",\n      \"external_id\": \"SUP-{{$timestamp}}\"\n    }\n  }\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));",
+                                                                                    "pm.test(\"Retornou lead_id\", () =\u003e pm.expect(r.lead_id).to.be.a(\"string\").and.not.empty);",
+                                                                                    "if (r.lead_id) pm.environment.set(\"lead_id\", r.lead_id);",
+                                                                                    "if (r.received_by) pm.environment.set(\"seller_from_id\", r.received_by.id);",
+                                                                                    "if (r.received_by) console.log(\"Lead recebido por: \" + r.received_by.name + \" \u003c\" + r.received_by.email + \"\u003e\");"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Atualizar Lead · PUT /leads/:id",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Envie só o que muda, dentro de `lead` (sem envelope `data`).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"lead\": {\n    \"channel_id\": 1,\n    \"customer\": { \"name\": \"Pedro Silva (TESTE ATUALIZADO)\" },\n    \"product\": { \"description\": \"Apartamento 3 quartos\" }\n  }\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Resposta traz o lead atualizado\", () =\u003e { pm.expect(r.success).to.eql(true); pm.expect(r).to.have.property(\"lead\"); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Encaminhar Lead · PATCH /leads/:id/forward",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/forward",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "forward"
+                                                                           ]
+                                                              },
+                                                      "description":  "Transfere o lead. Rode antes **GET /sellers** e preencha `seller_from_id` (atual) e `seller_id` (novo) no environment.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"seller_from_id\": \"{{seller_from_id}}\",\n  \"seller_to_id\": \"{{seller_id}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "[\"seller_from_id\", \"seller_id\"].forEach(v =\u003e {",
+                                                                                    "    if (!pm.environment.get(v)) throw new Error(\"Preencha \u0027\" + v + \"\u0027 no environment (use GET /sellers).\");",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));",
+                                                                                    "if (r.lead) console.log(\"Novo seller_id (numérico interno): \" + r.lead.seller_id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Listar Tags do Lead · GET /leads/:id/tags",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/tags",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "tags"
+                                                                           ]
+                                                              },
+                                                      "description":  "Lista as tags aplicadas ao lead."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Adicionar Tag ao Lead · POST /leads/:id/create_tag",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/create_tag",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "create_tag"
+                                                                           ]
+                                                              },
+                                                      "description":  "Aplica a tag `{{tag_id}}` ao lead.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"tag_id\": \"{{tag_id}}\" }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "if (!pm.environment.get(\"tag_id\")) throw new Error(\"Preencha \u0027tag_id\u0027 (rode GET /tags ou POST /tags).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Remover Tag do Lead · POST /leads/:id/remove_tag",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/remove_tag",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "remove_tag"
+                                                                           ]
+                                                              },
+                                                      "description":  "Remove uma tag. Também aceita lista: `{ \"tag_id\": [\"id1\", \"id2\"] }`.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"tag_id\": \"{{tag_id}}\" }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "if (!pm.environment.get(\"tag_id\")) throw new Error(\"Preencha \u0027tag_id\u0027 (rode GET /tags ou POST /tags).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Marcar Lead como Lido · POST /leads/:id/mark_as_interacted",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/mark_as_interacted",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "mark_as_interacted"
+                                                                           ]
+                                                              },
+                                                      "description":  "Sem body. Usado quando o atendimento acontece fora do C2S (ex.: chatbot)."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));",
+                                                                                    "pm.test(\"read_at preenchido\", () =\u003e pm.expect(r.lead.read_at).to.be.a(\"string\"));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Criar Mensagem no Lead · POST /leads/:id/create_message",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/create_message",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "create_message"
+                                                                           ]
+                                                              },
+                                                      "description":  "Grava mensagem no histórico (chatbots / WhatsApp). Opcionais: `url`, `external_id`, `parent_message_id`, `tags`.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"body\": \"Mensagem de teste do Suporte\",\n  \"from\": \"bot\",\n  \"origin\": \"whatsapp\",\n  \"message_type\": \"text\",\n  \"sender_name\": \"Assistente Virtual\",\n  \"created_at\": \"{{$isoTimestamp}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Criar Atividade no Lead · POST /leads/:id/create_activity",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/create_activity",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "create_activity"
+                                                                           ]
+                                                              },
+                                                      "description":  "Cria atividade/lembrete. Aparece em `schedulated_actions`. `send_push: true` notifica o vendedor.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"date\": \"2026-12-01T14:00:00-03:00\",\n  \"type\": { \"activity\": true },\n  \"body\": \"Ligar para confirmar visita (TESTE)\",\n  \"send_push\": false,\n  \"title\": \"Retorno ao cliente\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Atualizar Status do Lead · POST /leads/:id/update_status",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/update_status",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "update_status"
+                                                                           ]
+                                                              },
+                                                      "description":  "`status`: 0 = novo, 1 = em negociação, 3 = perdido/arquivado.\n`lost_reason_ids` são IDs de motivo de perda da conta **[Validar origem]**.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"status\": 3,\n  \"message\": \"Teste do Suporte - cliente sem interesse\",\n  \"lost_reason_ids\": []\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "if (r.data \u0026\u0026 r.data.attributes \u0026\u0026 r.data.attributes.lead_status)",
+                                                                                    "    console.log(\"Status agora: \" + r.data.attributes.lead_status.name + \" (\" + r.data.attributes.lead_status.alias + \")\");"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Fechar Negócio do Lead · POST /leads/:id/done_deal",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/leads/{{lead_id}}/done_deal",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "leads",
+                                                                               "{{lead_id}}",
+                                                                               "done_deal"
+                                                                           ]
+                                                              },
+                                                      "description":  "Registra negócio fechado. **Data só `AAAA-MM-DD`.**",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"prop_ref\": \"AP12345\",\n  \"done_type_negotiation\": \"sale\",\n  \"info\": \"Venda de teste do Suporte\",\n  \"date\": \"2026-09-23\",\n  \"value\": \"250000\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Usuários",
+                     "description":  "Descobrir e gerenciar vendedores.",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Vendedores · GET /sellers",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/sellers",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "sellers"
+                                                                           ]
+                                                              },
+                                                      "description":  "Lista vendedores (id criptografado, nome, e-mail, flags). Mostra os IDs no Console. Copie o do vendedor de destino para `seller_id`."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna uma lista\", () =\u003e pm.expect(r).to.be.an(\"array\"));",
+                                                                                    "(Array.isArray(r) ? r : []).forEach(s =\u003e console.log(s.id + \"  \" + s.name + \"  recebe=\" + s.is_recipient + \"  master=\" + s.is_master));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Criar Vendedor · POST /sellers",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/sellers",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "sellers"
+                                                                           ]
+                                                              },
+                                                      "description":  "Cria vendedor na empresa `{{company_id}}` (rode GET /me antes). Salva o `id` em `new_seller_id`.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"company_id\": \"{{company_id}}\",\n  \"name\": \"Vendedor Teste Suporte\",\n  \"username\": \"vendedor.teste.{{$timestamp}}\",\n  \"email\": \"vendedor.teste+{{$timestamp}}@exemplo.com\",\n  \"phone1\": \"11988887777\",\n  \"is_recipient\": false,\n  \"is_master\": false\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retornou id\", () =\u003e pm.expect(r.id).to.be.a(\"string\"));",
+                                                                                    "if (r.id) pm.environment.set(\"new_seller_id\", r.id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Atualizar Vendedor · PUT /sellers/:id",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/sellers/{{new_seller_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "sellers",
+                                                                               "{{new_seller_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Aceita os campos do POST + `recipient_rotation`, `recipient_distribution`, `recipient_memory`, `can_view_bucket`.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name\": \"Vendedor Teste Suporte (editado)\",\n  \"is_recipient\": false\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Batch Update Timeshift · PUT /sellers/batch_update_timeshift",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/sellers/batch_update_timeshift",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "sellers",
+                                                                               "batch_update_timeshift"
+                                                                           ]
+                                                              },
+                                                      "description":  "Atualiza rodízio de vários vendedores. Processa em ordem reversa e escalona `last_lead_received_at` em 1s para definir prioridade.\nValores de `recipient_*` **[Validar]** — o spec oficial mostra só \"...\".",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"seller_ids\": [\"{{new_seller_id}}\"],\n  \"recipient_rotation\": \"[Validar]\",\n  \"recipient_distribution\": \"[Validar]\",\n  \"recipient_memory\": \"[Validar]\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Empresas",
+                     "description":  "Matriz e filiais do grupo.",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Empresas · GET /companies",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/companies",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "companies"
+                                                                           ]
+                                                              },
+                                                      "description":  "Lista as empresas do grupo (`id`, `name`). Use para achar o `company_id` da unidade certa."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna uma lista de empresas\", () =\u003e pm.expect(r).to.be.an(\"array\"));",
+                                                                                    "(Array.isArray(r) ? r : []).forEach(c =\u003e console.log(c.id + \"  \" + c.name));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Tags",
+                     "description":  "Descobrir e criar tags.",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Tags · GET /tags",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/tags",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "tags"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "name",
+                                                                                    "value":  "Quente",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Filtrar por nome"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "autofill",
+                                                                                    "value":  "true",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Só tags de preenchimento automático"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Filtros opcionais `name` e `autofill`. Salva o primeiro `id` em `tag_id`."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna data[]\", () =\u003e pm.expect(r.data).to.be.an(\"array\"));",
+                                                                                    "(r.data || []).forEach(t =\u003e console.log(t.id + \"  \" + t.attributes.name));",
+                                                                                    "if (r.data \u0026\u0026 r.data.length) pm.environment.set(\"tag_id\", r.data[0].id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Criar Tag · POST /tags",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/tags",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "tags"
+                                                                           ]
+                                                              },
+                                                      "description":  "Se já existir tag igual, devolve a existente (201) com a chave `errors`. Salva `tag_id`.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"tag\": { \"name\": \"Teste Suporte\", \"autofill\": false, \"instructions\": \"Criada pelo Postman do Suporte\" }\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "if (r.errors) console.log(\"Tag já existia: \" + JSON.stringify(r.errors));",
+                                                                                    "if (r.tag \u0026\u0026 r.tag.id) pm.environment.set(\"tag_id\", r.tag.id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Regras de Distribuição",
+                     "description":  "Regras por código (cod_1..3) e vendedor.",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Regras de Distribuição · GET /distribution_rules",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/distribution_rules",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "distribution_rules"
+                                                                           ]
+                                                              },
+                                                      "description":  "Regras de distribuição (`cod_1..3`, `priority`, `type_rule`, `seller_id`)."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna uma lista\", () =\u003e pm.expect(r).to.be.an(\"array\"));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Criar Regra de Distribuição · POST /distribution_rules",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/distribution_rules",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "distribution_rules"
+                                                                           ]
+                                                              },
+                                                      "description":  "`type_rule`: `distribution` ou `rotation`. `cod_1..3` opcionais — significado na tela **[Validar]**.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"cod_1\": \"TESTE-SUPORTE\",\n  \"priority\": 1,\n  \"type_rule\": \"distribution\",\n  \"seller_id\": \"{{seller_id}}\",\n  \"company_id\": \"{{company_id}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Filas de Distribuição",
+                     "description":  "IDs de fila são numéricos.",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Filas de Distribuição · GET /distribution_queues/list_queues",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/distribution_queues/list_queues",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "distribution_queues",
+                                                                               "list_queues"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "page",
+                                                                                    "value":  "1",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Página"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "per_page",
+                                                                                    "value":  "20",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Itens por página"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Lista filas com `rules` e `next_seller`. **IDs de fila são numéricos.** Salva o primeiro em `queue_id`."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna distribution_queues[]\", () =\u003e pm.expect(r.distribution_queues).to.be.an(\"array\"));",
+                                                                                    "(r.distribution_queues || []).forEach(q =\u003e console.log(q.id + \"  \" + q.name + \"  próximo: \" + (q.next_seller ? q.next_seller.seller_name : \"-\")));",
+                                                                                    "if (r.distribution_queues \u0026\u0026 r.distribution_queues.length) pm.environment.set(\"queue_id\", r.distribution_queues[0].id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Listar Vendedores da Fila · GET /distribution_queues/:id/sellers",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/distribution_queues/{{queue_id}}/sellers",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "distribution_queues",
+                                                                               "{{queue_id}}",
+                                                                               "sellers"
+                                                                           ]
+                                                              },
+                                                      "description":  "Quem está na fila e a prioridade. Salva o `id` (numérico) do primeiro em `queue_seller_id`."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "if (!pm.environment.get(\"queue_id\")) throw new Error(\"Preencha \u0027queue_id\u0027 (rode GET list_queues).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna distribution_queue_sellers[]\", () =\u003e pm.expect(r.distribution_queue_sellers).to.be.an(\"array\"));",
+                                                                                    "(r.distribution_queue_sellers || []).forEach(s =\u003e console.log(s.id + \"  prio \" + s.priority + \"  \" + s.seller_name + \"  \" + s.status));",
+                                                                                    "if (r.distribution_queue_sellers \u0026\u0026 r.distribution_queue_sellers.length) pm.environment.set(\"queue_seller_id\", r.distribution_queue_sellers[0].id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Atualizar Prioridades dos Vendedores · POST /distribution_queues/:id/sellers_priorities",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/distribution_queues/{{queue_id}}/sellers_priorities",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "distribution_queues",
+                                                                               "{{queue_id}}",
+                                                                               "sellers_priorities"
+                                                                           ]
+                                                              },
+                                                      "description":  "Formato testado em 25/09/2026 (a doc oficial não informa). `id` = vínculo vendedor-fila (Listar Vendedores da Fila).\n**Sempre envie `\"status\": 1`: sem ele a API desativa o vendedor na fila.**",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"distribution_queue_sellers\": [\n    { \"id\": {{queue_seller_id}}, \"priority\": 1, \"status\": 1 }\n  ]\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "if (!pm.environment.get(\"queue_id\")) throw new Error(\"Preencha \u0027queue_id\u0027 (rode GET list_queues).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Nenhum vendedor ficou desativado\", () =\u003e {",
+                                                                                    "    (r.distribution_queue_sellers || []).forEach(s =\u003e pm.expect(s.status, s.seller_name).to.eql(\"enabled\"));",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Redistribuir Lead · POST /distribution_queues/:id/redistribute_lead",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/distribution_queues/{{queue_id}}/redistribute_lead",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "distribution_queues",
+                                                                               "{{queue_id}}",
+                                                                               "redistribute_lead"
+                                                                           ]
+                                                              },
+                                                      "description":  "Redistribui `{{lead_id}}` pela fila. A resposta traz `new_seller`.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"id\": \"{{lead_id}}\" }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "if (!pm.environment.get(\"queue_id\")) throw new Error(\"Preencha \u0027queue_id\u0027 (rode GET list_queues).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));",
+                                                                                    "if (r.new_seller) console.log(\"Novo vendedor: \" + r.new_seller.name);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Definir Próximo Vendedor · POST /distribution_queues/:id/next_seller",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/distribution_queues/{{queue_id}}/next_seller",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "distribution_queues",
+                                                                               "{{queue_id}}",
+                                                                               "next_seller"
+                                                                           ]
+                                                              },
+                                                      "description":  "Força quem recebe o próximo lead. `next_queue_seller_id` = `id` numérico de GET .../sellers.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"next_queue_seller_id\": {{queue_seller_id}} }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "if (!pm.environment.get(\"queue_id\")) throw new Error(\"Preencha \u0027queue_id\u0027 (rode GET list_queues).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Webhooks",
+                     "description":  "**1 endpoint por token.** Cadastrar outra URL apaga a anterior — mas os 3 gatilhos podem usar a mesma URL (uma assinatura por gatilho).\nCom o token do cliente, assinar um webhook substitui a URL que ele usa.\nGatilhos: `on_create_lead` (criação), `on_update_lead` (novo log de alteração), `on_close_lead` (arquivado ou negócio fechado).",
+                     "item":  [
+                                  {
+                                      "name":  "Assinar Webhook · on_create_lead",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/subscribe",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "subscribe"
+                                                                           ]
+                                                              },
+                                                      "description":  "**1 endpoint por token.** Cadastrar outra URL apaga a anterior — mas os 3 gatilhos podem usar a mesma URL (uma assinatura por gatilho).\nCom o token do cliente, assinar um webhook substitui a URL que ele usa.\nGatilhos: `on_create_lead` (criação), `on_update_lead` (novo log de alteração), `on_close_lead` (arquivado ou negócio fechado).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"hook_action\": \"on_create_lead\",\n  \"hook_url\": \"{{hook_url}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const u = pm.environment.get(\"hook_url\") || \"\";",
+                                                                                    "if (!/^https?:\\/\\//.test(u)) throw new Error(\"Preencha \u0027hook_url\u0027 (ex.: sua URL do webhook.site).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Assinar Webhook · on_update_lead",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/subscribe",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "subscribe"
+                                                                           ]
+                                                              },
+                                                      "description":  "**1 endpoint por token.** Cadastrar outra URL apaga a anterior — mas os 3 gatilhos podem usar a mesma URL (uma assinatura por gatilho).\nCom o token do cliente, assinar um webhook substitui a URL que ele usa.\nGatilhos: `on_create_lead` (criação), `on_update_lead` (novo log de alteração), `on_close_lead` (arquivado ou negócio fechado).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"hook_action\": \"on_update_lead\",\n  \"hook_url\": \"{{hook_url}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const u = pm.environment.get(\"hook_url\") || \"\";",
+                                                                                    "if (!/^https?:\\/\\//.test(u)) throw new Error(\"Preencha \u0027hook_url\u0027 (ex.: sua URL do webhook.site).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Assinar Webhook · on_close_lead",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/subscribe",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "subscribe"
+                                                                           ]
+                                                              },
+                                                      "description":  "**1 endpoint por token.** Cadastrar outra URL apaga a anterior — mas os 3 gatilhos podem usar a mesma URL (uma assinatura por gatilho).\nCom o token do cliente, assinar um webhook substitui a URL que ele usa.\nGatilhos: `on_create_lead` (criação), `on_update_lead` (novo log de alteração), `on_close_lead` (arquivado ou negócio fechado).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"hook_action\": \"on_close_lead\",\n  \"hook_url\": \"{{hook_url}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const u = pm.environment.get(\"hook_url\") || \"\";",
+                                                                                    "if (!/^https?:\\/\\//.test(u)) throw new Error(\"Preencha \u0027hook_url\u0027 (ex.: sua URL do webhook.site).\");"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Cancelar Webhook · on_create_lead",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/unsubscribe",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "unsubscribe"
+                                                                           ]
+                                                              },
+                                                      "description":  "Cancela a assinatura do gatilho. Rode ao terminar o teste.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"hook_action\": \"on_create_lead\" }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Cancelar Webhook · on_update_lead",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/unsubscribe",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "unsubscribe"
+                                                                           ]
+                                                              },
+                                                      "description":  "Cancela a assinatura do gatilho. Rode ao terminar o teste.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"hook_action\": \"on_update_lead\" }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Cancelar Webhook · on_close_lead",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/unsubscribe",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "unsubscribe"
+                                                                           ]
+                                                              },
+                                                      "description":  "Cancela a assinatura do gatilho. Rode ao terminar o teste.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"hook_action\": \"on_close_lead\" }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"success = true\", () =\u003e pm.expect(r.success).to.eql(true));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Stand de Vendas",
+                     "description":  "Requer módulo Stand de Vendas ativo.",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Estandes · GET /sales_stand/stands",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/sales_stand/stands",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "sales_stand",
+                                                                               "stands"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "company_ids[]",
+                                                                                    "value":  "{{company_id}}",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Filtrar por empresa"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Lista estandes e o `custom_lead_form_id` de cada um. Só funciona com o módulo Stand de Vendas ativo. Caminho conforme openapi.json; o llms-full.txt mostra `/integration/integration/...` — se der 404, teste com `{{base_url}}/integration/sales_stand/...` **[Validar]**."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "(r.data || []).forEach(s =\u003e console.log(s.id + \"  \" + s.name + \"  form=\" + s.custom_lead_form_id));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Listar Leads do Estande · GET /sales_stand/leads",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/sales_stand/leads?start_date=2026-09-01\u0026end_date=2026-09-23",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "sales_stand",
+                                                                               "leads"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "start_date",
+                                                                                    "value":  "2026-09-01",
+                                                                                    "disabled":  false,
+                                                                                    "description":  "Início (AAAA-MM-DD)"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "end_date",
+                                                                                    "value":  "2026-09-23",
+                                                                                    "disabled":  false,
+                                                                                    "description":  "Fim (AAAA-MM-DD)"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "custom_lead_form_ids[]",
+                                                                                    "value":  "",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "ID do formulário (de /stands)"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "company_ids[]",
+                                                                                    "value":  "{{company_id}}",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Filtrar por empresa"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page",
+                                                                                    "value":  "1",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Página"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Datas AAAA-MM-DD (padrão: último mês). Só funciona com o módulo Stand de Vendas ativo. Caminho conforme openapi.json; o llms-full.txt mostra `/integration/integration/...` — se der 404, teste com `{{base_url}}/integration/sales_stand/...` **[Validar]**."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Resumo de Presenças · GET /sales_stand/attendance_summaries",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/sales_stand/attendance_summaries?start_date=2026-09-01\u0026end_date=2026-09-23",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "sales_stand",
+                                                                               "attendance_summaries"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "start_date",
+                                                                                    "value":  "2026-09-01",
+                                                                                    "disabled":  false,
+                                                                                    "description":  "Obrigatório"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "end_date",
+                                                                                    "value":  "2026-09-23",
+                                                                                    "disabled":  false,
+                                                                                    "description":  "Obrigatório"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "company_ids[]",
+                                                                                    "value":  "{{company_id}}",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Filtrar por empresa"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page",
+                                                                                    "value":  "1",
+                                                                                    "disabled":  true,
+                                                                                    "description":  "Página"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "`start_date` e `end_date` **obrigatórios**. Só funciona com o módulo Stand de Vendas ativo. Caminho conforme openapi.json; o llms-full.txt mostra `/integration/integration/...` — se der 404, teste com `{{base_url}}/integration/sales_stand/...` **[Validar]**."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Blocklist",
+                     "description":  "Bloqueio de telefone/e-mail.",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Blocklist · GET /hierarchy_blocklists",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/hierarchy_blocklists",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "hierarchy_blocklists"
+                                                                           ]
+                                                              },
+                                                      "description":  "Telefones/e-mails bloqueados. Caminho conforme openapi.json; o llms-full.txt mostra `/integration/integration/...` **[Validar]**."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "pm.test(\"Retorna blocklists[]\", () =\u003e pm.expect(r.blocklists).to.be.an(\"array\"));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Adicionar à Blocklist · POST /hierarchy_blocklists",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/hierarchy_blocklists",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "hierarchy_blocklists"
+                                                                           ]
+                                                              },
+                                                      "description":  "Bloqueia `phone` e/ou `email`. **`remove_leads: true` apaga os leads existentes do contato.** Já bloqueado → 409. Caminho conforme openapi.json; o llms-full.txt mostra `/integration/integration/...` **[Validar]**.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"hierarchy_blocklist\": { \"phone\": \"{{test_phone}}\", \"remove_leads\": false }\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"Status HTTP esperado (200, 201, 409)\", () =\u003e pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));",
+                                                                                    "let r = {}; try { r = pm.response.json(); } catch (e) { pm.test(\"Resposta é JSON válido\", () =\u003e { throw e; }); }",
+                                                                                    "if (pm.response.code === 409) console.log(\"Contato já estava na blocklist.\");"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 }
+             ]
+}
