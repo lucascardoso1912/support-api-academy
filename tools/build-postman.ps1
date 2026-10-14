@@ -1,13 +1,8 @@
-﻿# Gera postman/API-C2S.postman_collection.json e postman/C2S.postman_environment.json
-# Uso (na raiz do projeto):  powershell -ExecutionPolicy Bypass -File tools/build-postman.ps1
-# Fonte: docs/00-referencia-api.md + spec/openapi.json (oficial).
-
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $outDir = Join-Path $root 'postman'
 New-Item -ItemType Directory -Force $outDir | Out-Null
 
-# ---------------------------------------------------------------- helpers
 
 function Lines([string]$text) { ,@($text -split "`r?`n") }
 
@@ -59,17 +54,14 @@ function Folder([string]$Name, [string]$Desc, [array]$Items) {
     [ordered]@{ name = $Name; description = $Desc; item = $Items }
 }
 
-# Trechos de teste reutilizados
 function T-Status([int[]]$codes) {
     $list = ($codes -join ', ')
     "pm.test(`"Status HTTP esperado ($list)`", () => pm.expect(pm.response.code).to.be.oneOf([$list]));"
 }
 $T_Json = 'let r = {}; try { r = pm.response.json(); } catch (e) { pm.test("Resposta é JSON válido", () => { throw e; }); }'
 $T_Success = 'pm.test("success = true", () => pm.expect(r.success).to.eql(true));'
-# teste mais comum: status esperado + resposta em JSON válido
 function T-Basic([int[]]$codes) { "$(T-Status $codes)`n$T_Json" }
 
-# ---------------------------------------------------------------- Informações Gerais e Empresas
 
 $me = Req -Name 'Informações da Empresa · GET /me' -Method GET -Path '/me' -Desc @'
 **Primeiro teste de todo caso de API.** Confirma que o token funciona e a qual empresa pertence.
@@ -92,7 +84,6 @@ pm.test("Retorna uma lista de empresas", () => pm.expect(r).to.be.an("array"));
 (Array.isArray(r) ? r : []).forEach(c => console.log(c.id + "  " + c.name));
 "@)
 
-# ---------------------------------------------------------------- Leads
 
 $leadCreate = Req -Name 'Criar Lead · POST /leads' -Method POST -Path '/leads' -Desc @'
 Cria um lead. **Único endpoint com envelope `data.type.attributes`.**
@@ -272,7 +263,6 @@ $leadDeal = Req -Name 'Fechar Negócio do Lead · POST /leads/:id/done_deal' -Me
 }
 '@ -Test (T-Basic 200,201)
 
-# ---------------------------------------------------------------- Usuários
 
 $sellers = Req -Name 'Listar Vendedores · GET /sellers' -Method GET -Path '/sellers' -Desc 'Lista vendedores (id criptografado, nome, e-mail, flags). Mostra os IDs no Console. Copie o do vendedor de destino para `seller_id`.' -Test (@"
 $(T-Status 200)
@@ -317,7 +307,6 @@ Valores de `recipient_*` **[Validar]** — o spec oficial mostra só "...".
 }
 '@ -Test (T-Basic 200)
 
-# ---------------------------------------------------------------- Tags
 
 $tags = Req -Name 'Listar Tags · GET /tags' -Method GET -Path '/tags' -Desc 'Filtros opcionais `name` e `autofill`. Salva o primeiro `id` em `tag_id`.' -Query @(
     ,@('name', 'Quente', $true, 'Filtrar por nome')
@@ -341,7 +330,6 @@ if (r.errors) console.log("Tag já existia: " + JSON.stringify(r.errors));
 if (r.tag && r.tag.id) pm.environment.set("tag_id", r.tag.id);
 "@)
 
-# ---------------------------------------------------------------- Regras e Filas de Distribuição
 
 $rules = Req -Name 'Listar Regras de Distribuição · GET /distribution_rules' -Method GET -Path '/distribution_rules' -Desc 'Regras de distribuição (`cod_1..3`, `priority`, `type_rule`, `seller_id`).' -Test (@"
 $(T-Status 200)
@@ -412,7 +400,6 @@ $queueNext = Req -Name 'Definir Próximo Vendedor · POST /distribution_queues/:
 { "next_queue_seller_id": {{queue_seller_id}} }
 '@ -Test (T-Basic 200)
 
-# ---------------------------------------------------------------- Stand de Vendas
 
 $standNote = 'Só funciona com o módulo Stand de Vendas ativo. Caminho conforme openapi.json; o llms-full.txt mostra `/integration/integration/...` — se der 404, teste com `{{base_url}}/integration/sales_stand/...` **[Validar]**.'
 
@@ -439,7 +426,6 @@ $standSummary = Req -Name 'Resumo de Presenças · GET /sales_stand/attendance_s
     ,@('page', '1', $true, 'Página')
 ) -Test (T-Basic 200)
 
-# ---------------------------------------------------------------- Blocklist
 
 $blockNote = 'Caminho conforme openapi.json; o llms-full.txt mostra `/integration/integration/...` **[Validar]**.'
 
@@ -459,7 +445,6 @@ $T_Json
 if (pm.response.code === 409) console.log("Contato já estava na blocklist.");
 "@)
 
-# ---------------------------------------------------------------- Webhooks
 
 $hookDesc = @'
 **1 endpoint por token.** Cadastrar outra URL apaga a anterior — mas os 3 gatilhos podem usar a mesma URL (uma assinatura por gatilho).
@@ -492,10 +477,8 @@ $hooks += foreach ($action in 'on_create_lead', 'on_update_lead', 'on_close_lead
 "@ -Test $T_Hook
 }
 
-# ---------------------------------------------------------------- collection
 
 $collectionPre = @'
-// Trava de segurança: requests de escrita só rodam com allow_writes = "true" no environment.
 const method = pm.request.method;
 if (method !== "GET" && pm.environment.get("allow_writes") !== "true") {
     throw new Error("Escrita bloqueada (" + method + "). Confirme que está numa conta de TESTE e defina allow_writes = true no environment.");
@@ -536,7 +519,6 @@ Gerada por `tools/build-postman.ps1` — edite o script e gere de novo em vez de
         [ordered]@{ listen = 'test';       script = [ordered]@{ type = 'text/javascript'; exec = (Lines $collectionTest.Trim()) } }
     )
     item = @(
-        # pastas e ordem iguais às seções da documentação oficial (docs-api-leads.c2sapp.com)
         (Folder 'Informações Gerais' 'Teste do token e da empresa dona dele.' @($me))
         (Folder 'Leads' 'Rode Listar Leads ou Criar Lead primeiro para preencher `lead_id`.' @($leadList, $leadGet, $leadCreate, $leadPut, $leadForward, $leadTags, $leadAddTag, $leadRemoveTag, $leadRead, $leadMsg, $leadActivity, $leadStatus, $leadDeal))
         (Folder 'Usuários' 'Descobrir e gerenciar vendedores.' @($sellers, $sellerCreate, $sellerUpdate, $sellerBatch))

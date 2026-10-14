@@ -14,7 +14,6 @@
   })();
 </script>
 <style>
-/* ================= CORES (Support API Academy) ================= */
 :root {
   color-scheme: dark;
   --bg: #0D1017;
@@ -75,7 +74,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; line-height: 1.2
 .icon { flex: none; display: inline-block; vertical-align: middle; }
 * { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 
-/* ---------- barra do topo */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-soft); margin-inline: -16px; padding: 10px 16px; }
 .top .wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -91,7 +89,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; line-height: 1.2
 .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
 .toc-btn { display: none; font: 600 13px var(--body); background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 7px; padding: 6px 12px; cursor: pointer; }
 
-/* ---------- mapa dos módulos */
 .route { margin: 20px 0 8px; overflow-x: auto; padding: 4px 2px 12px; }
 .route ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n, 8), minmax(96px, 1fr)); position: relative; min-width: calc(var(--n, 8) * 96px); }
 .route ol::before { content: ""; position: absolute; left: calc(50% / var(--n, 8)); right: calc(50% / var(--n, 8)); top: 21px; height: 3px; background: var(--line); border-radius: 3px; }
@@ -104,7 +101,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; line-height: 1.2
 .station small { font-size: 11.5px; line-height: 1.25; color: var(--faint); max-width: 11ch; }
 .station:hover small, .station.here small { color: var(--ink); }
 
-/* ---------- layout */
 .layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 36px; align-items: start; padding-block: 12px 80px; }
 .toc { position: sticky; top: 78px; max-height: calc(100vh - 96px); overflow: auto; padding-right: 6px; font-size: 14px; }
 .toc input { width: 100%; font: 13.5px var(--body); padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); margin-bottom: 12px; }
@@ -130,7 +126,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; line-height: 1.2
 .toc .plain:hover { color: var(--accent); }
 .toc .empty { color: var(--faint); padding: 8px 0; }
 
-/* ---------- início */
 .home { display: grid; gap: 20px; margin-bottom: 56px; }
 .home h1 { font-size: clamp(30px, 4.4vw, 44px); font-weight: 700; letter-spacing: -.02em; margin-top: 10px; background: linear-gradient(135deg, var(--ink) 45%, var(--accent) 130%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .lede { font-size: 17.5px; max-width: 64ch; color: var(--muted); margin: 8px 0 0; }
@@ -158,7 +153,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; line-height: 1.2
 .about { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 14px; padding: 4px 20px; }
 .about > summary { cursor: pointer; padding: 14px 0; font: 600 15px var(--display); }
 
-/* ---------- módulos e aulas */
 .module { margin-bottom: 64px; }
 .mod-head { border-top: 2px solid var(--accent); padding-top: 14px; margin-bottom: 18px; }
 .mod-head h2 { font-size: clamp(25px, 3.2vw, 34px); font-weight: 700; letter-spacing: -.015em; margin: 8px 0 6px; }
@@ -176,7 +170,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; line-height: 1.2
 .l-foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; border-top: 1px solid var(--line-soft); margin-top: 22px; padding-top: 14px; }
 .l-foot a { font-size: 13.5px; }
 
-/* ---------- texto das aulas */
 .prose { max-width: 76ch; margin-top: 8px; color: var(--muted); }
 .prose h3 { font-size: 20px; margin: 30px 0 10px; color: var(--ink); }
 .prose h4 { font-size: 16.5px; margin: 26px 0 8px; color: var(--ink); }
@@ -211,7 +204,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; line-height: 1.2
 pre.mermaid { background: var(--surface-2); border-radius: 10px; padding: 14px; overflow-x: auto; text-align: center; font: 12px var(--mono); color: var(--muted); }
 .ref { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 14px; padding: 22px clamp(16px, 3vw, 32px); box-shadow: var(--shadow); }
 
-/* ---------- títulos */
 .rank { display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--body); padding: 5px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); text-decoration: none; white-space: nowrap; }
 .rank:hover { box-shadow: var(--glow); }
 .title-now { margin: 0 0 12px; }
@@ -229,7 +221,6 @@ pre.mermaid { background: var(--surface-2); border-radius: 10px; padding: 14px; 
 .titles li.next::after { content: "próximo"; font: 600 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--accent); background: var(--accent-soft); padding: 1px 6px; border-radius: 99px; }
 .rank-meta { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); }
 .team-title { display: block; font: 500 11.5px var(--body); color: var(--accent); }
-/* só o texto "criador da trilha" em dourado; o resto da linha fica igual às outras */
 .team li.creator .ct { color: var(--gold); }
 .quiz-note.title { background: var(--accent-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
 .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 12px; max-width: min(440px, calc(100vw - 32px)); padding: 14px 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--accent); box-shadow: var(--shadow), var(--glow); }
@@ -242,7 +233,6 @@ pre.mermaid { background: var(--surface-2); border-radius: 10px; padding: 14px; 
 @media (prefers-reduced-motion: reduce) { .toast.show { animation: none; } }
 @media (max-width: 560px) { .rank span { max-width: 14ch; overflow: hidden; text-overflow: ellipsis; } }
 
-/* ---------- questionários, testes e bloqueio */
 .quiz { margin-top: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 14px 16px; }
 .quiz:empty { display: none; }
 .quiz.passed { border-color: color-mix(in srgb, var(--success) 45%, var(--line)); }
@@ -297,7 +287,6 @@ pre.mermaid { background: var(--surface-2); border-radius: 10px; padding: 14px; 
 .instructor { font: 600 12px var(--body); padding: 6px 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; }
 .instructor[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
-/* ---------- painel lateral: títulos e time */
 .side { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 0; }
 .side-head { display: flex; align-items: center; gap: 8px; padding: 10px 10px 0; }
 .side-tabs { display: flex; gap: 4px; flex: 1; background: var(--bg); border: 1px solid var(--line-soft); border-radius: 10px; padding: 3px; }
@@ -443,7 +432,6 @@ button.rank { border: 0; cursor: pointer; }
       .replace(/: (true|false|null)\b/g, ': <span class="n">$1</span>');
   }
 
-  // ---------- markdown
   const hasMarked = typeof window.marked !== "undefined";
   if (hasMarked) {
     marked.use({
@@ -466,7 +454,6 @@ button.rank { border: 0; cursor: pointer; }
   const md = src => hasMarked ? marked.parse(src) : "<pre>" + esc(src) + "</pre>";
   const mdInline = src => hasMarked ? marked.parseInline(src) : esc(src);
 
-  // ---------- conteúdo
   const grade = {};
   DATA.overview.split("\n").forEach(line => {
     const m = line.match(/^\| M(\d+) · (.+?) \| `(.+?)` \| (\d+) \| (.+?) \|\s*$/);
@@ -510,7 +497,6 @@ button.rank { border: 0; cursor: pointer; }
   const TOTAL = allLessons.length;
   const lessonLabel = l => l.id === "projeto" ? "Prova final" : "Aula " + l.id;
 
-  // ---------- início
   const ov = DATA.overview.replace(/\r\n/g, "\n");
   const ovParts = ov.split(/^## /m);
   $("#lede").innerHTML = mdInline(ovParts[0].replace(/^# .+$/m, "").trim().split("\n\n")[0]);
@@ -519,7 +505,6 @@ button.rank { border: 0; cursor: pointer; }
   const endpointLessons = allLessons.filter(l => l.id !== "projeto" && !l.written).length;
   $("#home-eyebrow").innerHTML = "<span>" + modules.length + " módulos</span><span>" + written + " aulas escritas</span><span>" + endpointLessons + " aulas práticas</span>";
 
-  // ---------- mapa
   const route = $("#route");
   route.style.setProperty("--n", modules.length);
   modules.forEach(m => {
@@ -529,7 +514,6 @@ button.rank { border: 0; cursor: pointer; }
     route.appendChild(li);
   });
 
-  // ---------- títulos: um por etapa concluída (teste de módulo aprovado) e um final
   const TITLES = [
     { key: "inicio", emoji: "🌱", name: "Recruta da API", how: "Começou a trilha." },
     { mod: 0, emoji: "📘", name: "Aprendiz da API", how: "Passou no teste do Módulo 0." },
@@ -543,10 +527,9 @@ button.rank { border: 0; cursor: pointer; }
     { key: "final", emoji: "🧙‍♂️", name: "Mestres da API", how: "Passou em todos os testes e na prova final." }
   ];
   const withEmoji = t => t.emoji + " " + t.name;
-  let isCreator = false;   // o dono da página é o criador: com o modo instrutor ligado, tem todos os títulos
+  let isCreator = false;
   const titleOfMod = n => TITLES.find(t => t.mod === n);
 
-  // ---------- índice e aulas
   const tocMods = $("#toc-modules");
   const modsEl = $("#modules");
   let finalArt = null;
@@ -597,7 +580,6 @@ button.rank { border: 0; cursor: pointer; }
       if (l.id === "projeto") finalArt = art; else modBody.appendChild(art);
     });
 
-    // teste do módulo: 10 questões sorteadas do banco, precisa acertar 7
     const test = document.createElement("article");
     test.className = "lesson module-test";
     test.id = "teste-m" + m.num;
@@ -605,7 +587,6 @@ button.rank { border: 0; cursor: pointer; }
       (mi < modules.length - 1 ? "liberar o Módulo " + modules[mi + 1].num : "liberar a prova final") + "</span>" +
       (titleOfMod(m.num) ? '<span class="rank-meta">Título: ' + esc(withEmoji(titleOfMod(m.num))) + "</span>" : "") + '</div></div><div class="quiz" data-kind="teste" data-key="' + m.num + '"></div>';
     modBody.appendChild(test);
-    // a prova final cobre a trilha inteira, então fica depois do teste do último módulo
     if (finalArt) { modBody.appendChild(finalArt); finalArt = null; }
     modsEl.appendChild(sec);
   });
@@ -613,7 +594,6 @@ button.rank { border: 0; cursor: pointer; }
   const ref = DATA.reference.replace(/\r\n/g, "\n").replace(/^# .+\n+.*·.*\n/, "").replace(/^(#{2,5}) /gm, "#$1 ");
   $("#ref-body").innerHTML = md(ref);
 
-  // ---------- etiquetas de método e [Validar]
   $$(".prose code").forEach(c => {
     if (c.closest("pre")) return;
     const m = c.textContent.match(/^(GET|POST|PUT|PATCH) (\/\S*)$/);
@@ -655,14 +635,12 @@ button.rank { border: 0; cursor: pointer; }
     try { navigator.clipboard.writeText(code.textContent).then(ok, fallback); } catch (err) { fallback(); }
   });
 
-  // ---------- progresso
   const LS_KEY = "api-support-course:progresso-v2", LS_OLD = "api-support-course:progresso";
-  // numeração antiga (11 módulos) para a nova (8 módulos): Leads virou um módulo só
   const OLD_IDS = { "3.1": "2.5", "3.2": "2.6", "3.3": "2.7", "3.4": "2.8", "4.1": "2.9", "4.2": "2.9", "4.3": "2.9", "4.4": "2.10", "4.5": "2.10", "4.6": "2.10", "5.1": "2.11", "5.2": "2.11" };
   const migrate = list => Array.from(new Set(list.map(id => { if (OLD_IDS[id]) return OLD_IDS[id]; const m = String(id).match(/^(6|7|8|9|10)\.(\d)$/); return m ? (+m[1] - 3) + "." + m[2] : id; })));
-  const done = new Set();          // aulas concluídas (questionário aprovado)
-  let scores = {};                 // melhor nota de cada questionário de aula
-  let tests = {};                  // testes de módulo aprovados: { "0": { passed, score, at } }
+  const done = new Set();
+  let scores = {};
+  let tests = {};
   let last = null, remote = null, writeChain = Promise.resolve(), writeTimer = null, pending = false;
   try {
     let v = JSON.parse(localStorage.getItem(LS_KEY) || "null");
@@ -685,7 +663,6 @@ button.rank { border: 0; cursor: pointer; }
     }, 700);
   }
 
-  // ---------- questionários e testes
   const QUIZ = {};
   Object.entries(DATA.quiz || {}).forEach(([k, txt]) => { try { QUIZ[k] = JSON.parse(txt); } catch (e) {} });
   const quizPool = (kind, key) => kind === "final" ? Object.values(QUIZ).flatMap(q => q.teste || []) : kind === "aula" ? ((QUIZ[key.split(".")[0]] || {}).aulas || {})[key] : (QUIZ[key] || {}).teste;
@@ -694,8 +671,6 @@ button.rank { border: 0; cursor: pointer; }
   const modOf = n => modules.find(m => m.num === +n);
   const quizLessons = m => m.lessons.filter(l => l.id !== "projeto");
   const testPassed = n => !!(tests[n] && tests[n].passed);
-  // Modo master (revisão): ?master=1 liga e fica lembrado neste navegador; ?master=0 ou o botão do topo desliga.
-  // Só libera a navegação; não é controle de acesso (o conteúdo é público).
   const MASTER_KEY = "api-support-course:master";
   let instructor = false;
   try {
@@ -715,7 +690,6 @@ button.rank { border: 0; cursor: pointer; }
   const unlocked = n => instructor || +n === modules[0].num || testPassed(+n - 1);
   let attemptSeq = 0;
 
-  // criador com o modo instrutor ligado tem todos os títulos; desligado, vale só o progresso real, como um aluno
   const earned = t => (isCreator && instructor) || (t.key === "inicio" ? true : t.key === "final" ? modules.every(m => testPassed(m.num)) && done.has("projeto") : testPassed(t.mod));
   const currentTitle = () => TITLES.filter(earned).pop();
   let toastTimer = null;
@@ -727,7 +701,6 @@ button.rank { border: 0; cursor: pointer; }
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { el.hidden = true; }, 6000);
   }
-  // compara o título antes e depois de uma ação do aluno e comemora se mudou
   function withTitleCheck(action) {
     const before = currentTitle().name;
     action();
@@ -874,7 +847,6 @@ button.rank { border: 0; cursor: pointer; }
     });
     $("#route-fill").style.width = "calc((100% - 100% / " + modules.length + ") * " + Math.max(0, lastFull) / (modules.length - 1) + ")";
 
-    // próximo passo: primeira aula sem questionário aprovado; depois o teste do módulo
     let target = null;
     for (const m of modules) {
       if (!unlocked(m.num)) break;
@@ -884,7 +856,6 @@ button.rank { border: 0; cursor: pointer; }
     }
     if (!target) { const pf = allLessons.find(l => l.id === "projeto" && !done.has(l.id)); if (pf) target = { href: "#" + pf.anchor, html: "Prova final" }; }
     renderTitles();
-    // o aviso dos módulos bloqueados leva de volta ao passo pendente
     $$("[data-resume]").forEach(a => {
       a.href = target ? target.href : "#inicio";
       a.innerHTML = target ? "Voltar para onde você parou: " + target.html.replace(/<[^>]+>/g, "") + " →" : "Voltar ao início";
@@ -900,7 +871,6 @@ button.rank { border: 0; cursor: pointer; }
     }
   }
 
-  // ---------- painel lateral (títulos e time): coluna fixa em tela larga, gaveta em tela estreita
   const side = $("#side"), backdrop = $("#side-backdrop"), sideBtn = $("#side-btn");
   const narrow = window.matchMedia("(max-width: 1280px)");
   function showTab(name) {
@@ -925,14 +895,13 @@ button.rank { border: 0; cursor: pointer; }
   document.addEventListener("keydown", e => { if (e.key === "Escape" && side.classList.contains("open")) closeSide(); });
   (narrow.addEventListener ? narrow.addEventListener.bind(narrow, "change") : narrow.addListener.bind(narrow))(() => { if (!narrow.matches) closeSide(); });
 
-  // ---------- links internos: rola até o destino; se ele estiver num módulo bloqueado, vai para o aviso do módulo
   function goTo(hash) {
     const id = decodeURIComponent((hash || "").replace(/^#/, ""));
     let el = id ? document.getElementById(id) : null;
     if (!el) return false;
     const lockedMod = el.closest(".module.locked");
     if (lockedMod && el !== lockedMod) el = lockedMod.querySelector(".lock-card") || lockedMod;
-    el.scrollIntoView({ block: "start" });   // a suavidade vem do scroll-behavior do CSS (desligada com reduced-motion)
+    el.scrollIntoView({ block: "start" });
     el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
     try { history.replaceState(null, "", "#" + id); } catch (e) {}
     return true;
@@ -943,7 +912,6 @@ button.rank { border: 0; cursor: pointer; }
     if (goTo(a.getAttribute("href"))) e.preventDefault();
   });
 
-  // ---------- busca, item ativo, índice no celular, tema
   const search = $("#search");
   search.addEventListener("input", () => {
     const q = norm(search.value.trim());
