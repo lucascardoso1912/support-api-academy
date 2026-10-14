@@ -337,9 +337,10 @@ button.rank { border: 0; cursor: pointer; }
     <button class="rank" id="rank" type="button" title="Ver seus títulos" aria-controls="side"></button>
     <div class="meter" aria-label="Seu progresso na trilha"><div class="bar"><i id="meter-fill"></i></div><output id="meter-text">0 de 54</output></div>
     <span class="status-line" id="save-status">Progresso salvo neste navegador</span>
+    <button class="instructor" id="master" type="button" hidden aria-pressed="true" title="Modo master: todos os módulos, testes e a prova final liberados para revisão, sem registrar nada como concluído. Clique para sair.">Modo master · Sair</button>
     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema claro/escuro"></button>
     <button class="toc-btn" id="toc-btn" type="button" aria-controls="toc" aria-expanded="false">Índice</button>
-    <button class="side-btn" id="side-btn" type="button" aria-controls="side" aria-expanded="false">Títulos e time</button>
+    <button class="side-btn" id="side-btn" type="button" aria-controls="side" aria-expanded="false">Títulos</button>
   </div>
 </header>
 
@@ -688,7 +689,24 @@ button.rank { border: 0; cursor: pointer; }
   const modOf = n => modules.find(m => m.num === +n);
   const quizLessons = m => m.lessons.filter(l => l.id !== "projeto");
   const testPassed = n => !!(tests[n] && tests[n].passed);
+  // Modo master (revisão): ?master=1 liga e fica lembrado neste navegador; ?master=0 ou o botão do topo desliga.
+  // Só libera a navegação; não é controle de acesso (o conteúdo é público).
+  const MASTER_KEY = "api-support-course:master";
   let instructor = false;
+  try {
+    const q = new URLSearchParams(location.search).get("master");
+    if (q === "1") localStorage.setItem(MASTER_KEY, "1");
+    if (q === "0") localStorage.removeItem(MASTER_KEY);
+    instructor = localStorage.getItem(MASTER_KEY) === "1";
+  } catch (e) { instructor = new URLSearchParams(location.search).get("master") === "1"; }
+  if (instructor) {
+    const mb = document.getElementById("master");
+    mb.hidden = false;
+    mb.addEventListener("click", () => {
+      try { localStorage.removeItem(MASTER_KEY); } catch (e) {}
+      location.replace(location.pathname + location.hash);
+    });
+  }
   const unlocked = n => instructor || +n === modules[0].num || testPassed(+n - 1);
   let attemptSeq = 0;
 
